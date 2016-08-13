@@ -35,8 +35,10 @@ function Boot (server, done) {
     this.emit('start')
   }
 
-  this._batch = null
+  this._batch = []
   this.use(nooplugin)
+
+  process.nextTick(clear, this)
 }
 
 inherits(Boot, EE)
@@ -49,32 +51,22 @@ Boot.prototype.use = function (plugin, opts) {
     opts
   }
 
-  if (this._batch) {
-    this._batch.push(obj)
-  } else {
-    this._batch = [obj]
-    // add all the current batch in the next tick
-    process.nextTick(clear, this)
-  }
+  this._batch.push(obj)
 }
 
 // add all element in the batch at the top of the
 // queue, in the order that they are called with use()
 function clear (boot) {
-  // needed if the plugin loads sync
-  if (!boot._batch) {
-    return
-  }
-
-  // reverse the batch
-  const batch = boot._batch.reverse()
-  boot._batch = null
+  const batch = boot._batch
 
   // we need to pause, otherwise one of the jobs might be triggered
   // and we will trigger the wrong one, because we are adding them
   // at the top
   boot._queue.pause()
-  batch.forEach((obj) => boot._queue.unshift(obj))
+  let obj
+  while ((obj = batch.pop()) !== undefined) {
+    boot._queue.unshift(obj)
+  }
   boot._queue.resume()
 }
 
