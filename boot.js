@@ -79,8 +79,8 @@ Boot.prototype.use = function (plugin, opts, callback) {
     deferred: false
   }
 
-  // defer finishing off the current element if we have a callback
-  if (callback !== noop && current && !current.deferred) {
+  // defer finishing off the current element
+  if (current && !current.deferred) {
     current.deferred = true
     process.nextTick(clear, this, (err) => {
       if (err) {
