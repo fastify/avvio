@@ -1,6 +1,6 @@
 'use strict'
 
-const fastq = require('fastq')
+const fastseries = require('fastseries')
 const EE = require('events').EventEmitter
 const inherits = require('inherits')
 
@@ -16,62 +16,94 @@ function Boot (server, done) {
 
   server = server || this
 
-  this._queue = fastq(server, (toLoad, cb) => {
-    const func = toLoad.plugin
-    func(server, toLoad.opts, (err) => {
-      // schedule all tasks left in the batch
-      clear(this)
+  this._series = fastseries()
 
-      // always delay the next task
-      process.nextTick(cb, err)
+  this._current = null
+
+  this._process = (toLoad, cb) => {
+    const func = toLoad.plugin
+    this._current = toLoad
+    this._current.onFinish = cb
+    func(server, toLoad.opts, (err) => {
+      if (err) {
+        toLoad.callback(err)
+        process.nextTick(cb, err)
+        return
+      }
+
+      if (!toLoad.deferred) {
+        this._current = null
+        process.nextTick(clear, this, (err) => {
+          if (err) {
+            this.emit('error', err)
+          }
+          toLoad.callback(err)
+          cb(err)
+        })
+      }
     })
-  }, 1)
+  }
 
   if (done) {
     this.on('start', done)
   }
 
-  this._queue.drain = () => {
-    this.emit('start')
-  }
-
   this._batch = []
-  this.use(nooplugin)
 
-  process.nextTick(clear, this)
+  // always trigger start in the next tick
+  // if no "use" is called first
+  process.nextTick(clear, this, (err) => {
+    if (err) {
+      this.emit('error', err)
+    } else {
+      this.emit('start')
+    }
+  })
 }
 
 inherits(Boot, EE)
 
-Boot.prototype.use = function (plugin, opts) {
+Boot.prototype.use = function (plugin, opts, callback) {
+  if (typeof opts === 'function') {
+    callback = opts
+    opts = null
+  }
   opts = opts || {}
+  callback = callback || noop
+  const current = this._current
 
   const obj = {
     plugin,
-    opts
+    opts,
+    callback,
+    deferred: false
+  }
+
+  // defer finishing off the current element if we have a callback
+  if (callback !== noop && current && !current.deferred) {
+    current.deferred = true
+    process.nextTick(clear, this, (err) => {
+      if (err) {
+        this.emit('error', err)
+      }
+      current.callback(err)
+      current.onFinish(err)
+    })
   }
 
   this._batch.push(obj)
 }
 
-// add all element in the batch at the top of the
-// queue, in the order that they are called with use()
-function clear (boot) {
+// executes all elements in the batch in series
+function clear (boot, cb) {
   const batch = boot._batch
+  boot._batch = []
 
-  // we need to pause, otherwise one of the jobs might be triggered
-  // and we will trigger the wrong one, because we are adding them
-  // at the top
-  boot._queue.pause()
-  let obj
-  while ((obj = batch.pop()) !== undefined) {
-    boot._queue.unshift(obj)
-  }
-  boot._queue.resume()
+  cb = cb || noop
+
+  boot._series(boot, boot._process, batch, cb)
 }
 
-function nooplugin (s, o, done) {
-  done()
-}
+function noop () {}
 
 module.exports = Boot
