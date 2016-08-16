@@ -6,7 +6,7 @@ Asynchronous bootstrapping made easy. Wait for all components/plugins to start, 
 components/plugins _within_ plugins, and be still sure that things will
 happen in the right order.
 
-[![js-standard-style](https://raw.githubusercontent.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
+[![JavaScript Style Guide](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
 
 ## Example
 
