@@ -29,7 +29,6 @@
     "tap": "^6.3.0"
   },
   "dependencies": {
-    "fastseries": "^1.7.2",
-    "inherits": "^2.0.1"
+    "fastq": "^1.4.1"
   }
 }

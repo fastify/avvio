@@ -2,7 +2,7 @@
 
 const fastq = require('fastq')
 const EE = require('events').EventEmitter
-const inherits = require('inherits')
+const inherits = require('util').inherits
 
 function Boot (server, done) {
   if (!(this instanceof Boot)) {
