@@ -1,6 +1,6 @@
 'use strict'
 
-const fastseries = require('fastseries')
+const fastq = require('fastq')
 const EE = require('events').EventEmitter
 const inherits = require('inherits')
 
@@ -16,53 +16,38 @@ function Boot (server, done) {
 
   server = server || this
 
-  this._series = fastseries()
-
-  this._current = null
-
-  this._process = (toLoad, cb) => {
-    const func = toLoad.plugin
-    this._current = toLoad
-    this._current.onFinish = cb
-    func(server, toLoad.opts, (err) => {
-      if (err) {
-        toLoad.callback(err)
-        process.nextTick(cb, err)
-        return
-      }
-
-      if (!toLoad.deferred) {
-        this._current = null
-        process.nextTick(clear, this, (err) => {
-          if (err) {
-            this.emit('error', err)
-          }
-          toLoad.callback(err)
-          cb(err)
-        })
-      }
-    })
-  }
+  this._server = server
+  this._current = []
 
   if (done) {
-    this.on('start', done)
+    this.once('start', done)
   }
 
-  this._batch = []
-
-  // always trigger start in the next tick
-  // if no "use" is called first
-  process.nextTick(clear, this, (err) => {
-    if (err) {
-      this.emit('error', err)
-    } else {
-      this.emit('start')
-    }
-  })
+  // we init, because we need to emit "start" if no use is called
+  this._init()
 }
 
 inherits(Boot, EE)
 
+// create the root node upon to hold each subsequent call to use()
+// the root node is responsible for emitting 'start'
+Boot.prototype._init = function () {
+  if (this._current.length === 0) {
+    const main = new Plugin(this, (s, opts, done) => {
+      // we need to wait any call to use() to happen
+      process.nextTick(done)
+    }, {}, noop)
+    loadPlugin.call(this, main, (err) => {
+      if (err) {
+        this.emit('error', err)
+      } else {
+        this.emit('start')
+      }
+    })
+  }
+}
+
+// load a plugin
 Boot.prototype.use = function (plugin, opts, callback) {
   if (typeof opts === 'function') {
     callback = opts
@@ -70,40 +55,72 @@ Boot.prototype.use = function (plugin, opts, callback) {
   }
   opts = opts || {}
   callback = callback || noop
-  const current = this._current
 
-  const obj = {
-    plugin,
-    opts,
-    callback,
-    deferred: false
-  }
+  // we reinit, if use is called after emitting start once
+  this._init()
 
-  // defer finishing off the current element
-  if (current && !current.deferred) {
-    current.deferred = true
-    process.nextTick(clear, this, (err) => {
-      if (err) {
-        this.emit('error', err)
-      }
-      current.callback(err)
-      current.onFinish(err)
-    })
-  }
+  // we always add plugins to load at the current element
+  const current = this._current[0]
 
-  this._batch.push(obj)
-}
+  const obj = new Plugin(this, plugin, opts, callback)
 
-// executes all elements in the batch in series
-function clear (boot, cb) {
-  const batch = boot._batch
-  boot._batch = []
-
-  cb = cb || noop
-
-  boot._series(boot, boot._process, batch, cb)
+  // we add the plugin to be loaded at the end of the current queue
+  current.q.push(obj, (err) => {
+    if (err) {
+      this.emit('error', err)
+    }
+  })
 }
 
 function noop () {}
+
+function Plugin (parent, func, opts, callback) {
+  this.func = func
+  this.opts = opts
+  this.callback = callback
+  this.deferred = false
+  this.onFinish = null
+  this.parent = parent
+
+  this.q = fastq(parent, loadPlugin, 1)
+  this.q.pause()
+
+  // always start the queue in the next tick
+  // because we try to attach subsequent call to use()
+  // to the right plugin. we need to defer them,
+  // or they will end up at the top of _current
+  process.nextTick(this.q.resume.bind(this.q))
+}
+
+Plugin.prototype.exec = function (server, cb) {
+  const func = this.func
+  func(server, this.opts, cb)
+}
+
+Plugin.prototype.finish = function (err, cb) {
+  const callback = this.callback
+  callback(err)
+  cb(err)
+}
+
+// loads a plugin
+function loadPlugin (toLoad, cb) {
+  // place the plugin at the top of _current
+  this._current.unshift(toLoad)
+  toLoad.exec(this._server, (err) => {
+    if (err || !(toLoad.q.length() > 0 || toLoad.q.running() > 0)) {
+      // finish now, because there is nothing left to do
+      this._current.shift()
+      toLoad.finish(err, cb)
+      return
+    } else {
+      // finish when the queue of nested plugins to load is empty
+      toLoad.q.drain = () => {
+        this._current.shift()
+        toLoad.finish(null, cb)
+      }
+    }
+  })
+}
 
 module.exports = Boot

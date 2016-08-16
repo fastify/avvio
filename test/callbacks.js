@@ -44,3 +44,47 @@ test('reentrant with callbacks', (t) => {
     done()
   }
 })
+
+test('reentrant with callbacks deferred', (t) => {
+  t.plan(13)
+
+  const app = boot()
+  let firstLoaded = false
+  let secondLoaded = false
+  let thirdLoaded = false
+
+  app.use(first)
+
+  function first (s, opts, done) {
+    t.notOk(firstLoaded, 'first is not loaded')
+    t.notOk(secondLoaded, 'second is not loaded')
+    t.notOk(thirdLoaded, 'third is not loaded')
+    firstLoaded = true
+    s.use(second, function () {
+      s.use(third, done)
+    })
+  }
+
+  function second (s, opts, done) {
+    t.ok(firstLoaded, 'first is loaded')
+    t.notOk(secondLoaded, 'second is not loaded')
+    t.notOk(thirdLoaded, 'third is not loaded')
+    secondLoaded = true
+    done()
+  }
+
+  function third (s, opts, done) {
+    t.ok(firstLoaded, 'first is loaded')
+    t.ok(secondLoaded, 'second is loaded')
+    t.notOk(thirdLoaded, 'third is not loaded')
+    thirdLoaded = true
+    done()
+  }
+
+  app.on('start', () => {
+    t.ok(firstLoaded, 'first is loaded')
+    t.ok(secondLoaded, 'second is loaded')
+    t.ok(thirdLoaded, 'third is loaded')
+    t.pass('booted')
+  })
+})
