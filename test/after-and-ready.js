@@ -145,10 +145,9 @@ test('ready adds at the end of the queue', (t) => {
     t.notOk(readyCalled, 'ready not called')
     pluginLoaded = true
 
-    app.ready(function (cb) {
+    app.ready(function () {
       t.ok(readyCalled, 'after the first ready')
       t.ok(afterCalled, 'after the after callback')
-      process.nextTick(cb)
     })
 
     done()

@@ -23,7 +23,7 @@ function Boot (server, done) {
     this.once('start', done)
   }
 
-  this._readyQ = fastq(this, doReady, 1)
+  this._readyQ = fastq(this, callWithCbOrNextTick, 1)
   this._readyQ.pause()
   this._readyQ.drain = () => {
     this.emit('start')
@@ -84,12 +84,7 @@ Boot.prototype.use = function (plugin, opts, callback) {
 Boot.prototype.after = function (func, cb) {
   // TODO do not rely on .use()
   this.use(function (s, opts, done) {
-    if (func.length === 0) {
-      func()
-      process.nextTick(done)
-    } else {
-      func(done)
-    }
+    callWithCbOrNextTick(func, done)
   }, cb)
   return this
 }
@@ -150,9 +145,13 @@ function loadPlugin (toLoad, cb) {
   })
 }
 
-// executes a Ready thing
-function doReady (func, cb) {
-  func(cb)
+function callWithCbOrNextTick (func, cb) {
+  if (func.length === 0) {
+    func()
+    process.nextTick(cb)
+  } else {
+    func(cb)
+  }
 }
 
 module.exports = Boot
