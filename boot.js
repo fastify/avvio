@@ -23,6 +23,12 @@ function Boot (server, done) {
     this.once('start', done)
   }
 
+  this._readyQ = fastq(this, doReady, 1)
+  this._readyQ.pause()
+  this._readyQ.drain = () => {
+    this.emit('start')
+  }
+
   // we init, because we need to emit "start" if no use is called
   this._init()
 }
@@ -40,6 +46,8 @@ Boot.prototype._init = function () {
     loadPlugin.call(this, main, (err) => {
       if (err) {
         this.emit('error', err)
+      } else if (this._readyQ.length() > 0) {
+        this._readyQ.resume()
       } else {
         this.emit('start')
       }
@@ -70,6 +78,7 @@ Boot.prototype.use = function (plugin, opts, callback) {
       this.emit('error', err)
     }
   })
+  return this
 }
 
 Boot.prototype.after = function (func, cb) {
@@ -82,6 +91,12 @@ Boot.prototype.after = function (func, cb) {
       func(done)
     }
   }, cb)
+  return this
+}
+
+Boot.prototype.ready = function (func) {
+  this._readyQ.push(func)
+  return this
 }
 
 function noop () {}
@@ -133,6 +148,11 @@ function loadPlugin (toLoad, cb) {
       }
     }
   })
+}
+
+// executes a Ready thing
+function doReady (func, cb) {
+  func(cb)
 }
 
 module.exports = Boot

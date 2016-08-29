@@ -8,22 +8,22 @@ test('boot a plugin and then execute a call after that', (t) => {
 
   const app = boot()
   let pluginLoaded = false
-  let deferCalled = false
+  let afterCalled = false
 
   app.use(function (s, opts, done) {
-    t.notOk(deferCalled, 'defer not called')
+    t.notOk(afterCalled, 'after not called')
     pluginLoaded = true
     done()
   })
 
   app.after(function (cb) {
-    t.ok(pluginLoaded, 'deferred!')
-    deferCalled = true
+    t.ok(pluginLoaded, 'afterred!')
+    afterCalled = true
     cb()
   })
 
   app.on('start', () => {
-    t.ok(deferCalled, 'defer called')
+    t.ok(afterCalled, 'after called')
     t.ok(pluginLoaded, 'plugin loaded')
   })
 })
@@ -33,26 +33,26 @@ test('after without a done callback', (t) => {
 
   const app = boot()
   let pluginLoaded = false
-  let deferCalled = false
+  let afterCalled = false
 
   app.use(function (s, opts, done) {
-    t.notOk(deferCalled, 'defer not called')
+    t.notOk(afterCalled, 'after not called')
     pluginLoaded = true
     done()
   })
 
   app.after(function () {
-    t.ok(pluginLoaded, 'deferred!')
-    deferCalled = true
+    t.ok(pluginLoaded, 'afterred!')
+    afterCalled = true
   })
 
   app.on('start', () => {
-    t.ok(deferCalled, 'defer called')
+    t.ok(afterCalled, 'after called')
     t.ok(pluginLoaded, 'plugin loaded')
   })
 })
 
-test('verify when a deferred call happens', (t) => {
+test('verify when a afterred call happens', (t) => {
   t.plan(2)
 
   const app = boot()
@@ -64,7 +64,7 @@ test('verify when a deferred call happens', (t) => {
   app.after(function (cb) {
     cb()
   }, function () {
-    t.pass('deferred finished')
+    t.pass('afterred finished')
   })
 
   app.on('start', () => {
@@ -122,5 +122,48 @@ test('internal after', (t) => {
     t.ok(thirdLoaded, 'third is loaded')
     t.ok(afterCalled, 'after was called')
     t.pass('booted')
+  })
+})
+
+test('ready adds at the end of the queue', (t) => {
+  t.plan(11)
+
+  const app = boot()
+  let pluginLoaded = false
+  let afterCalled = false
+  let readyCalled = false
+
+  app.ready(function (cb) {
+    t.ok(pluginLoaded, 'after the plugin')
+    t.ok(afterCalled, 'after after')
+    readyCalled = true
+    process.nextTick(cb)
+  })
+
+  app.use(function (s, opts, done) {
+    t.notOk(afterCalled, 'after not called')
+    t.notOk(readyCalled, 'ready not called')
+    pluginLoaded = true
+
+    app.ready(function (cb) {
+      t.ok(readyCalled, 'after the first ready')
+      t.ok(afterCalled, 'after the after callback')
+      process.nextTick(cb)
+    })
+
+    done()
+  })
+
+  app.after(function (cb) {
+    t.ok(pluginLoaded, 'executing after!')
+    t.notOk(readyCalled, 'ready not called')
+    afterCalled = true
+    cb()
+  })
+
+  app.on('start', () => {
+    t.ok(afterCalled, 'after called')
+    t.ok(pluginLoaded, 'plugin loaded')
+    t.ok(readyCalled, 'ready called')
   })
 })
