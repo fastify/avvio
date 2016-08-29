@@ -78,7 +78,20 @@ function plugin (server, opts, done) {
 }
 ```
 
-Done must be called only once.
+`done` must be called only once.
+
+### app.after(func([done]), [cb])
+
+Calls a functon after all the previous plugins are loaded, including
+all their dependencies. The `'start'` event is not emitted yet.
+
+```js
+boot.after(function (done) {
+  done()
+})
+```
+
+`done` must be called only once.
 
 ## License
 

@@ -72,6 +72,18 @@ Boot.prototype.use = function (plugin, opts, callback) {
   })
 }
 
+Boot.prototype.after = function (func, cb) {
+  // TODO do not rely on .use()
+  this.use(function (s, opts, done) {
+    if (func.length === 0) {
+      func()
+      process.nextTick(done)
+    } else {
+      func(done)
+    }
+  }, cb)
+}
+
 function noop () {}
 
 function Plugin (parent, func, opts, callback) {
