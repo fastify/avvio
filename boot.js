@@ -39,7 +39,7 @@ function wrap (server, opts, instance) {
 }
 
 function Boot (server, opts, done) {
-  if (typeof server === 'function') {
+  if (typeof server === 'function' && arguments.length === 1) {
     done = server
     opts = {}
     server = null
@@ -203,3 +203,10 @@ function callWithCbOrNextTick (func, cb) {
 }
 
 module.exports = Boot
+module.exports.express = function (app) {
+  return Boot(app, {
+    expose: {
+      use: 'load'
+    }
+  })
+}
