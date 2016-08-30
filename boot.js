@@ -4,14 +4,62 @@ const fastq = require('fastq')
 const EE = require('events').EventEmitter
 const inherits = require('util').inherits
 
-function Boot (server, done) {
-  if (!(this instanceof Boot)) {
-    return new Boot(server, done)
+function wrap (server, opts, instance) {
+  const expose = opts.expose || {}
+  const useKey = expose.use || 'use'
+  const afterKey = expose.after || 'after'
+  const readyKey = expose.ready || 'ready'
+
+  if (server[useKey]) {
+    throw new Error(useKey + '() is already defined, specify an expose option')
   }
 
-  if (typeof server === 'function') {
+  if (server[afterKey]) {
+    throw new Error(afterKey + '() is already defined, specify an expose option')
+  }
+
+  if (server[readyKey]) {
+    throw new Error(readyKey + '() is already defined, specify an expose option')
+  }
+
+  server[useKey] = function (a, b, c) {
+    instance.use(a, b, c)
+    return this
+  }
+
+  server[afterKey] = function (cb) {
+    instance.after(cb)
+    return this
+  }
+
+  server[readyKey] = function (cb) {
+    instance.after(cb)
+    return this
+  }
+}
+
+function Boot (server, opts, done) {
+  if (typeof server === 'function' && arguments.length === 1) {
     done = server
+    opts = {}
     server = null
+  }
+
+  if (typeof opts === 'function') {
+    done = opts
+    opts = {}
+  }
+
+  opts = opts || {}
+
+  if (!(this instanceof Boot)) {
+    const instance = new Boot(server, opts, done)
+
+    if (server) {
+      wrap(server, opts, instance)
+    }
+
+    return instance
   }
 
   server = server || this
@@ -155,3 +203,10 @@ function callWithCbOrNextTick (func, cb) {
 }
 
 module.exports = Boot
+module.exports.express = function (app) {
+  return Boot(app, {
+    expose: {
+      use: 'load'
+    }
+  })
+}
