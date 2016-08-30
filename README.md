@@ -8,7 +8,29 @@ happen in the right order.
 
 [![JavaScript Style Guide](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
 
+* [Install](#install)
+* [Example](#example)
+* [API](#api)
+* [Acknowledgements](#acknowledgements)
+* [License](#license)
+
+<a name="install"></a>
+## Install
+
+To install `boot-in-the-arse`, simply use npm:
+
+```
+npm install boot-in-the-arse --save
+```
+
+<a name="example"></a>
 ## Example
+
+The example below can be found [here][example] and ran using `node example.js`. It
+demonstrates how to use `boot-in-the-arse` to load functions /
+plugins in
+order.
+
 
 ```js
 'use strict'
@@ -49,7 +71,17 @@ function third (instance, opts, cb) {
 }
 ```
 
+<a name="api"></a>
 ## API
+
+  * <a href="#constructor"><code><b>boot()</b></code></a>
+  * <a href="#use"><code>instance.<b>use()</b></code></a>
+  * <a href="#after"><code>instance.<b>after()</b></code></a>
+  * <a href="#ready"><code>instance.<b>ready()</b></code></a>
+  * <a href="#express"><code>boot.<b>express()</b></code></a>
+
+-------------------------------------------------------
+<a name="constructor"></a>
 
 ### boot([instance], [started])
 
@@ -88,6 +120,9 @@ Events:
 The `boot` function can be used also as a
 constructor to inherits from.
 
+-------------------------------------------------------
+<a name="use"></a>
+
 ### app.use(func, [opts], [cb])
 
 Loads a functions asynchronously. The function must have the
@@ -104,6 +139,9 @@ function plugin (server, opts, done) {
 Returns the instance on which `use` is called, to support a
 chainable API.
 
+-------------------------------------------------------
+<a name="after"></a>
+
 ### app.after(func([done]), [cb])
 
 Calls a functon after all the previously defined plugins are loaded, including
@@ -119,6 +157,9 @@ boot.after(function (done) {
 
 Returns the instance on which `after` is called, to support a
 chainable API.
+
+-------------------------------------------------------
+<a name="ready"></a>
 
 ### app.ready(func([done]))
 
@@ -137,6 +178,9 @@ boot.ready(function (done) {
 Returns the instance on which `ready` is called, to support a
 chainable API.
 
+-------------------------------------------------------
+<a name="express"></a>
+
 ### boot.express(app)
 
 Same as:
@@ -151,6 +195,15 @@ boot(app, {
 })
 ```
 
+-------------------------------------------------------
+
+## Acknowledgements
+
+This project was kindly sponsored by [nearForm](http://nearform.com).
+
 ## License
 
-MIT
+Copyright Matteo Collina 2016, Licensed under [MIT][].
+
+[MIT]: ./LICENSE
+[example]: ./example.js
