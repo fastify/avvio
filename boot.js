@@ -4,14 +4,37 @@ const fastq = require('fastq')
 const EE = require('events').EventEmitter
 const inherits = require('util').inherits
 
-function Boot (server, done) {
-  if (!(this instanceof Boot)) {
-    return new Boot(server, done)
+function wrap (server, instance) {
+  server.use = function (a, b, c) {
+    instance.use(a, b, c)
+    return this
   }
 
+  server.after = function (cb) {
+    instance.after(cb)
+    return this
+  }
+
+  server.ready = function (cb) {
+    instance.after(cb)
+    return this
+  }
+}
+
+function Boot (server, done) {
   if (typeof server === 'function') {
     done = server
     server = null
+  }
+
+  if (!(this instanceof Boot)) {
+    const instance = new Boot(server, done)
+
+    if (server) {
+      wrap(server, instance)
+    }
+
+    return instance
   }
 
   server = server || this
