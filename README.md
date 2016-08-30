@@ -15,15 +15,23 @@ happen in the right order.
 
 const boot = require('boot-in-the-arse')()
 
-boot.use(first, { hello: 'world' })
-boot.use(third, (err) => {
-  if (err) {
-    console.log('something bad happened')
-    console.log(err)
-  }
+boot
+  .use(first, { hello: 'world' })
+  .after((cb) => {
+    console.log('after first and second')
+    cb()
+  })
+  .use(third, (err) => {
+    if (err) {
+      console.log('something bad happened')
+      console.log(err)
+    }
 
-  console.log('third plugin loaded')
-})
+    console.log('third plugin loaded')
+  })
+  .ready(function () {
+    console.log('application booted!')
+  })
 
 function first (instance, opts, cb) {
   console.log('first loaded', opts)
@@ -39,10 +47,6 @@ function third (instance, opts, cb) {
   console.log('third loaded')
   cb()
 }
-
-boot.on('start', function () {
-  console.log('application booted!')
-})
 ```
 
 ## API
@@ -97,6 +101,9 @@ function plugin (server, opts, done) {
 
 `done` must be called only once.
 
+Returns the instance on which `use` is called, to support a
+chainable API.
+
 ### app.after(func([done]), [cb])
 
 Calls a functon after all the previously defined plugins are loaded, including
@@ -109,6 +116,9 @@ boot.after(function (done) {
 ```
 
 `done` must be called only once.
+
+Returns the instance on which `after` is called, to support a
+chainable API.
 
 ### app.ready(func([done]))
 
@@ -123,6 +133,9 @@ boot.ready(function (done) {
 ```
 
 `done` must be called only once.
+
+Returns the instance on which `ready` is called, to support a
+chainable API.
 
 ### boot.express(app)
 
