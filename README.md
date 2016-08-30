@@ -49,23 +49,40 @@ boot.on('start', function () {
 
 ### boot([instance], [started])
 
-Start a booting sequence. The `boot` function can be used also as a
-constructor to inherits from.
+Start a booting sequence.
 
 `instance` will be used as the first
-argument of all plugins loaded, you are responsible for exposing
-`use()` if you pass this parameter, like:
+argument of all plugins loaded and `use`, `after` and `ready` 
+function will be
+added to that object, keeping the support for the chainable API:
 
 ```js
 const server = {}
-const boot = require('boot-in-the-arse')(server)
-server.use = boot.use.bind(use)
+
+require('boot-in-the-arse')(server)
+
+server.use(function first (s, opts, cb) {
+  // s is the same of server
+  s.use(function second (s, opts, cb) {
+    cb()
+  }, cb)
+}).after(function (cb) {
+  // after first and second are finished
+  cb()
+})
 ```
+
+Options:
+
+* `expose`: a key/value property to change how `use`, `after` and `ready` are exposed.
 
 Events:
 
 * `'error'`  if something bad happens
 * `'start'`  when the application starts
+
+The `boot` function can be used also as a
+constructor to inherits from.
 
 ### app.use(func, [opts], [cb])
 
@@ -106,6 +123,20 @@ boot.ready(function (done) {
 ```
 
 `done` must be called only once.
+
+### boot.express(app)
+
+Same as:
+
+```js
+const app = express()
+
+boot(app, {
+  expose: {
+    use: 'load'
+  }
+})
+```
 
 ## License
 
