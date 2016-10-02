@@ -109,6 +109,9 @@ Boot.prototype.use = function (plugin, opts, callback) {
     callback = opts
     opts = null
   }
+  if (typeof plugin !== 'function') {
+    throw new Error('plugin must be a function')
+  }
   opts = opts || {}
   callback = callback || noop
 

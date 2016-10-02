@@ -80,3 +80,11 @@ test('boot a plugin with options', (t) => {
     t.pass('booted')
   })
 })
+
+test('throw on non-function use', (t) => {
+  t.plan(1)
+  const app = boot()
+  t.throws(() => {
+    app.use({})
+  })
+})
