@@ -1,6 +1,6 @@
 {
   "name": "boot-in-the-arse",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Asynchronous bootstrapping of Node applications",
   "main": "boot.js",
   "scripts": {
