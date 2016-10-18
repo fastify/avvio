@@ -133,11 +133,16 @@ function plugin (server, opts, done) {
   done()
 }
 ```
-
 `done` must be called only once.
 
 Returns the instance on which `use` is called, to support a
 chainable API.
+
+If you need to add more than a function and you don't need to use a different options object or callback, you can pass an array of functions to `.use`.
+```js
+boot.use([first, second, third], opts, cb)
+```
+The functions will be loaded in the same order as they are inside the array.
 
 -------------------------------------------------------
 <a name="after"></a>
