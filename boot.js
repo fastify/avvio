@@ -109,6 +109,21 @@ Boot.prototype.use = function (plugin, opts, callback) {
     callback = opts
     opts = null
   }
+
+  if (typeof plugin === 'function') {
+    this._addPlugin(plugin, opts, callback)
+  } else if (Array.isArray(plugin)) {
+    for (var i = 0; i < plugin.length; i++) {
+      this._addPlugin(plugin[i], opts, callback)
+    }
+  } else {
+    throw new Error('plugin must be a function')
+  }
+
+  return this
+}
+
+Boot.prototype._addPlugin = function (plugin, opts, callback) {
   if (typeof plugin !== 'function') {
     throw new Error('plugin must be a function')
   }
@@ -129,7 +144,6 @@ Boot.prototype.use = function (plugin, opts, callback) {
       this.emit('error', err)
     }
   })
-  return this
 }
 
 Boot.prototype.after = function (func, cb) {
