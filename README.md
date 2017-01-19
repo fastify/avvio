@@ -1,8 +1,8 @@
-# boot-in-the-arse &nbsp;&nbsp;[![Build Status](https://travis-ci.org/mcollina/boot-in-the-arse.svg)](https://travis-ci.org/mcollina/boot-in-the-arse)
+# avvio &nbsp;&nbsp;[![Build Status](https://travis-ci.org/mcollina/avvio.svg)](https://travis-ci.org/mcollina/avvio)
 
 Asynchronous bootstrapping made easy. Wait for all components/plugins to start, and then start your whole app.
 
-`boot-in-the-arse` is fully reentrant and graph-based. You can load
+`avvio` is fully reentrant and graph-based. You can load
 components/plugins _within_ plugins, and be still sure that things will
 happen in the right order.
 
@@ -17,17 +17,17 @@ happen in the right order.
 <a name="install"></a>
 ## Install
 
-To install `boot-in-the-arse`, simply use npm:
+To install `avvio`, simply use npm:
 
 ```
-npm install boot-in-the-arse --save
+npm install avvio --save
 ```
 
 <a name="example"></a>
 ## Example
 
 The example below can be found [here][example] and ran using `node example.js`. It
-demonstrates how to use `boot-in-the-arse` to load functions /
+demonstrates how to use `avvio` to load functions /
 plugins in
 order.
 
@@ -35,7 +35,7 @@ order.
 ```js
 'use strict'
 
-const boot = require('boot-in-the-arse')()
+const boot = require('avvio')()
 
 boot
   .use(first, { hello: 'world' })
@@ -85,7 +85,7 @@ function third (instance, opts, cb) {
 
 ### boot([instance], [started])
 
-Start a booting sequence.
+Start a boot sequence.
 
 `instance` will be used as the first
 argument of all plugins loaded and `use`, `after` and `ready` 
@@ -95,7 +95,7 @@ added to that object, keeping the support for the chainable API:
 ```js
 const server = {}
 
-require('boot-in-the-arse')(server)
+require('avvio')(server)
 
 server.use(function first (s, opts, cb) {
   // s is the same of server
