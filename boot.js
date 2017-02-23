@@ -103,6 +103,11 @@ Boot.prototype._init = function () {
   }
 }
 
+// allows to override the instance of a server, given a plugin
+Boot.prototype.override = function (server) {
+  return server
+}
+
 // load a plugin
 Boot.prototype.use = function (plugin, opts, callback) {
   if (typeof opts === 'function') {
@@ -181,7 +186,8 @@ function Plugin (parent, func, opts, callback) {
 
 Plugin.prototype.exec = function (server, cb) {
   const func = this.func
-  func(server, this.opts, cb)
+  this.server = this.parent.override(server)
+  func(this.server, this.opts, cb)
 }
 
 Plugin.prototype.finish = function (err, cb) {
@@ -192,9 +198,10 @@ Plugin.prototype.finish = function (err, cb) {
 
 // loads a plugin
 function loadPlugin (toLoad, cb) {
+  const last = this._current[0]
   // place the plugin at the top of _current
   this._current.unshift(toLoad)
-  toLoad.exec(this._server, (err) => {
+  toLoad.exec(last && last.server || this._server, (err) => {
     if (err || !(toLoad.q.length() > 0 || toLoad.q.running() > 0)) {
       // finish now, because there is nothing left to do
       this._current.shift()

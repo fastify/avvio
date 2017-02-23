@@ -78,6 +78,7 @@ function third (instance, opts, cb) {
   * <a href="#use"><code>instance.<b>use()</b></code></a>
   * <a href="#after"><code>instance.<b>after()</b></code></a>
   * <a href="#ready"><code>instance.<b>ready()</b></code></a>
+  * <a href="#override"><code>instance.<b>override()</b></code></a>
   * <a href="#express"><code>boot.<b>express()</b></code></a>
 
 -------------------------------------------------------
@@ -196,6 +197,47 @@ const app = express()
 boot(app, {
   expose: {
     use: 'load'
+  }
+})
+```
+
+-------------------------------------------------------
+<a name="override"></a>
+
+### app.override(server)
+
+Allows to override the instance of the server for each loading
+plugin. It allows the creation of an inheritance chain for the
+server instances.
+
+```js
+const boot = require('avvio')
+const assert = require('assert')
+const server = { count: 0 }
+const app = boot(server)
+
+console.log(app !== server, 'override must be set on the Avvio instance')
+
+app.override = function (s) {
+  // create a new instance with the
+  // server as the prototype
+  const res = Object.create(s)
+  res.count = res.count + 1
+
+  return res
+}
+
+app.use(function first (s1, opts, cb) {
+  assert(s1 !== server)
+  assert(server.isPrototypeOf(s1))
+  assert(s1.count === 1)
+  s1.use(second, cb)
+
+  function second (s2, opts, cb) {
+    assert(s2 !== s1)
+    assert(s1.isPrototypeOf(s2))
+    assert(s2.count === 2)
+    cb()
   }
 })
 ```
