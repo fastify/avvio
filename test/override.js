@@ -98,3 +98,45 @@ test('custom inheritance multiple levels with multiple heads', (t) => {
     t.equal(server.count, 0)
   })
 })
+
+test('fastify test case', (t) => {
+  t.plan(7)
+
+  const noop = () => {}
+
+  function build () {
+    const app = boot(server, {})
+    app.override = function (s) {
+      return Object.create(s)
+    }
+
+    server.add = function (name, fn, cb) {
+      if (this[name]) return cb(new Error('already existent'))
+      this[name] = fn
+      cb()
+    }
+
+    return server
+
+    function server (req, res) {}
+  }
+
+  const instance = build()
+  t.ok(instance.add)
+  t.ok(instance.use)
+
+  instance.use((i, opts, cb) => {
+    t.notEqual(i, instance)
+    t.ok(instance.isPrototypeOf(i))
+
+    i.add('test', noop, (err) => {
+      t.error(err)
+      t.ok(i.test)
+      cb()
+    })
+  })
+
+  instance.ready(() => {
+    t.notOk(instance.test)
+  })
+})
