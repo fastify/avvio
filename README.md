@@ -242,6 +242,20 @@ app.use(function first (s1, opts, cb) {
 })
 ```
 
+You can also force the ovverride of the instance by passing the `override` option to *avvio*.
+```js
+const boot = require('avvio')
+const assert = require('assert')
+const server = { count: 0 }
+const app = boot(server, { override: true })
+
+app.use(function first (s, opts, cb) {
+  assert.notEqual(s, server)
+  assert(server.isPrototypeOf(s))
+  cb()
+})
+```
+
 -------------------------------------------------------
 
 ## Acknowledgements

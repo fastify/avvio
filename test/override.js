@@ -98,3 +98,17 @@ test('custom inheritance multiple levels with multiple heads', (t) => {
     t.equal(server.count, 0)
   })
 })
+
+test('force override', (t) => {
+  t.plan(3)
+
+  const server = { my: 'server' }
+  const app = boot(server, { override: true })
+  t.ok(app._forceOverride)
+
+  app.use(function first (s, opts, cb) {
+    t.notEqual(s, server)
+    t.ok(server.isPrototypeOf(s))
+    cb()
+  })
+})
