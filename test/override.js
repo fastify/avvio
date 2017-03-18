@@ -151,9 +151,12 @@ test('skip override', (t) => {
     return Object.create(s)
   }
 
-  app.use(function first (s, opts, cb) {
+  first[Symbol.for('skip-override')] = true
+  app.use(first)
+
+  function first (s, opts, cb) {
     t.equal(s, server)
     t.notOk(server.isPrototypeOf(s))
     cb()
-  }, { skipOverride: true })
+  }
 })
