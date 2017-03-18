@@ -201,12 +201,11 @@ function loadPlugin (toLoad, cb) {
   const last = this._current[0]
   // place the plugin at the top of _current
   this._current.unshift(toLoad)
-  toLoad.exec(last && last.server || this._server, (err) => {
+  toLoad.exec((last && last.server) || this._server, (err) => {
     if (err || !(toLoad.q.length() > 0 || toLoad.q.running() > 0)) {
       // finish now, because there is nothing left to do
       this._current.shift()
       toLoad.finish(err, cb)
-      return
     } else {
       // finish when the queue of nested plugins to load is empty
       toLoad.q.drain = () => {
