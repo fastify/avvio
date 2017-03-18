@@ -241,7 +241,26 @@ app.use(function first (s1, opts, cb) {
   }
 })
 ```
+<a name="skip-override"></a>
+#### Skip override
+If for some reason you have set an override and you want to skip it for a *specific function*, you must add `functionName[Symbol.for('skip-override')] = true` to your code.  
+Example:
+```js
+const server = { my: 'server' }
+const app = boot(server)
 
+app.override = function (s) {
+  return Object.create(s)
+}
+
+first[Symbol.for('skip-override')] = true
+app.use(first)
+
+function first (s, opts, cb) {
+  // some code
+  cb()
+}
+```
 -------------------------------------------------------
 
 ## Acknowledgements
