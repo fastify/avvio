@@ -140,3 +140,23 @@ test('fastify test case', (t) => {
     t.notOk(instance.test)
   })
 })
+
+test('skip override', (t) => {
+  t.plan(2)
+
+  const server = { my: 'server' }
+  const app = boot(server)
+
+  app.override = function (s) {
+    return Object.create(s)
+  }
+
+  first[Symbol.for('skip-override')] = true
+  app.use(first)
+
+  function first (s, opts, cb) {
+    t.equal(s, server)
+    t.notOk(server.isPrototypeOf(s))
+    cb()
+  }
+})
