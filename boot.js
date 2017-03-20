@@ -174,7 +174,6 @@ function Plugin (parent, func, opts, callback) {
   this.deferred = false
   this.onFinish = null
   this.parent = parent
-  this.skipOverride = !!func[Symbol.for('skip-override')]
 
   this.q = fastq(parent, loadPlugin, 1)
   this.q.pause()
@@ -188,7 +187,7 @@ function Plugin (parent, func, opts, callback) {
 
 Plugin.prototype.exec = function (server, cb) {
   const func = this.func
-  this.server = this.skipOverride ? server : this.parent.override(server, func)
+  this.server = this.parent.override(server, func)
   func(this.server, this.opts, cb)
 }
 
