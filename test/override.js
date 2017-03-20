@@ -141,26 +141,6 @@ test('fastify test case', (t) => {
   })
 })
 
-test('skip override', (t) => {
-  t.plan(2)
-
-  const server = { my: 'server' }
-  const app = boot(server)
-
-  app.override = function (s) {
-    return Object.create(s)
-  }
-
-  first[Symbol.for('skip-override')] = true
-  app.use(first)
-
-  function first (s, opts, cb) {
-    t.equal(s, server)
-    t.notOk(server.isPrototypeOf(s))
-    cb()
-  }
-})
-
 test('override should pass also the plugin function', (t) => {
   t.plan(3)
 
@@ -177,6 +157,29 @@ test('override should pass also the plugin function', (t) => {
 
   function first (s, opts, cb) {
     t.equal(s, server)
+    cb()
+  }
+})
+
+test('skip override - fastify test case', (t) => {
+  t.plan(2)
+
+  const server = { my: 'server' }
+  const app = boot(server)
+
+  app.override = function (s, func) {
+    if (func[Symbol.for('skip-override')]) {
+      return s
+    }
+    return Object.create(s)
+  }
+
+  first[Symbol.for('skip-override')] = true
+  app.use(first)
+
+  function first (s, opts, cb) {
+    t.equal(s, server)
+    t.notOk(server.isPrototypeOf(s))
     cb()
   }
 })
