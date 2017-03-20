@@ -166,3 +166,24 @@ test('ready adds at the end of the queue', (t) => {
     t.ok(readyCalled, 'ready called')
   })
 })
+
+test('if the after/ready callback has two parameters, the first one must be the context', (t) => {
+  t.plan(2)
+
+  const server = { my: 'server' }
+  const app = boot(server)
+
+  app.use(function (s, opts, done) {
+    done()
+  })
+
+  app.after(function (context, cb) {
+    t.equal(server, context)
+    cb()
+  })
+
+  app.ready(function (context, cb) {
+    t.equal(server, context)
+    cb()
+  })
+})

@@ -71,9 +71,6 @@ function Boot (server, opts, done) {
     this.once('start', done)
   }
 
-  /* function readyQIterator (func, cb) {
-    callWithCbOrNextTick(func, cb, server)
-  } */
   this._readyQ = fastq(this, callWithCbOrNextTick, 1)
   this._readyQ.pause()
   this._readyQ.drain = () => {

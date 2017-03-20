@@ -160,3 +160,23 @@ test('skip override', (t) => {
     cb()
   }
 })
+
+test('override should pass also the plugin function', (t) => {
+  t.plan(3)
+
+  const server = { my: 'server' }
+  const app = boot(server)
+
+  app.override = function (s, fn) {
+    t.type(fn, 'function')
+    t.equal(fn, first)
+    return s
+  }
+
+  app.use(first)
+
+  function first (s, opts, cb) {
+    t.equal(s, server)
+    cb()
+  }
+})
