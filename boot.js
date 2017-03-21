@@ -104,7 +104,7 @@ Boot.prototype._init = function () {
 }
 
 // allows to override the instance of a server, given a plugin
-Boot.prototype.override = function (server) {
+Boot.prototype.override = function (server, func) {
   return server
 }
 
@@ -153,9 +153,10 @@ Boot.prototype._addPlugin = function (plugin, opts, callback) {
 
 Boot.prototype.after = function (func, cb) {
   // TODO do not rely on .use()
+  // const server = this._server
   this.use(function (s, opts, done) {
-    callWithCbOrNextTick(func, done)
-  }, cb)
+    callWithCbOrNextTick.call(this, func, done)
+  }.bind(this), cb)
   return this
 }
 
@@ -173,7 +174,6 @@ function Plugin (parent, func, opts, callback) {
   this.deferred = false
   this.onFinish = null
   this.parent = parent
-  this.skipOverride = !!func[Symbol.for('skip-override')]
 
   this.q = fastq(parent, loadPlugin, 1)
   this.q.pause()
@@ -187,7 +187,7 @@ function Plugin (parent, func, opts, callback) {
 
 Plugin.prototype.exec = function (server, cb) {
   const func = this.func
-  this.server = this.skipOverride ? server : this.parent.override(server)
+  this.server = this.parent.override(server, func)
   func(this.server, this.opts, cb)
 }
 
@@ -217,12 +217,18 @@ function loadPlugin (toLoad, cb) {
   })
 }
 
-function callWithCbOrNextTick (func, cb) {
+function callWithCbOrNextTick (func, cb, context) {
+  if (this && this._server) {
+    context = this._server
+  }
+
   if (func.length === 0) {
     func()
     process.nextTick(cb)
-  } else {
+  } else if (func.length === 1) {
     func(cb)
+  } else {
+    func(context, cb)
   }
 }
 

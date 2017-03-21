@@ -148,13 +148,24 @@ The functions will be loaded in the same order as they are inside the array.
 -------------------------------------------------------
 <a name="after"></a>
 
-### app.after(func([done]), [cb])
+### app.after(func([context], [done]), [cb])
 
-Calls a functon after all the previously defined plugins are loaded, including
-all their dependencies. The `'start'` event is not emitted yet.
+Calls a function after all the previously defined plugins are loaded, including
+all their dependencies. The `'start'` event is not emitted yet.  
+If one parameter is given to the callback, that parameter will be the `done` callback.  
+If two parameters are given to the callback, the first will be the `contenxt`, the second will be the `done` callback.
 
 ```js
+const server = {}
+...
+// after with one parameter
 boot.after(function (done) {
+  done()
+})
+
+// after with two parameters
+boot.after(function (context, done) {
+  assert.equal(context, server)
   done()
 })
 ```
@@ -167,14 +178,24 @@ chainable API.
 -------------------------------------------------------
 <a name="ready"></a>
 
-### app.ready(func([done]))
+### app.ready(func([context], [done]))
 
 Calls a functon after all the plugins and `after` call are
 completed, but befer `'start'` is emitted. `ready` callbacks are
-executed one at a time.
-
+executed one at a time.  
+If one parameter is given to the callback, that parameter will be the `done` callback.  
+If two parameters are given to the callback, the first will be the `contenxt`, the second will be the `done` callback.
 ```js
+const server = {}
+...
+// ready with one parameter
 boot.ready(function (done) {
+  done()
+})
+
+// ready with two parameters
+boot.ready(function (context, done) {
+  assert.equal(context, server)
   done()
 })
 ```
@@ -204,11 +225,12 @@ boot(app, {
 -------------------------------------------------------
 <a name="override"></a>
 
-### app.override(server)
+### app.override(server, plugin)
 
 Allows to override the instance of the server for each loading
 plugin. It allows the creation of an inheritance chain for the
-server instances.
+server instances.  
+The first parameter is the server instance and the second is the plugin function.
 
 ```js
 const boot = require('avvio')
@@ -218,7 +240,7 @@ const app = boot(server)
 
 console.log(app !== server, 'override must be set on the Avvio instance')
 
-app.override = function (s) {
+app.override = function (s, fn) {
   // create a new instance with the
   // server as the prototype
   const res = Object.create(s)
@@ -240,26 +262,6 @@ app.use(function first (s1, opts, cb) {
     cb()
   }
 })
-```
-<a name="skip-override"></a>
-#### Skip override
-If for some reason you have set an override and you want to skip it for a *specific function*, you must add `functionName[Symbol.for('skip-override')] = true` to your code.  
-Example:
-```js
-const server = { my: 'server' }
-const app = boot(server)
-
-app.override = function (s) {
-  return Object.create(s)
-}
-
-first[Symbol.for('skip-override')] = true
-app.use(first)
-
-function first (s, opts, cb) {
-  // some code
-  cb()
-}
 ```
 -------------------------------------------------------
 
