@@ -148,23 +148,24 @@ The functions will be loaded in the same order as they are inside the array.
 -------------------------------------------------------
 <a name="after"></a>
 
-### app.after(func([context], [done]), [cb])
+### app.after(func(error, [context], [done]), [cb])
 
 Calls a function after all the previously defined plugins are loaded, including
 all their dependencies. The `'start'` event is not emitted yet.  
-If one parameter is given to the callback, that parameter will be the `done` callback.  
-If two parameters are given to the callback, the first will be the `contenxt`, the second will be the `done` callback.
+1. If one parameter is given to the callback, that parameter will be the `error` object.  
+2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.  
+3. If three parameters are given to the callback, the first will be the `error` object, the second will be the `context` and the third the `done` callback.
 
 ```js
 const server = {}
 ...
 // after with one parameter
-boot.after(function (done) {
+boot.after(function (err, done) {
   done()
 })
 
 // after with two parameters
-boot.after(function (context, done) {
+boot.after(function (err, context, done) {
   assert.equal(context, server)
   done()
 })
@@ -178,23 +179,25 @@ chainable API.
 -------------------------------------------------------
 <a name="ready"></a>
 
-### app.ready(func([context], [done]))
+### app.ready(func(error, [context], [done]))
 
 Calls a functon after all the plugins and `after` call are
 completed, but befer `'start'` is emitted. `ready` callbacks are
 executed one at a time.  
-If one parameter is given to the callback, that parameter will be the `done` callback.  
-If two parameters are given to the callback, the first will be the `contenxt`, the second will be the `done` callback.
+1. If one parameter is given to the callback, that parameter will be the `error` object.  
+2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.  
+3. If three parameters are given to the callback, the first will be the `error` object, the second will be the `context` and the third the `done` callback.
+
 ```js
 const server = {}
 ...
 // ready with one parameter
-boot.ready(function (done) {
+boot.ready(function (err, done) {
   done()
 })
 
 // ready with two parameters
-boot.ready(function (context, done) {
+boot.ready(function (err, context, done) {
   assert.equal(context, server)
   done()
 })
