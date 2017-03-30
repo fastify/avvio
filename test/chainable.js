@@ -4,13 +4,14 @@ const test = require('tap').test
 const boot = require('..')
 
 test('chainable standalone', (t) => {
-  t.plan(4)
+  t.plan(5)
 
   boot()
     .use(function (ctx, opts, done) {
       t.pass('1st plugin')
       done()
-    }).after(function (done) {
+    }).after(function (err, done) {
+      t.error(err)
       t.pass('2nd after')
       done()
     }).ready(function () {
@@ -22,7 +23,7 @@ test('chainable standalone', (t) => {
 })
 
 test('chainable automatically binded', (t) => {
-  t.plan(4)
+  t.plan(5)
 
   const app = {}
   boot(app)
@@ -31,7 +32,8 @@ test('chainable automatically binded', (t) => {
     .use(function (ctx, opts, done) {
       t.pass('1st plugin')
       done()
-    }).after(function (done) {
+    }).after(function (err, done) {
+      t.error(err)
       t.pass('2nd after')
       done()
     }).ready(function () {
