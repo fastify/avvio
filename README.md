@@ -39,7 +39,7 @@ const boot = require('avvio')()
 
 boot
   .use(first, { hello: 'world' })
-  .after((cb) => {
+  .after((err, cb) => {
     console.log('after first and second')
     cb()
   })
@@ -103,7 +103,7 @@ server.use(function first (s, opts, cb) {
   s.use(function second (s, opts, cb) {
     cb()
   }, cb)
-}).after(function (cb) {
+}).after(function (err, cb) {
   // after first and second are finished
   cb()
 })
@@ -115,7 +115,6 @@ Options:
 
 Events:
 
-* `'error'`  if something bad happens
 * `'start'`  when the application starts
 
 The `boot` function can be used also as a
@@ -159,12 +158,12 @@ all their dependencies. The `'start'` event is not emitted yet.
 ```js
 const server = {}
 ...
-// after with one parameter
+// after with two parameter
 boot.after(function (err, done) {
   done()
 })
 
-// after with two parameters
+// after with three parameters
 boot.after(function (err, context, done) {
   assert.equal(context, server)
   done()
@@ -191,12 +190,12 @@ executed one at a time.
 ```js
 const server = {}
 ...
-// ready with one parameter
+// ready with two parameter
 boot.ready(function (err, done) {
   done()
 })
 
-// ready with two parameters
+// ready with three parameters
 boot.ready(function (err, context, done) {
   assert.equal(context, server)
   done()
