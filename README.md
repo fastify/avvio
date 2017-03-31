@@ -1,12 +1,13 @@
-# avvio &nbsp;&nbsp;[![Build Status](https://travis-ci.org/mcollina/avvio.svg)](https://travis-ci.org/mcollina/avvio)
+# avvio
 
-Asynchronous bootstrapping made easy. Wait for all components/plugins to start, and then start your whole app.
+[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](http://standardjs.com/)
+ [![Build Status](https://travis-ci.org/mcollina/avvio.svg)](https://travis-ci.org/mcollina/avvio)
 
-`avvio` is fully reentrant and graph-based. You can load
-components/plugins _within_ plugins, and be still sure that things will
-happen in the right order.
+Asynchronous bootstrapping is hard, different things can go wrong, *error handling* and *load order* just to name a few. The aim of this module is to made it simple.
 
-[![JavaScript Style Guide](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
+`avvio` is fully *reentrant* and *graph-based*. You can load
+components/plugins *within* plugins, and be still sure that things will
+happen in the right order. At the end of the loading, you application will start.
 
 * [Install](#install)
 * [Example](#example)
@@ -26,34 +27,34 @@ npm install avvio --save
 <a name="example"></a>
 ## Example
 
-The example below can be found [here][example] and ran using `node example.js`. It
-demonstrates how to use `avvio` to load functions /
-plugins in
-order.
+The example below can be found [here][example] and ran using `node example.js`.  
+It demonstrates how to use `avvio` to load functions / plugins in order.
 
 
 ```js
 'use strict'
 
-const boot = require('avvio')()
+const avvio = require('avvio')()
 
-boot
+avvio
   .use(first, { hello: 'world' })
   .after((err, cb) => {
     console.log('after first and second')
     cb()
   })
-  .use(third, (err) => {
-    if (err) {
-      console.log('something bad happened')
-      console.log(err)
-    }
 
-    console.log('third plugin loaded')
-  })
-  .ready(function () {
-    console.log('application booted!')
-  })
+avvio.use(third, (err) => {
+  if (err) {
+    console.log('something bad happened')
+    console.log(err)
+  }
+
+  console.log('third plugin loaded')
+})
+
+avvio.ready(function () {
+  console.log('application booted!')
+})
 
 function first (instance, opts, cb) {
   console.log('first loaded', opts)
@@ -74,24 +75,21 @@ function third (instance, opts, cb) {
 <a name="api"></a>
 ## API
 
-  * <a href="#constructor"><code><b>boot()</b></code></a>
+  * <a href="#constructor"><code><b>avvio()</b></code></a>
   * <a href="#use"><code>instance.<b>use()</b></code></a>
   * <a href="#after"><code>instance.<b>after()</b></code></a>
   * <a href="#ready"><code>instance.<b>ready()</b></code></a>
   * <a href="#override"><code>instance.<b>override()</b></code></a>
-  * <a href="#express"><code>boot.<b>express()</b></code></a>
+  * <a href="#express"><code>avvio.<b>express()</b></code></a>
 
 -------------------------------------------------------
 <a name="constructor"></a>
 
-### boot([instance], [started])
+### avvio([instance], [started])
 
-Start a boot sequence.
-
-`instance` will be used as the first
-argument of all plugins loaded and `use`, `after` and `ready` 
-function will be
-added to that object, keeping the support for the chainable API:
+Starts the avvio sequence.  
+As the name suggest, `instance` is the object representing your application.  
+Avvio will add the functions `use`, `after` and `ready` to the instance.
 
 ```js
 const server = {}
@@ -117,32 +115,70 @@ Events:
 
 * `'start'`  when the application starts
 
-The `boot` function can be used also as a
+The `avvio` function can be used also as a
 constructor to inherits from.
+```js
+function Server () {}
+const app = boot(new Server())
+
+app.use(function (s, opts, done) {
+  // your code
+  done()
+})
+
+app.on('start', () => {
+  // you app can start
+})
+```
 
 -------------------------------------------------------
 <a name="use"></a>
 
 ### app.use(func, [opts], [cb])
 
-Loads a functions asynchronously. The function must have the
-signature:
+Loads one or more functions asynchronously.  
+The function **must** have the signature: `instance, options, done`
 
+Plugin example:
 ```js
 function plugin (server, opts, done) {
   done()
 }
-```
-`done` must be called only once.
 
-Returns the instance on which `use` is called, to support a
-chainable API.
+app.use(plugin)
+```
+`done` must be called only once, when your plugin is ready to go.
+
+`use` returns the instance on which `use` is called, to support a chainable API.
 
 If you need to add more than a function and you don't need to use a different options object or callback, you can pass an array of functions to `.use`.
 ```js
-boot.use([first, second, third], opts, cb)
+app.use([first, second, third], opts, cb)
 ```
 The functions will be loaded in the same order as they are inside the array.
+
+<a name="error-handling"></a>
+#### Error handling
+The third argument of the plugin, the `done` function can accept an error parameter, if you pass it, you **must** handle that error. You have two ways to do it:
+1. the callback of the use function
+```js
+app.use(function (instance, opts, done) {
+      done(new Error('error'))
+}, opts, function (err) {
+      if (err) throw err
+})
+```
+2. the next `ready` or `after` callback
+```js
+app.use(function (instance, opts, done) {
+      done(new Error('error'))
+}, opts)
+app.ready(function (err) {
+    if (err) throw err
+})
+```
+
+*Note if you pass a callback to `use` without an error parameter, the error will be automatically passed to the next `ready` or `after` callback.*
 
 -------------------------------------------------------
 <a name="after"></a>
@@ -151,6 +187,8 @@ The functions will be loaded in the same order as they are inside the array.
 
 Calls a function after all the previously defined plugins are loaded, including
 all their dependencies. The `'start'` event is not emitted yet.  
+
+The callback changes basing on the parameters your are giving:
 1. If one parameter is given to the callback, that parameter will be the `error` object.  
 2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.  
 3. If three parameters are given to the callback, the first will be the `error` object, the second will be the `context` and the third the `done` callback.
@@ -158,13 +196,20 @@ all their dependencies. The `'start'` event is not emitted yet.
 ```js
 const server = {}
 ...
+// after with one parameter
+boot.after(function (err) {
+  if (err) throw err
+})
+
 // after with two parameter
 boot.after(function (err, done) {
+  if (err) throw err
   done()
 })
 
 // after with three parameters
 boot.after(function (err, context, done) {
+  if (err) throw err
   assert.equal(context, server)
   done()
 })
@@ -172,17 +217,16 @@ boot.after(function (err, context, done) {
 
 `done` must be called only once.
 
-Returns the instance on which `after` is called, to support a
-chainable API.
+Returns the instance on which `after` is called, to support a chainable API.
 
 -------------------------------------------------------
 <a name="ready"></a>
 
 ### app.ready(func(error, [context], [done]))
 
-Calls a functon after all the plugins and `after` call are
-completed, but befer `'start'` is emitted. `ready` callbacks are
-executed one at a time.  
+Calls a functon after all the plugins and `after` call are completed, but before `'start'` is emitted. `ready` callbacks are executed one at a time.  
+
+The callback changes basing on the parameters your are giving:
 1. If one parameter is given to the callback, that parameter will be the `error` object.  
 2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.  
 3. If three parameters are given to the callback, the first will be the `error` object, the second will be the `context` and the third the `done` callback.
@@ -190,13 +234,20 @@ executed one at a time.
 ```js
 const server = {}
 ...
+// ready with one parameter
+boot.ready(function (err) {
+  if (err) throw err
+})
+
 // ready with two parameter
 boot.ready(function (err, done) {
+  if (err) throw err
   done()
 })
 
 // ready with three parameters
 boot.ready(function (err, context, done) {
+  if (err) throw err
   assert.equal(context, server)
   done()
 })
@@ -204,8 +255,7 @@ boot.ready(function (err, context, done) {
 
 `done` must be called only once.
 
-Returns the instance on which `ready` is called, to support a
-chainable API.
+Returns the instance on which `ready` is called, to support a chainable API.
 
 -------------------------------------------------------
 <a name="express"></a>
@@ -229,9 +279,8 @@ boot(app, {
 
 ### app.override(server, plugin)
 
-Allows to override the instance of the server for each loading
-plugin. It allows the creation of an inheritance chain for the
-server instances.  
+Allows to override the instance of the server for each loading plugin.  
+It allows the creation of an inheritance chain for the server instances.  
 The first parameter is the server instance and the second is the plugin function.
 
 ```js
@@ -273,7 +322,7 @@ This project was kindly sponsored by [nearForm](http://nearform.com).
 
 ## License
 
-Copyright Matteo Collina 2016, Licensed under [MIT][].
+Copyright Matteo Collina 2016-2017, Licensed under [MIT][].
 
 [MIT]: ./LICENSE
 [example]: ./example.js
