@@ -137,7 +137,7 @@ Boot.prototype._addPlugin = function (plugin, opts, callback) {
     throw new Error('plugin must be a function')
   }
   opts = opts || {}
-  callback = callback || noop
+  callback = callback || null
 
   // we reinit, if use is called after emitting start once
   this._init()
@@ -197,8 +197,14 @@ Plugin.prototype.exec = function (server, cb) {
 
 Plugin.prototype.finish = function (err, cb) {
   const callback = this.callback
-  callback(err)
-  cb(err)
+  // if 'use' has a callback
+  if (callback) {
+    callback(err)
+    // if 'use' has a callback but does not have parameters
+    cb(callback.length > 0 ? null : err)
+  } else {
+    cb(err)
+  }
 }
 
 // loads a plugin
