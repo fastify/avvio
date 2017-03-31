@@ -66,6 +66,7 @@ function Boot (server, opts, done) {
 
   this._server = server
   this._current = []
+  this._error = null
 
   if (done) {
     this.once('start', done)
@@ -93,7 +94,10 @@ Boot.prototype._init = function () {
     }, {}, noop)
     loadPlugin.call(this, main, (err) => {
       if (err) {
-        this.emit('error', err)
+        this._error = err
+        if (this._readyQ.length() === 0) {
+          throw err
+        }
       } else if (this._readyQ.length() > 0) {
         this._readyQ.resume()
       } else {
@@ -133,7 +137,7 @@ Boot.prototype._addPlugin = function (plugin, opts, callback) {
     throw new Error('plugin must be a function')
   }
   opts = opts || {}
-  callback = callback || noop
+  callback = callback || null
 
   // we reinit, if use is called after emitting start once
   this._init()
@@ -146,7 +150,7 @@ Boot.prototype._addPlugin = function (plugin, opts, callback) {
   // we add the plugin to be loaded at the end of the current queue
   current.q.push(obj, (err) => {
     if (err) {
-      this.emit('error', err)
+      this._error = err
     }
   })
 }
@@ -193,8 +197,14 @@ Plugin.prototype.exec = function (server, cb) {
 
 Plugin.prototype.finish = function (err, cb) {
   const callback = this.callback
-  callback(err)
-  cb(err)
+  // if 'use' has a callback
+  if (callback) {
+    callback(err)
+    // if 'use' has a callback but does not have parameters
+    cb(callback.length > 0 ? null : err)
+  } else {
+    cb(err)
+  }
 }
 
 // loads a plugin
@@ -222,14 +232,16 @@ function callWithCbOrNextTick (func, cb, context) {
     context = this._server
   }
 
-  if (func.length === 0) {
-    func()
+  if (func.length === 0 || func.length === 1) {
+    func(this._error)
     process.nextTick(cb)
-  } else if (func.length === 1) {
-    func(cb)
+  } else if (func.length === 2) {
+    func(this._error, cb)
   } else {
-    func(context, cb)
+    func(this._error, context, cb)
   }
+  // with this the error will appear just in the next after/ready callback
+  this._error = null
 }
 
 module.exports = Boot

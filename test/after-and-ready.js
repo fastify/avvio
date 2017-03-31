@@ -4,7 +4,7 @@ const test = require('tap').test
 const boot = require('..')
 
 test('boot a plugin and then execute a call after that', (t) => {
-  t.plan(4)
+  t.plan(5)
 
   const app = boot()
   let pluginLoaded = false
@@ -16,7 +16,8 @@ test('boot a plugin and then execute a call after that', (t) => {
     done()
   })
 
-  app.after(function (cb) {
+  app.after(function (err, cb) {
+    t.error(err)
     t.ok(pluginLoaded, 'afterred!')
     afterCalled = true
     cb()
@@ -29,7 +30,7 @@ test('boot a plugin and then execute a call after that', (t) => {
 })
 
 test('after without a done callback', (t) => {
-  t.plan(4)
+  t.plan(5)
 
   const app = boot()
   let pluginLoaded = false
@@ -41,7 +42,8 @@ test('after without a done callback', (t) => {
     done()
   })
 
-  app.after(function () {
+  app.after(function (err) {
+    t.error(err)
     t.ok(pluginLoaded, 'afterred!')
     afterCalled = true
   })
@@ -53,7 +55,7 @@ test('after without a done callback', (t) => {
 })
 
 test('verify when a afterred call happens', (t) => {
-  t.plan(2)
+  t.plan(3)
 
   const app = boot()
 
@@ -61,7 +63,8 @@ test('verify when a afterred call happens', (t) => {
     done()
   })
 
-  app.after(function (cb) {
+  app.after(function (err, cb) {
+    t.error(err)
     cb()
   }, function () {
     t.pass('afterred finished')
@@ -73,7 +76,7 @@ test('verify when a afterred call happens', (t) => {
 })
 
 test('internal after', (t) => {
-  t.plan(17)
+  t.plan(18)
 
   const app = boot()
   let firstLoaded = false
@@ -90,7 +93,8 @@ test('internal after', (t) => {
     t.notOk(thirdLoaded, 'third is not loaded')
     firstLoaded = true
     s.use(second)
-    s.after(function (cb) {
+    s.after(function (err, cb) {
+      t.error(err)
       t.notOk(afterCalled, 'after was not called')
       afterCalled = true
       cb()
@@ -126,14 +130,15 @@ test('internal after', (t) => {
 })
 
 test('ready adds at the end of the queue', (t) => {
-  t.plan(11)
+  t.plan(14)
 
   const app = boot()
   let pluginLoaded = false
   let afterCalled = false
   let readyCalled = false
 
-  app.ready(function (cb) {
+  app.ready(function (err, cb) {
+    t.error(err)
     t.ok(pluginLoaded, 'after the plugin')
     t.ok(afterCalled, 'after after')
     readyCalled = true
@@ -145,7 +150,8 @@ test('ready adds at the end of the queue', (t) => {
     t.notOk(readyCalled, 'ready not called')
     pluginLoaded = true
 
-    app.ready(function () {
+    app.ready(function (err) {
+      t.error(err)
       t.ok(readyCalled, 'after the first ready')
       t.ok(afterCalled, 'after the after callback')
     })
@@ -153,7 +159,8 @@ test('ready adds at the end of the queue', (t) => {
     done()
   })
 
-  app.after(function (cb) {
+  app.after(function (err, cb) {
+    t.error(err)
     t.ok(pluginLoaded, 'executing after!')
     t.notOk(readyCalled, 'ready not called')
     afterCalled = true
@@ -168,7 +175,7 @@ test('ready adds at the end of the queue', (t) => {
 })
 
 test('if the after/ready callback has two parameters, the first one must be the context', (t) => {
-  t.plan(2)
+  t.plan(4)
 
   const server = { my: 'server' }
   const app = boot(server)
@@ -177,13 +184,161 @@ test('if the after/ready callback has two parameters, the first one must be the 
     done()
   })
 
-  app.after(function (context, cb) {
+  app.after(function (err, context, cb) {
+    t.error(err)
     t.equal(server, context)
     cb()
   })
 
-  app.ready(function (context, cb) {
+  app.ready(function (err, context, cb) {
+    t.error(err)
     t.equal(server, context)
     cb()
+  })
+})
+
+test('error should come in the first after - one parameter', (t) => {
+  t.plan(3)
+
+  const server = { my: 'server' }
+  const app = boot(server)
+
+  app.use(function (s, opts, done) {
+    done(new Error('err'))
+  })
+
+  app.after(function (err) {
+    t.ok(err instanceof Error)
+    t.is(err.message, 'err')
+  })
+
+  app.ready(function (err) {
+    t.error(err)
+  })
+})
+
+test('error should come in the first after - two parameters', (t) => {
+  t.plan(3)
+
+  const server = { my: 'server' }
+  const app = boot(server)
+
+  app.use(function (s, opts, done) {
+    done(new Error('err'))
+  })
+
+  app.after(function (err, cb) {
+    t.ok(err instanceof Error)
+    t.is(err.message, 'err')
+    cb()
+  })
+
+  app.ready(function (err) {
+    t.error(err)
+  })
+})
+
+test('error should come in the first after - three parameter', (t) => {
+  t.plan(4)
+
+  const server = { my: 'server' }
+  const app = boot(server)
+
+  app.use(function (s, opts, done) {
+    done(new Error('err'))
+  })
+
+  app.after(function (err, context, cb) {
+    t.ok(err instanceof Error)
+    t.is(err.message, 'err')
+    t.equal(context, server)
+    cb()
+  })
+
+  app.ready(function (err) {
+    t.error(err)
+  })
+})
+
+test('error should come in the first ready - one parameter', (t) => {
+  t.plan(2)
+
+  const server = { my: 'server' }
+  const app = boot(server)
+
+  app.use(function (s, opts, done) {
+    done(new Error('err'))
+  })
+
+  app.ready(function (err) {
+    t.ok(err instanceof Error)
+    t.is(err.message, 'err')
+  })
+})
+
+test('error should come in the first ready - two parameters', (t) => {
+  t.plan(2)
+
+  const server = { my: 'server' }
+  const app = boot(server)
+
+  app.use(function (s, opts, done) {
+    done(new Error('err'))
+  })
+
+  app.ready(function (err, cb) {
+    t.ok(err instanceof Error)
+    t.is(err.message, 'err')
+    cb()
+  })
+})
+
+test('error should come in the first ready - three parameters', (t) => {
+  t.plan(3)
+
+  const server = { my: 'server' }
+  const app = boot(server)
+
+  app.use(function (s, opts, done) {
+    done(new Error('err'))
+  })
+
+  app.ready(function (err, context, cb) {
+    t.ok(err instanceof Error)
+    t.is(err.message, 'err')
+    t.equal(context, server)
+    cb()
+  })
+})
+
+test('if `use` has a callback with more then one parameter, the error must not reach ready', (t) => {
+  t.plan(2)
+
+  const server = { my: 'server' }
+  const app = boot(server)
+
+  app.use(function (s, opts, done) {
+    done(new Error('err'))
+  }, err => {
+    t.ok(err)
+  })
+
+  app.ready(function (err) {
+    t.error(err)
+  })
+})
+
+test('if `use` has a callback without parameters, the error must reach ready', (t) => {
+  t.plan(1)
+
+  const server = { my: 'server' }
+  const app = boot(server)
+
+  app.use(function (s, opts, done) {
+    done(new Error('err'))
+  }, () => {})
+
+  app.ready(function (err) {
+    t.ok(err)
   })
 })

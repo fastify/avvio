@@ -39,7 +39,7 @@ const boot = require('avvio')()
 
 boot
   .use(first, { hello: 'world' })
-  .after((cb) => {
+  .after((err, cb) => {
     console.log('after first and second')
     cb()
   })
@@ -103,7 +103,7 @@ server.use(function first (s, opts, cb) {
   s.use(function second (s, opts, cb) {
     cb()
   }, cb)
-}).after(function (cb) {
+}).after(function (err, cb) {
   // after first and second are finished
   cb()
 })
@@ -115,7 +115,6 @@ Options:
 
 Events:
 
-* `'error'`  if something bad happens
 * `'start'`  when the application starts
 
 The `boot` function can be used also as a
@@ -148,23 +147,24 @@ The functions will be loaded in the same order as they are inside the array.
 -------------------------------------------------------
 <a name="after"></a>
 
-### app.after(func([context], [done]), [cb])
+### app.after(func(error, [context], [done]), [cb])
 
 Calls a function after all the previously defined plugins are loaded, including
 all their dependencies. The `'start'` event is not emitted yet.  
-If one parameter is given to the callback, that parameter will be the `done` callback.  
-If two parameters are given to the callback, the first will be the `contenxt`, the second will be the `done` callback.
+1. If one parameter is given to the callback, that parameter will be the `error` object.  
+2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.  
+3. If three parameters are given to the callback, the first will be the `error` object, the second will be the `context` and the third the `done` callback.
 
 ```js
 const server = {}
 ...
-// after with one parameter
-boot.after(function (done) {
+// after with two parameter
+boot.after(function (err, done) {
   done()
 })
 
-// after with two parameters
-boot.after(function (context, done) {
+// after with three parameters
+boot.after(function (err, context, done) {
   assert.equal(context, server)
   done()
 })
@@ -178,23 +178,25 @@ chainable API.
 -------------------------------------------------------
 <a name="ready"></a>
 
-### app.ready(func([context], [done]))
+### app.ready(func(error, [context], [done]))
 
 Calls a functon after all the plugins and `after` call are
 completed, but befer `'start'` is emitted. `ready` callbacks are
 executed one at a time.  
-If one parameter is given to the callback, that parameter will be the `done` callback.  
-If two parameters are given to the callback, the first will be the `contenxt`, the second will be the `done` callback.
+1. If one parameter is given to the callback, that parameter will be the `error` object.  
+2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.  
+3. If three parameters are given to the callback, the first will be the `error` object, the second will be the `context` and the third the `done` callback.
+
 ```js
 const server = {}
 ...
-// ready with one parameter
-boot.ready(function (done) {
+// ready with two parameter
+boot.ready(function (err, done) {
   done()
 })
 
-// ready with two parameters
-boot.ready(function (context, done) {
+// ready with three parameters
+boot.ready(function (err, context, done) {
   assert.equal(context, server)
   done()
 })
