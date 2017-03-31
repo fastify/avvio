@@ -1,9 +1,8 @@
 'use strict'
 
-// const boot = require('boot-in-the-arse')()
-const boot = require('.')()
+const avvio = require('.')()
 
-boot
+avvio
   .use(first, { hello: 'world' })
   .after((cb) => {
     console.log('after first and second')

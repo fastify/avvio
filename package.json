@@ -18,6 +18,12 @@
     "open"
   ],
   "author": "Matteo Collina <hello@matteocollina.com>",
+  "contributors": [
+    {
+      "name": "Tomas Della Vedova",
+      "url": "http://delved.org"
+    }
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/mcollina/avvio/issues"
