@@ -277,11 +277,11 @@ boot(app, {
 -------------------------------------------------------
 <a name="override"></a>
 
-### app.override(server, plugin)
+### app.override(server, plugin, options)
 
 Allows to override the instance of the server for each loading plugin.  
 It allows the creation of an inheritance chain for the server instances.  
-The first parameter is the server instance and the second is the plugin function.
+The first parameter is the server instance and the second is the plugin function while the third is the options object that you give to use.
 
 ```js
 const boot = require('avvio')
@@ -291,7 +291,7 @@ const app = boot(server)
 
 console.log(app !== server, 'override must be set on the Avvio instance')
 
-app.override = function (s, fn) {
+app.override = function (s, fn, opts) {
   // create a new instance with the
   // server as the prototype
   const res = Object.create(s)
