@@ -108,7 +108,7 @@ Boot.prototype._init = function () {
 }
 
 // allows to override the instance of a server, given a plugin
-Boot.prototype.override = function (server, func) {
+Boot.prototype.override = function (server, func, opts) {
   return server
 }
 
@@ -191,7 +191,7 @@ function Plugin (parent, func, opts, callback) {
 
 Plugin.prototype.exec = function (server, cb) {
   const func = this.func
-  this.server = this.parent.override(server, func)
+  this.server = this.parent.override(server, func, this.opts)
   func(this.server, this.opts, cb)
 }
 
