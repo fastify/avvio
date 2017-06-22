@@ -183,3 +183,27 @@ test('skip override - fastify test case', (t) => {
     cb()
   }
 })
+
+test('override can receive options object', (t) => {
+  t.plan(4)
+
+  const server = { my: 'server' }
+  const options = { hello: 'world' }
+  const app = boot(server)
+
+  app.override = function (s, fn, opts) {
+    t.equal(s, server)
+    t.deepEqual(opts, options)
+
+    const res = Object.create(s)
+    res.b = 42
+
+    return res
+  }
+
+  app.use(function first (s, opts, cb) {
+    t.notEqual(s, server)
+    t.ok(server.isPrototypeOf(s))
+    cb()
+  }, options)
+})
