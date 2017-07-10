@@ -45,7 +45,7 @@ test('boot an app with a plugin and a callback', (t) => {
 })
 
 test('boot a plugin with a custom server', (t) => {
-  t.plan(3)
+  t.plan(4)
 
   const server = {}
   const app = boot(server)
@@ -56,8 +56,43 @@ test('boot a plugin with a custom server', (t) => {
     done()
   })
 
+  app.onClose(() => {
+    t.ok('onClose called')
+  })
+
   app.on('start', () => {
-    t.pass('booted')
+    app.close(() => {
+      t.pass('booted')
+    })
+  })
+})
+
+test('custom instance should inherits avvio methods', (t) => {
+  t.plan(6)
+
+  const server = {}
+  const app = boot(server, {})
+
+  server.use(function (s, opts, done) {
+    t.equal(s, server, 'the first argument is the server')
+    t.deepEqual(opts, {}, 'no options')
+    done()
+  }).after(() => {
+    t.ok('after called')
+  })
+
+  server.onClose(() => {
+    t.ok('onClose called')
+  })
+
+  server.ready(() => {
+    t.ok('ready called')
+  })
+
+  app.on('start', () => {
+    server.close(() => {
+      t.pass('booted')
+    })
   })
 })
 
