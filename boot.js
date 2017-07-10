@@ -10,6 +10,8 @@ function wrap (server, opts, instance) {
   const useKey = expose.use || 'use'
   const afterKey = expose.after || 'after'
   const readyKey = expose.ready || 'ready'
+  const onCloseKey = expose.onClose || 'onClose'
+  const closeKey = expose.close || 'close'
 
   if (server[useKey]) {
     throw new Error(useKey + '() is already defined, specify an expose option')
@@ -34,7 +36,17 @@ function wrap (server, opts, instance) {
   }
 
   server[readyKey] = function (cb) {
-    instance.after(cb)
+    instance.ready(cb)
+    return this
+  }
+
+  server[onCloseKey] = function (cb) {
+    instance.onClose(cb)
+    return this
+  }
+
+  server[closeKey] = function (cb) {
+    instance.close(cb)
     return this
   }
 }
