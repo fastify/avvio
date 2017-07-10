@@ -3,6 +3,7 @@
 const fastq = require('fastq')
 const EE = require('events').EventEmitter
 const inherits = require('util').inherits
+const Plugin = require('./plugin')
 
 function wrap (server, opts, instance) {
   const expose = opts.expose || {}
@@ -77,6 +78,11 @@ function Boot (server, opts, done) {
   this._readyQ.drain = () => {
     this.emit('start')
   }
+  this._closeQ = fastq(this, callWithCbOrNextTick, 1)
+  this._closeQ.pause()
+  this._closeQ.drain = () => {
+    this.emit('close')
+  }
 
   // we init, because we need to emit "start" if no use is called
   this._init()
@@ -92,7 +98,7 @@ Boot.prototype._init = function () {
       // we need to wait any call to use() to happen
       process.nextTick(done)
     }, {}, noop)
-    loadPlugin.call(this, main, (err) => {
+    Plugin.loadPlugin.call(this, main, (err) => {
       if (err) {
         this._error = err
         if (this._readyQ.length() === 0) {
@@ -164,68 +170,25 @@ Boot.prototype.after = function (func, cb) {
   return this
 }
 
+Boot.prototype.onClose = function (func) {
+  this._closeQ.push(func, err => {
+    if (err) this._error = err
+  })
+  return this
+}
+
+Boot.prototype.close = function (cb) {
+  this._error = null
+  this._closeQ.push(cb)
+  process.nextTick(this._closeQ.resume.bind(this._closeQ))
+}
+
 Boot.prototype.ready = function (func) {
   this._readyQ.push(func)
   return this
 }
 
 function noop () {}
-
-function Plugin (parent, func, opts, callback) {
-  this.func = func
-  this.opts = opts
-  this.callback = callback
-  this.deferred = false
-  this.onFinish = null
-  this.parent = parent
-
-  this.q = fastq(parent, loadPlugin, 1)
-  this.q.pause()
-
-  // always start the queue in the next tick
-  // because we try to attach subsequent call to use()
-  // to the right plugin. we need to defer them,
-  // or they will end up at the top of _current
-  process.nextTick(this.q.resume.bind(this.q))
-}
-
-Plugin.prototype.exec = function (server, cb) {
-  const func = this.func
-  this.server = this.parent.override(server, func, this.opts)
-  func(this.server, this.opts, cb)
-}
-
-Plugin.prototype.finish = function (err, cb) {
-  const callback = this.callback
-  // if 'use' has a callback
-  if (callback) {
-    callback(err)
-    // if 'use' has a callback but does not have parameters
-    cb(callback.length > 0 ? null : err)
-  } else {
-    cb(err)
-  }
-}
-
-// loads a plugin
-function loadPlugin (toLoad, cb) {
-  const last = this._current[0]
-  // place the plugin at the top of _current
-  this._current.unshift(toLoad)
-  toLoad.exec((last && last.server) || this._server, (err) => {
-    if (err || !(toLoad.q.length() > 0 || toLoad.q.running() > 0)) {
-      // finish now, because there is nothing left to do
-      this._current.shift()
-      toLoad.finish(err, cb)
-    } else {
-      // finish when the queue of nested plugins to load is empty
-      toLoad.q.drain = () => {
-        this._current.shift()
-        toLoad.finish(null, cb)
-      }
-    }
-  })
-}
 
 function callWithCbOrNextTick (func, cb, context) {
   if (this && this._server) {
