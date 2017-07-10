@@ -80,6 +80,8 @@ function third (instance, opts, cb) {
   * <a href="#after"><code>instance.<b>after()</b></code></a>
   * <a href="#ready"><code>instance.<b>ready()</b></code></a>
   * <a href="#override"><code>instance.<b>override()</b></code></a>
+  * <a href="#onClose"><code>instance.<b>onClose()</b></code></a>
+  * <a href="#close"><code>instance.<b>close()</b></code></a>
   * <a href="#express"><code>avvio.<b>express()</b></code></a>
 
 -------------------------------------------------------
@@ -224,7 +226,7 @@ Returns the instance on which `after` is called, to support a chainable API.
 
 ### app.ready(func(error, [context], [done]))
 
-Calls a functon after all the plugins and `after` call are completed, but before `'start'` is emitted. `ready` callbacks are executed one at a time.  
+Calls a function after all the plugins and `after` call are completed, but before `'start'` is emitted. `ready` callbacks are executed one at a time.  
 
 The callback changes basing on the parameters your are giving:
 1. If one parameter is given to the callback, that parameter will be the `error` object.  
@@ -314,6 +316,79 @@ app.use(function first (s1, opts, cb) {
   }
 })
 ```
+-------------------------------------------------------
+
+<a name="onClose"></a>
+### app.onClose(func(error, [context], [done]))
+
+Registers a new callback that will be fired once then `close` api is called.
+
+The callback changes basing on the parameters your are giving:
+1. If one parameter is given to the callback, that parameter will be the `error` object.  
+2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.  
+3. If three parameters are given to the callback, the first will be the `error` object, the second will be the `context` and the third the `done` callback.
+
+```js
+const server = {}
+...
+// onClose with one parameter
+boot.onClose(function (err) {
+  if (err) throw err
+})
+
+// onClose with two parameter
+boot.onClose(function (err, done) {
+  if (err) throw err
+  done()
+})
+
+// onClose with three parameters
+boot.onClose(function (err, context, done) {
+  if (err) throw err
+  assert.equal(context, server)
+  done()
+})
+```
+
+`done` must be called only once.
+Returns the instance on which `onClose` is called, to support a chainable API.
+
+-------------------------------------------------------
+
+<a name="close"></a>
+### app.close(func(error, [context], [done]))
+
+Starts the shotdown procedure, the callback is called once all the registered callbacks with `onClose` has been executed.
+
+The callback changes basing on the parameters your are giving:
+1. If one parameter is given to the callback, that parameter will be the `error` object.  
+2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.  
+3. If three parameters are given to the callback, the first will be the `error` object, the second will be the `context` and the third the `done` callback.
+
+```js
+const server = {}
+...
+// close with one parameter
+boot.close(function (err) {
+  if (err) throw err
+})
+
+// close with two parameter
+boot.close(function (err, done) {
+  if (err) throw err
+  done()
+})
+
+// close with three parameters
+boot.close(function (err, context, done) {
+  if (err) throw err
+  assert.equal(context, server)
+  done()
+})
+```
+
+`done` must be called only once.
+
 -------------------------------------------------------
 
 ## Acknowledgements
