@@ -171,7 +171,7 @@ Boot.prototype.after = function (func, cb) {
 }
 
 Boot.prototype.onClose = function (func) {
-  this._closeQ.push(func, err => {
+  this._closeQ.unshift(func, err => {
     if (err) this._error = err
   })
   return this

@@ -109,3 +109,37 @@ test('close event', (t) => {
     t.pass('event fired')
   })
 })
+
+test('close order', (t) => {
+  t.plan(5)
+
+  const app = boot()
+  var order = [1, 2, 3, 4]
+
+  app.use(function (server, opts, done) {
+    app.onClose(() => {
+      t.is(order.shift(), 3)
+    })
+
+    app.use(function (server, opts, done) {
+      app.onClose(() => {
+        t.is(order.shift(), 2)
+      })
+      done()
+    }, done)
+  })
+
+  app.use(function (server, opts, done) {
+    app.onClose(() => {
+      t.is(order.shift(), 1)
+    })
+    done()
+  })
+
+  app.on('start', () => {
+    app.close(() => {
+      t.is(order.shift(), 4)
+      t.pass('Closed in the correct order')
+    })
+  })
+})
