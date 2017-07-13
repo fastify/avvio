@@ -174,8 +174,6 @@ Boot.prototype._addPlugin = function (plugin, opts, callback) {
 }
 
 Boot.prototype.after = function (func, cb) {
-  // TODO do not rely on .use()
-  // const server = this._server
   this.use(function (s, opts, done) {
     callWithCbOrNextTick.call(this, func, done)
   }.bind(this), cb)
@@ -203,20 +201,20 @@ Boot.prototype.ready = function (func) {
 function noop () {}
 
 function callWithCbOrNextTick (func, cb, context) {
-  if (this && this._server) {
-    context = this._server
-  }
+  context = this._server
+  var err = this._error
 
-  if (func.length === 0 || func.length === 1) {
-    func(this._error)
-    process.nextTick(cb)
-  } else if (func.length === 2) {
-    func(this._error, cb)
-  } else {
-    func(this._error, context, cb)
-  }
   // with this the error will appear just in the next after/ready callback
   this._error = null
+
+  if (func.length === 0 || func.length === 1) {
+    func(err)
+    process.nextTick(cb)
+  } else if (func.length === 2) {
+    func(err, cb)
+  } else {
+    func(err, context, cb)
+  }
 }
 
 module.exports = Boot

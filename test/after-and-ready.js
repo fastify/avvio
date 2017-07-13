@@ -342,3 +342,33 @@ test('if `use` has a callback without parameters, the error must reach ready', (
     t.ok(err)
   })
 })
+
+test('shold pass the errors from after to ready', (t) => {
+  t.plan(6)
+
+  const server = {}
+  const app = boot(server, {})
+
+  server.use(function (s, opts, done) {
+    t.equal(s, server, 'the first argument is the server')
+    t.deepEqual(opts, {}, 'no options')
+    done()
+  }).after((err, done) => {
+    t.error(err)
+    done(new Error('some error'))
+  })
+
+  server.onClose(() => {
+    t.ok('onClose called')
+  })
+
+  server.ready(err => {
+    t.is(err.message, 'some error')
+  })
+
+  app.on('start', () => {
+    server.close(() => {
+      t.pass('booted')
+    })
+  })
+})
