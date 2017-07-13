@@ -189,7 +189,9 @@ Boot.prototype.onClose = function (func) {
 
 Boot.prototype.close = function (cb) {
   this._error = null
-  this._closeQ.push(cb)
+  if (cb) {
+    this._closeQ.push(cb)
+  }
   process.nextTick(this._closeQ.resume.bind(this._closeQ))
 }
 

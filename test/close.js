@@ -143,3 +143,16 @@ test('close order', (t) => {
     })
   })
 })
+
+test('close without a cb', (t) => {
+  t.plan(1)
+
+  const app = boot()
+
+  app.onClose((err, instance, done) => {
+    t.error(err)
+    done()
+  })
+
+  app.close()
+})
