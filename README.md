@@ -319,33 +319,25 @@ app.use(function first (s1, opts, cb) {
 -------------------------------------------------------
 
 <a name="onClose"></a>
-### app.onClose(func(error, [context], [done]))
+### app.onClose(func([context], [done]))
 
 Registers a new callback that will be fired once then `close` api is called.
 
 The callback changes basing on the parameters your are giving:
-1. If one parameter is given to the callback, that parameter will be the `error` object.  
-2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.  
-3. If three parameters are given to the callback, the first will be the `error` object, the second will be the `context` and the third the `done` callback.
+1. If one parameter is given to the callback, that parameter will be the `context`.  
+2. If two parameters are given to the callback, the first will be the `context`, the second will be the `done` callback.  
 
 ```js
 const server = {}
 ...
 // onClose with one parameter
-boot.onClose(function (err) {
-  if (err) throw err
+boot.onClose(function (context) {
+  // ...
 })
 
 // onClose with two parameter
-boot.onClose(function (err, done) {
-  if (err) throw err
-  done()
-})
-
-// onClose with three parameters
-boot.onClose(function (err, context, done) {
-  if (err) throw err
-  assert.equal(context, server)
+boot.onClose(function (context, done) {
+  // ...
   done()
 })
 ```
