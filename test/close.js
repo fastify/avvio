@@ -32,8 +32,8 @@ test('onClose arguments', (t) => {
   const app = boot()
 
   app.use(function (server, opts, done) {
-    app.onClose((err, instance, done) => {
-      t.error(err)
+    app.onClose((instance, done) => {
+      t.ok('called')
       t.equal(app, instance)
       done()
     })
@@ -53,9 +53,35 @@ test('onClose should handle errors', (t) => {
   const app = boot()
 
   app.use(function (server, opts, done) {
-    app.onClose((err, instance, done) => {
-      t.error(err)
+    app.onClose((instance, done) => {
+      t.ok('called')
       done(new Error('some error'))
+    })
+    done()
+  })
+
+  app.on('start', () => {
+    app.close(err => {
+      t.is(err.message, 'some error')
+      t.pass('Closed in the correct order')
+    })
+  })
+})
+
+test('onClose should handle errors / 2', (t) => {
+  t.plan(4)
+
+  const app = boot()
+
+  app.onClose((instance, done) => {
+    t.ok('called')
+    done(new Error('some error'))
+  })
+
+  app.use(function (server, opts, done) {
+    app.onClose((instance, done) => {
+      t.ok('called')
+      done()
     })
     done()
   })
@@ -74,8 +100,8 @@ test('close arguments', (t) => {
   const app = boot()
 
   app.use(function (server, opts, done) {
-    app.onClose((err, instance, done) => {
-      t.error(err)
+    app.onClose((instance, done) => {
+      t.ok('called')
       done()
     })
     done()
@@ -149,8 +175,8 @@ test('close without a cb', (t) => {
 
   const app = boot()
 
-  app.onClose((err, instance, done) => {
-    t.error(err)
+  app.onClose((instance, done) => {
+    t.ok('called')
     done()
   })
 

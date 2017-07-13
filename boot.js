@@ -90,11 +90,13 @@ function Boot (server, opts, done) {
   this._readyQ.drain = () => {
     this.emit('start')
   }
-  this._closeQ = fastq(this, callWithCbOrNextTick, 1)
+
+  this._closeQ = fastq(this, closeWithCbOrNextTick, 1)
   this._closeQ.pause()
   this._closeQ.drain = () => {
     this.emit('close')
   }
+  this._thereIsCloseCb = false
 
   // we init, because we need to emit "start" if no use is called
   this._init()
@@ -191,6 +193,7 @@ Boot.prototype.close = function (cb) {
   this._error = null
   if (cb) {
     this._closeQ.push(cb)
+    this._thereIsCloseCb = true
   }
   process.nextTick(this._closeQ.resume.bind(this._closeQ))
 }
@@ -216,6 +219,27 @@ function callWithCbOrNextTick (func, cb, context) {
     func(err, cb)
   } else {
     func(err, context, cb)
+  }
+}
+
+function closeWithCbOrNextTick (func, cb, context) {
+  context = this._server
+  if (this._closeQ.length() === 0 && this._thereIsCloseCb) {
+    if (func.length === 0 || func.length === 1) {
+      func(this._error)
+      process.nextTick(cb)
+    } else if (func.length === 2) {
+      func(this._error, cb)
+    } else {
+      func(this._error, context, cb)
+    }
+  } else {
+    if (func.length === 0 || func.length === 1) {
+      func(context)
+      process.nextTick(cb)
+    } else {
+      func(context, cb)
+    }
   }
 }
 
