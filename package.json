@@ -30,10 +30,10 @@
   },
   "homepage": "https://github.com/mcollina/avvio#readme",
   "devDependencies": {
-    "express": "^4.15.3",
+    "express": "^4.15.4",
     "pre-commit": "^1.2.2",
-    "standard": "^10.0.2",
-    "tap": "^10.7.0"
+    "standard": "^10.0.3",
+    "tap": "^10.7.2"
   },
   "dependencies": {
     "fastq": "^1.5.0"
