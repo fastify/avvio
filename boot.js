@@ -116,10 +116,8 @@ Boot.prototype._init = function () {
         if (this._readyQ.length() === 0) {
           throw err
         }
-      } else if (this._readyQ.length() > 0) {
-        this._readyQ.resume()
       } else {
-        this.emit('start')
+        this._readyQ.resume()
       }
     })
   }
