@@ -123,3 +123,24 @@ test('throw on non-function use', (t) => {
     app.use({})
   })
 })
+
+// https://github.com/mcollina/avvio/issues/20
+test('ready and nextTick', (t) => {
+  const app = boot()
+  process.nextTick(() => {
+    app.ready(() => {
+      t.end()
+    })
+  })
+})
+
+// https://github.com/mcollina/avvio/issues/20
+test('promises and microtask', (t) => {
+  const app = boot()
+  Promise.resolve()
+    .then(() => {
+      app.ready(function () {
+        t.end()
+      })
+    })
+})
