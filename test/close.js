@@ -91,6 +91,45 @@ test('onClose arguments - fastify encapsulation test case', (t) => {
   })
 })
 
+test('onClose arguments - fastify encapsulation test case / 2', (t) => {
+  t.plan(5)
+
+  const server = { my: 'server' }
+  const app = boot(server)
+
+  app.override = function (s, fn, opts) {
+    s = Object.create(s)
+    return s
+  }
+
+  server.use(function (instance, opts, next) {
+    instance.test = true
+    instance.onClose((i, done) => {
+      t.ok(i.test)
+      done()
+    })
+    next()
+  })
+
+  server.use(function (instance, opts, next) {
+    t.notOk(instance.test)
+    instance.onClose((i) => {
+      t.notOk(i.test)
+    })
+    next()
+  })
+
+  app.on('start', () => {
+    t.notOk(server.test)
+    try {
+      server.close()
+      t.pass()
+    } catch (err) {
+      t.fail(err)
+    }
+  })
+})
+
 test('onClose arguments - encapsulation test case no server', (t) => {
   t.plan(5)
 
