@@ -259,7 +259,7 @@ function encapsulateTwoParam (func, that) {
   }
 }
 
-function encapsulateThreeParam (func, that, useContext) {
+function encapsulateThreeParam (func, that) {
   return _encapsulateThreeParam.bind(that)
   function _encapsulateThreeParam (err, cb) {
     if (func.length === 0 || func.length === 1) {
