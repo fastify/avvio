@@ -31,22 +31,22 @@ function wrap (server, opts, instance) {
   }
 
   server[afterKey] = function (func) {
-    instance.after(encapsulateThreeParam(func, this, true))
+    instance.after(encapsulateThreeParamServer(func, this, true))
     return this
   }
 
   server[readyKey] = function (func) {
-    instance.ready(encapsulateThreeParam(func, this, true))
+    instance.ready(encapsulateThreeParamServer(func, this, true))
     return this
   }
 
   server[onCloseKey] = function (func) {
-    instance.onClose(encapsulateTwoParam(func, this))
+    instance.onClose(encapsulateTwoParamServer(func, this))
     return this
   }
 
   server[closeKey] = function (func) {
-    instance.close(encapsulateThreeParam(func, this))
+    instance.close(encapsulateThreeParamServer(func, this))
     return this
   }
 }
@@ -179,7 +179,7 @@ Boot.prototype.after = function (func, cb) {
   function _after (s, opts, done) {
     callWithCbOrNextTick.call(
       this,
-      encapsulateThreeParam(func, this),
+      encapsulateThreeParamAvvio(func, this),
       done
     )
   }
@@ -189,7 +189,7 @@ Boot.prototype.after = function (func, cb) {
 
 Boot.prototype.onClose = function (func) {
   this._closeQ.unshift(
-    encapsulateTwoParam(func, this),
+    encapsulateTwoParamAvvio(func, this),
     callback.bind(this)
   )
 
@@ -203,14 +203,14 @@ Boot.prototype.onClose = function (func) {
 Boot.prototype.close = function (func) {
   this._error = null
   if (func) {
-    this._closeQ.push(encapsulateThreeParam(func, this))
+    this._closeQ.push(encapsulateThreeParamAvvio(func, this))
     this._thereIsCloseCb = true
   }
   process.nextTick(this._closeQ.resume.bind(this._closeQ))
 }
 
 Boot.prototype.ready = function (func) {
-  this._readyQ.push(encapsulateThreeParam(func, this))
+  this._readyQ.push(encapsulateThreeParamAvvio(func, this))
   return this
 }
 
@@ -233,7 +233,19 @@ function closeWithCbOrNextTick (func, cb, context) {
   }
 }
 
-function encapsulateTwoParam (func, that) {
+function encapsulateTwoParamAvvio (func, that) {
+  return _encapsulateTwoParam.bind(that)
+  function _encapsulateTwoParam (context, cb) {
+    if (func.length === 0 || func.length === 1) {
+      func(this._server)
+      process.nextTick(cb)
+    } else {
+      func(this._server, cb)
+    }
+  }
+}
+
+function encapsulateTwoParamServer (func, that) {
   return _encapsulateTwoParam.bind(that)
   function _encapsulateTwoParam (context, cb) {
     if (func.length === 0 || func.length === 1) {
@@ -245,7 +257,7 @@ function encapsulateTwoParam (func, that) {
   }
 }
 
-function encapsulateThreeParam (func, that, useContext) {
+function encapsulateThreeParamAvvio (func, that, useContext) {
   return _encapsulateThreeParam.bind(that)
   function _encapsulateThreeParam (err, cb) {
     if (func.length === 0 || func.length === 1) {
@@ -254,11 +266,21 @@ function encapsulateThreeParam (func, that, useContext) {
     } else if (func.length === 2) {
       func(err, cb)
     } else {
-      if (useContext) {
-        func(err, this, cb)
-      } else {
-        func(err, this._server, cb)
-      }
+      func(err, this._server, cb)
+    }
+  }
+}
+
+function encapsulateThreeParamServer (func, that, useContext) {
+  return _encapsulateThreeParam.bind(that)
+  function _encapsulateThreeParam (err, cb) {
+    if (func.length === 0 || func.length === 1) {
+      func(err)
+      process.nextTick(cb)
+    } else if (func.length === 2) {
+      func(err, cb)
+    } else {
+      func(err, this, cb)
     }
   }
 }
