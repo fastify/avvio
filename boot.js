@@ -232,9 +232,11 @@ function closeWithCbOrNextTick (func, cb, context) {
       func(this._error, context, cb)
     }
   } else {
-    if (func.length === 0 || func.length === 1) {
-      func(context)
+    if (func.length === 0) {
+      func()
       process.nextTick(cb)
+    } else if (func.length === 1) {
+      func(cb)
     } else {
       func(context, cb)
     }
