@@ -27,17 +27,33 @@ test('boot an app with a plugin', (t) => {
 })
 
 test('onClose arguments', (t) => {
-  t.plan(3)
+  t.plan(6)
 
   const app = boot()
 
-  app.use(function (server, opts, done) {
+  app.use(function (server, opts, next) {
     app.onClose((instance, done) => {
       t.ok('called')
       t.equal(app, instance)
       done()
     })
-    done()
+    next()
+  })
+
+  app.use(function (server, opts, next) {
+    app.onClose((done) => {
+      t.ok('called')
+      t.is(typeof done, 'function')
+      done()
+    })
+    next()
+  })
+
+  app.use(function (server, opts, next) {
+    app.onClose(() => {
+      t.ok('called')
+    })
+    next()
   })
 
   app.on('start', () => {
