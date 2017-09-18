@@ -27,20 +27,99 @@ test('boot an app with a plugin', (t) => {
 })
 
 test('onClose arguments', (t) => {
-  t.plan(3)
+  t.plan(5)
 
   const app = boot()
 
-  app.use(function (server, opts, done) {
-    app.onClose((instance, done) => {
+  app.use(function (server, opts, next) {
+    server.onClose((instance, done) => {
       t.ok('called')
-      t.equal(app, instance)
+      t.equal(server, instance)
       done()
     })
-    done()
+    next()
+  })
+
+  app.use(function (server, opts, next) {
+    server.onClose((instance) => {
+      t.ok('called')
+      t.equal(server, instance)
+    })
+    next()
   })
 
   app.on('start', () => {
+    app.close(() => {
+      t.pass('Closed in the correct order')
+    })
+  })
+})
+
+test('onClose arguments - fastify encapsulation test case', (t) => {
+  t.plan(5)
+
+  const server = { my: 'server' }
+  const app = boot(server)
+
+  app.override = function (s, fn, opts) {
+    s = Object.create(s)
+    return s
+  }
+
+  app.use(function (instance, opts, next) {
+    instance.test = true
+    instance.onClose((i, done) => {
+      t.ok(i.test)
+      done()
+    })
+    next()
+  })
+
+  app.use(function (instance, opts, next) {
+    t.notOk(instance.test)
+    instance.onClose((i) => {
+      t.notOk(i.test)
+    })
+    next()
+  })
+
+  app.on('start', () => {
+    t.notOk(app.test)
+    app.close(() => {
+      t.pass('Closed in the correct order')
+    })
+  })
+})
+
+test('onClose arguments - encapsulation test case', (t) => {
+  t.plan(5)
+
+  const app = boot()
+
+  app.override = function (s, fn, opts) {
+    s = Object.create(s)
+    return s
+  }
+
+  app.use(function (instance, opts, next) {
+    instance.test = true
+    instance.onClose((i, done) => {
+      t.ok(i.test)
+      done()
+    })
+    next()
+  })
+
+  app.use(function (instance, opts, next) {
+    t.notOk(instance.test)
+    instance.onClose((i) => {
+      t.notOk(i.test)
+    })
+    next()
+  })
+
+  app.on('start', () => {
+    t.notOk(app.test)
     app.close(() => {
       t.pass('Closed in the correct order')
     })

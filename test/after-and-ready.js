@@ -343,7 +343,7 @@ test('if `use` has a callback without parameters, the error must reach ready', (
   })
 })
 
-test('shold pass the errors from after to ready', (t) => {
+test('should pass the errors from after to ready', (t) => {
   t.plan(6)
 
   const server = {}
@@ -370,5 +370,111 @@ test('shold pass the errors from after to ready', (t) => {
     server.close(() => {
       t.pass('booted')
     })
+  })
+})
+
+test('after encapsulation', t => {
+  t.plan(4)
+
+  const app = boot()
+  app.override = function (s, fn, opts) {
+    s = Object.create(s)
+    return s
+  }
+
+  app.use(function (instance, opts, next) {
+    instance.test = true
+    instance.after(function (err, i, done) {
+      t.error(err)
+      t.ok(i.test)
+      done()
+    })
+    next()
+  })
+
+  app.after(function (err, i, done) {
+    t.error(err)
+    t.notOk(i.test)
+    done()
+  })
+})
+
+test('ready encapsulation', t => {
+  t.plan(4)
+
+  const app = boot()
+  app.override = function (s, fn, opts) {
+    s = Object.create(s)
+    return s
+  }
+
+  app.use(function (instance, opts, next) {
+    instance.test = true
+    instance.ready(function (err, i, done) {
+      t.error(err)
+      t.ok(i.test)
+      done()
+    })
+    next()
+  })
+
+  app.ready(function (err, i, done) {
+    t.error(err)
+    t.notOk(i.test)
+    done()
+  })
+})
+
+test('after encapsulation with a server', t => {
+  t.plan(4)
+
+  const server = { my: 'server' }
+  const app = boot(server)
+  app.override = function (s, fn, opts) {
+    s = Object.create(s)
+    return s
+  }
+
+  app.use(function (instance, opts, next) {
+    instance.test = true
+    instance.after(function (err, i, done) {
+      t.error(err)
+      t.ok(i.test)
+      done()
+    })
+    next()
+  })
+
+  app.after(function (err, i, done) {
+    t.error(err)
+    t.notOk(i.test)
+    done()
+  })
+})
+
+test('ready encapsulation with a server', t => {
+  t.plan(4)
+
+  const server = { my: 'server' }
+  const app = boot(server)
+  app.override = function (s, fn, opts) {
+    s = Object.create(s)
+    return s
+  }
+
+  app.use(function (instance, opts, next) {
+    instance.test = true
+    instance.ready(function (err, i, done) {
+      t.error(err)
+      t.ok(i.test)
+      done()
+    })
+    next()
+  })
+
+  app.ready(function (err, i, done) {
+    t.error(err)
+    t.notOk(i.test)
+    done()
   })
 })
