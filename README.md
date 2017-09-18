@@ -231,7 +231,7 @@ Calls a function after all the plugins and `after` call are completed, but befor
 The callback changes basing on the parameters your are giving:
 1. If one parameter is given to the callback, that parameter will be the `error` object.  
 2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.  
-3. If three parameters are given to the callback, the first will be the `error` object, the second will be the `context` and the third the `done` callback.
+3. If three parameters are given to the callback, the first will be the `error` object, the second will be the top level `context` and the third the `done` callback.
 
 ```js
 const server = {}
@@ -324,14 +324,20 @@ app.use(function first (s1, opts, cb) {
 Registers a new callback that will be fired once then `close` api is called.
 
 The callback changes basing on the parameters your are giving:
-1. If one parameter is given to the callback, that parameter will be the `context`.  
-2. If two parameters are given to the callback, the first will be the `context`, the second will be the `done` callback.  
+1. If no parameters are provided, the function will be considered synchronous.
+2. If one parameter is given to the callback, that parameter will be the `done` callback.  
+3. If two parameters are given to the callback, the first will be the top level `context`, the second will be the `done` callback.  
 
 ```js
 const server = {}
 ...
+// onClose without parameters
+boot.onClose(function () {
+  // ...
+})
+
 // onClose with one parameter
-boot.onClose(function (context) {
+boot.onClose(function (done) {
   // ...
 })
 
@@ -355,7 +361,7 @@ Starts the shotdown procedure, the callback is called once all the registered ca
 The callback changes basing on the parameters your are giving:
 1. If one parameter is given to the callback, that parameter will be the `error` object.  
 2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.  
-3. If three parameters are given to the callback, the first will be the `error` object, the second will be the `context` and the third the `done` callback.
+3. If three parameters are given to the callback, the first will be the `error` object, the second will be the top level `context` and the third the `done` callback.
 
 ```js
 const server = {}
