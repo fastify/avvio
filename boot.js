@@ -30,23 +30,23 @@ function wrap (server, opts, instance) {
     return this
   }
 
-  server[afterKey] = function (cb) {
-    instance.after(cb)
+  server[afterKey] = function (func) {
+    instance.after(encapsulateThreeParam(func, this))
     return this
   }
 
-  server[readyKey] = function (cb) {
-    instance.ready(cb)
+  server[readyKey] = function (func) {
+    instance.ready(encapsulateThreeParam(func, this))
     return this
   }
 
-  server[onCloseKey] = function (cb) {
-    instance.onClose(cb)
+  server[onCloseKey] = function (func) {
+    instance.onClose(encapsulateTwoParam(func, this))
     return this
   }
 
-  server[closeKey] = function (cb) {
-    instance.close(cb)
+  server[closeKey] = function (func) {
+    instance.close(encapsulateThreeParam(func, this))
     return this
   }
 }
@@ -174,23 +174,29 @@ Boot.prototype._addPlugin = function (plugin, opts, callback) {
 }
 
 Boot.prototype.after = function (func, cb) {
-  this.use(function (s, opts, done) {
+  this.use(_after.bind(this), cb)
+
+  function _after (s, opts, done) {
     callWithCbOrNextTick.call(this, func, done)
-  }.bind(this), cb)
+  }
+
   return this
 }
 
 Boot.prototype.onClose = function (func) {
-  this._closeQ.unshift(func, err => {
+  this._closeQ.unshift(func, callback.bind(this))
+
+  function callback (err) {
     if (err) this._error = err
-  })
+  }
+
   return this
 }
 
-Boot.prototype.close = function (cb) {
+Boot.prototype.close = function (func) {
   this._error = null
-  if (cb) {
-    this._closeQ.push(cb)
+  if (func) {
+    this._closeQ.push(func)
     this._thereIsCloseCb = true
   }
   process.nextTick(this._closeQ.resume.bind(this._closeQ))
@@ -237,6 +243,32 @@ function closeWithCbOrNextTick (func, cb, context) {
       process.nextTick(cb)
     } else {
       func(context, cb)
+    }
+  }
+}
+
+function encapsulateTwoParam (func, that) {
+  return _encapsulateTwoParam.bind(that)
+  function _encapsulateTwoParam (context, cb) {
+    if (func.length === 0 || func.length === 1) {
+      func(this)
+      process.nextTick(cb)
+    } else {
+      func(this, cb)
+    }
+  }
+}
+
+function encapsulateThreeParam (func, that) {
+  return _encapsulateThreeParam.bind(that)
+  function _encapsulateThreeParam (err, cb) {
+    if (func.length === 0 || func.length === 1) {
+      func(err)
+      process.nextTick(cb)
+    } else if (func.length === 2) {
+      func(err, cb)
+    } else {
+      func(err, this, cb)
     }
   }
 }
