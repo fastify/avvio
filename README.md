@@ -193,7 +193,7 @@ all their dependencies. The `'start'` event is not emitted yet.
 The callback changes basing on the parameters your are giving:
 1. If one parameter is given to the callback, that parameter will be the `error` object.  
 2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.  
-3. If three parameters are given to the callback, the first will be the `error` object, the second will be the top level `context` if you didn't provide the server, otherwise an encapsulated `context`, and the third the `done` callback.
+3. If three parameters are given to the callback, the first will be the `error` object, the second will be the top level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, and the third the `done` callback.
 
 ```js
 const server = {}
@@ -231,7 +231,7 @@ Calls a function after all the plugins and `after` call are completed, but befor
 The callback changes basing on the parameters your are giving:
 1. If one parameter is given to the callback, that parameter will be the `error` object.  
 2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.  
-3. If three parameters are given to the callback, the first will be the `error` object, the second will be the top level `context` if you didn't provide the server, otherwise an encapsulated `context`, and the third the `done` callback.
+3. If three parameters are given to the callback, the first will be the `error` object, the second will be the top level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, and the third the `done` callback.
 
 ```js
 const server = {}
@@ -325,7 +325,7 @@ Registers a new callback that will be fired once then `close` api is called.
 
 The callback changes basing on the parameters your are giving:
 1. If one parameter is given to the callback, that parameter will be the `context`.  
-2. If two parameters are given to the callback, the first will be the top level `context` if you didn't provide the server, otherwise an encapsulated `context`, the second will be the `done` callback.  
+2. If two parameters are given to the callback, the first will be the top level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, the second will be the `done` callback.  
 
 ```js
 const server = {}
@@ -355,7 +355,7 @@ Starts the shotdown procedure, the callback is called once all the registered ca
 The callback changes basing on the parameters your are giving:
 1. If one parameter is given to the callback, that parameter will be the `error` object.  
 2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.  
-3. If three parameters are given to the callback, the first will be the `error` object, the second will be the top level `context` if you didn't provide the server, otherwise an encapsulated `context`, and the third the `done` callback.
+3. If three parameters are given to the callback, the first will be the `error` object, the second will be the top level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, and the third the `done` callback.
 
 ```js
 const server = {}
