@@ -30,23 +30,23 @@ function wrap (server, opts, instance) {
     return this
   }
 
-  server[afterKey] = function (cb) {
-    instance.after(cb)
+  server[afterKey] = function (func) {
+    instance.after(encapsulateThreeParam(func, this, true))
     return this
   }
 
-  server[readyKey] = function (cb) {
-    instance.ready(cb)
+  server[readyKey] = function (func) {
+    instance.ready(encapsulateThreeParam(func, this, true))
     return this
   }
 
-  server[onCloseKey] = function (cb) {
-    instance.onClose(cb)
+  server[onCloseKey] = function (func) {
+    instance.onClose(encapsulateTwoParam(func, this))
     return this
   }
 
-  server[closeKey] = function (cb) {
-    instance.close(cb)
+  server[closeKey] = function (func) {
+    instance.close(encapsulateThreeParam(func, this))
     return this
   }
 }
@@ -174,69 +174,91 @@ Boot.prototype._addPlugin = function (plugin, opts, callback) {
 }
 
 Boot.prototype.after = function (func, cb) {
-  this.use(function (s, opts, done) {
-    callWithCbOrNextTick.call(this, func, done)
-  }.bind(this), cb)
+  this.use(_after.bind(this), cb)
+
+  function _after (s, opts, done) {
+    callWithCbOrNextTick.call(
+      this,
+      encapsulateThreeParam(func, this),
+      done
+    )
+  }
+
   return this
 }
 
 Boot.prototype.onClose = function (func) {
-  this._closeQ.unshift(func, err => {
+  this._closeQ.unshift(
+    encapsulateTwoParam(func, this),
+    callback.bind(this)
+  )
+
+  function callback (err) {
     if (err) this._error = err
-  })
+  }
+
   return this
 }
 
-Boot.prototype.close = function (cb) {
+Boot.prototype.close = function (func) {
   this._error = null
-  if (cb) {
-    this._closeQ.push(cb)
+  if (func) {
+    this._closeQ.push(encapsulateThreeParam(func, this))
     this._thereIsCloseCb = true
   }
   process.nextTick(this._closeQ.resume.bind(this._closeQ))
 }
 
 Boot.prototype.ready = function (func) {
-  this._readyQ.push(func)
+  this._readyQ.push(encapsulateThreeParam(func, this))
   return this
 }
 
 function noop () {}
 
 function callWithCbOrNextTick (func, cb, context) {
-  context = this._server
   var err = this._error
 
   // with this the error will appear just in the next after/ready callback
   this._error = null
-
-  if (func.length === 0 || func.length === 1) {
-    func(err)
-    process.nextTick(cb)
-  } else if (func.length === 2) {
-    func(err, cb)
-  } else {
-    func(err, context, cb)
-  }
+  func(err, cb)
 }
 
 function closeWithCbOrNextTick (func, cb, context) {
   context = this._server
   if (this._closeQ.length() === 0 && this._thereIsCloseCb) {
+    func(this._error, cb)
+  } else {
+    func(context, cb)
+  }
+}
+
+function encapsulateTwoParam (func, that) {
+  return _encapsulateTwoParam.bind(that)
+  function _encapsulateTwoParam (context, cb) {
     if (func.length === 0 || func.length === 1) {
-      func(this._error)
+      func(this)
+      process.nextTick(cb)
+    } else {
+      func(this, cb)
+    }
+  }
+}
+
+function encapsulateThreeParam (func, that, useContext) {
+  return _encapsulateThreeParam.bind(that)
+  function _encapsulateThreeParam (err, cb) {
+    if (func.length === 0 || func.length === 1) {
+      func(err)
       process.nextTick(cb)
     } else if (func.length === 2) {
-      func(this._error, cb)
+      func(err, cb)
     } else {
-      func(this._error, context, cb)
-    }
-  } else {
-    if (func.length === 0 || func.length === 1) {
-      func(context)
-      process.nextTick(cb)
-    } else {
-      func(context, cb)
+      if (useContext) {
+        func(err, this, cb)
+      } else {
+        func(err, this._server, cb)
+      }
     }
   }
 }
