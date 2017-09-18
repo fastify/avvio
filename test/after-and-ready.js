@@ -373,7 +373,7 @@ test('should pass the errors from after to ready', (t) => {
   })
 })
 
-test('after encapsulation', t => {
+test('after no encapsulation', t => {
   t.plan(4)
 
   const app = boot()
@@ -386,7 +386,7 @@ test('after encapsulation', t => {
     instance.test = true
     instance.after(function (err, i, done) {
       t.error(err)
-      t.ok(i.test)
+      t.notOk(i.test)
       done()
     })
     next()
@@ -399,7 +399,7 @@ test('after encapsulation', t => {
   })
 })
 
-test('ready encapsulation', t => {
+test('ready no encapsulation', t => {
   t.plan(4)
 
   const app = boot()
@@ -412,7 +412,7 @@ test('ready encapsulation', t => {
     instance.test = true
     instance.ready(function (err, i, done) {
       t.error(err)
-      t.ok(i.test)
+      t.notOk(i.test)
       done()
     })
     next()

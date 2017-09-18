@@ -91,7 +91,7 @@ test('onClose arguments - fastify encapsulation test case', (t) => {
   })
 })
 
-test('onClose arguments - encapsulation test case', (t) => {
+test('onClose arguments - encapsulation test case no server', (t) => {
   t.plan(5)
 
   const app = boot()
@@ -104,7 +104,7 @@ test('onClose arguments - encapsulation test case', (t) => {
   app.use(function (instance, opts, next) {
     instance.test = true
     instance.onClose((i, done) => {
-      t.ok(i.test)
+      t.notOk(i.test)
       done()
     })
     next()
