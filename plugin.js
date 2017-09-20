@@ -23,7 +23,13 @@ function Plugin (parent, func, opts, callback) {
 Plugin.prototype.exec = function (server, cb) {
   const func = this.func
   this.server = this.parent.override(server, func, this.opts)
-  func(this.server, this.opts, cb)
+  var that = this
+
+  // we must defer the loading of the plugin until the
+  // current execution has ended
+  process.nextTick(function () {
+    func(that.server, that.opts, cb)
+  })
 }
 
 Plugin.prototype.finish = function (err, cb) {
