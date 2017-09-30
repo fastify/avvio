@@ -1,6 +1,7 @@
 'use strict'
 
 const test = require('tap').test
+const sleep = require('then-sleep')
 
 const boot = require('..')
 
@@ -76,6 +77,7 @@ test('multiple reentrant plugin loading', (t) => {
     t.notOk(fifthLoaded, 'fifth is not loaded')
     secondLoaded = true
     s.use(third)
+    await sleep(10)
     s.use(fourth)
   }
 
