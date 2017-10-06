@@ -31,6 +31,26 @@ test('boot an app with a plugin', (t) => {
   })
 })
 
+test('boot an app with a promisified plugin', (t) => {
+  t.plan(4)
+
+  const app = boot()
+  var after = false
+
+  app.use(function (server, opts) {
+    t.equal(server, app, 'the first argument is the server')
+    t.deepEqual(opts, {}, 'no options')
+    t.ok(after, 'delayed execution')
+    return Promise.resolve()
+  })
+
+  after = true
+
+  app.on('start', () => {
+    t.pass('booted')
+  })
+})
+
 test('boot an app with a plugin and a callback', (t) => {
   t.plan(2)
 

@@ -24,11 +24,25 @@ function Plugin (parent, func, opts, callback) {
 
 Plugin.prototype.exec = function (server, cb) {
   const func = this.func
+  var completed = false
   this.server = this.parent.override(server, func, this.opts)
 
   debug('exec', this.name)
 
-  func(this.server, this.opts, cb)
+  var promise = func(this.server, this.opts, done)
+  if (promise && typeof promise.then === 'function') {
+    promise.then(() => done()).catch(done)
+  }
+
+  function done (err) {
+    if (completed) {
+      return
+    }
+
+    completed = true
+
+    cb(err)
+  }
 }
 
 Plugin.prototype.enqueue = function (obj, cb) {

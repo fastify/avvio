@@ -59,9 +59,9 @@ function second (instance, opts, cb) {
   process.nextTick(cb)
 }
 
-function third (instance, opts, cb) {
+// async/await or Promise support
+async function third (instance, opts) {
   console.log('third loaded')
-  cb()
 }
 ```
 
@@ -144,6 +144,15 @@ function plugin (server, opts, done) {
 app.use(plugin)
 ```
 `done` must be called only once, when your plugin is ready to go.
+
+async/await is also supported:
+
+```js
+async function plugin (server, opts) {
+  await sleep(10)
+}
+app.use(plugin)
+```
 
 `use` returns the instance on which `use` is called, to support a chainable API.
 
