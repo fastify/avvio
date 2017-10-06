@@ -27,7 +27,7 @@ npm install avvio --save
 <a name="example"></a>
 ## Example
 
-The example below can be found [here][example] and ran using `node example.js`.  
+The example below can be found [here][example] and ran using `node example.js`.
 It demonstrates how to use `avvio` to load functions / plugins in order.
 
 
@@ -43,14 +43,7 @@ avvio
     cb()
   })
 
-avvio.use(third, (err) => {
-  if (err) {
-    console.log('something bad happened')
-    console.log(err)
-  }
-
-  console.log('third plugin loaded')
-})
+avvio.use(third)
 
 avvio.ready(function () {
   console.log('application booted!')
@@ -89,8 +82,8 @@ function third (instance, opts, cb) {
 
 ### avvio([instance], [started])
 
-Starts the avvio sequence.  
-As the name suggest, `instance` is the object representing your application.  
+Starts the avvio sequence.
+As the name suggest, `instance` is the object representing your application.
 Avvio will add the functions `use`, `after` and `ready` to the instance.
 
 ```js
@@ -102,7 +95,8 @@ server.use(function first (s, opts, cb) {
   // s is the same of server
   s.use(function second (s, opts, cb) {
     cb()
-  }, cb)
+  })
+  cb()
 }).after(function (err, cb) {
   // after first and second are finished
   cb()
@@ -136,9 +130,9 @@ app.on('start', () => {
 -------------------------------------------------------
 <a name="use"></a>
 
-### app.use(func, [opts], [cb])
+### app.use(func, [opts])
 
-Loads one or more functions asynchronously.  
+Loads one or more functions asynchronously.
 The function **must** have the signature: `instance, options, done`
 
 Plugin example:
@@ -155,32 +149,25 @@ app.use(plugin)
 
 If you need to add more than a function and you don't need to use a different options object or callback, you can pass an array of functions to `.use`.
 ```js
-app.use([first, second, third], opts, cb)
+app.use([first, second, third], opts)
 ```
 The functions will be loaded in the same order as they are inside the array.
 
 <a name="error-handling"></a>
 #### Error handling
-The third argument of the plugin, the `done` function can accept an error parameter, if you pass it, you **must** handle that error. You have two ways to do it:
-1. the callback of the use function
-```js
-app.use(function (instance, opts, done) {
-      done(new Error('error'))
-}, opts, function (err) {
-      if (err) throw err
-})
-```
-2. the next `ready` or `after` callback
-```js
-app.use(function (instance, opts, done) {
-      done(new Error('error'))
-}, opts)
-app.ready(function (err) {
-    if (err) throw err
-})
-```
 
-*Note if you pass a callback to `use` without an error parameter, the error will be automatically passed to the next `ready` or `after` callback.*
+In order to handle errors in the loading plugins, you must use the
+`.reayd()` method, like so:
+
+```js
+app.use(function (instance, opts, done) {
+  done(new Error('error'))
+}, opts)
+
+app.ready(function (err) {
+  if (err) throw err
+})
+```
 
 -------------------------------------------------------
 <a name="after"></a>
@@ -188,11 +175,11 @@ app.ready(function (err) {
 ### app.after(func(error, [context], [done]), [cb])
 
 Calls a function after all the previously defined plugins are loaded, including
-all their dependencies. The `'start'` event is not emitted yet.  
+all their dependencies. The `'start'` event is not emitted yet.
 
 The callback changes basing on the parameters your are giving:
-1. If one parameter is given to the callback, that parameter will be the `error` object.  
-2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.  
+1. If one parameter is given to the callback, that parameter will be the `error` object.
+2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.
 3. If three parameters are given to the callback, the first will be the `error` object, the second will be the top level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, and the third the `done` callback.
 
 ```js
@@ -226,11 +213,11 @@ Returns the instance on which `after` is called, to support a chainable API.
 
 ### app.ready(func(error, [context], [done]))
 
-Calls a function after all the plugins and `after` call are completed, but before `'start'` is emitted. `ready` callbacks are executed one at a time.  
+Calls a function after all the plugins and `after` call are completed, but before `'start'` is emitted. `ready` callbacks are executed one at a time.
 
 The callback changes basing on the parameters your are giving:
-1. If one parameter is given to the callback, that parameter will be the `error` object.  
-2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.  
+1. If one parameter is given to the callback, that parameter will be the `error` object.
+2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.
 3. If three parameters are given to the callback, the first will be the `error` object, the second will be the top level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, and the third the `done` callback.
 
 ```js
@@ -281,8 +268,8 @@ boot(app, {
 
 ### app.override(server, plugin, options)
 
-Allows to override the instance of the server for each loading plugin.  
-It allows the creation of an inheritance chain for the server instances.  
+Allows to override the instance of the server for each loading plugin.
+It allows the creation of an inheritance chain for the server instances.
 The first parameter is the server instance and the second is the plugin function while the third is the options object that you give to use.
 
 ```js
@@ -306,7 +293,8 @@ app.use(function first (s1, opts, cb) {
   assert(s1 !== server)
   assert(server.isPrototypeOf(s1))
   assert(s1.count === 1)
-  s1.use(second, cb)
+  s1.use(second)
+  cb()
 
   function second (s2, opts, cb) {
     assert(s2 !== s1)
@@ -324,8 +312,8 @@ app.use(function first (s1, opts, cb) {
 Registers a new callback that will be fired once then `close` api is called.
 
 The callback changes basing on the parameters your are giving:
-1. If one parameter is given to the callback, that parameter will be the `context`.  
-2. If two parameters are given to the callback, the first will be the top level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, the second will be the `done` callback.  
+1. If one parameter is given to the callback, that parameter will be the `context`.
+2. If two parameters are given to the callback, the first will be the top level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, the second will be the `done` callback.
 
 ```js
 const server = {}
@@ -353,8 +341,8 @@ Returns the instance on which `onClose` is called, to support a chainable API.
 Starts the shotdown procedure, the callback is called once all the registered callbacks with `onClose` has been executed.
 
 The callback changes basing on the parameters your are giving:
-1. If one parameter is given to the callback, that parameter will be the `error` object.  
-2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.  
+1. If one parameter is given to the callback, that parameter will be the `error` object.
+2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.
 3. If three parameters are given to the callback, the first will be the `error` object, the second will be the top level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, and the third the `done` callback.
 
 ```js
