@@ -51,7 +51,8 @@ avvio.ready(function () {
 
 function first (instance, opts, cb) {
   console.log('first loaded', opts)
-  instance.use(second, cb)
+  instance.use(second)
+  cb()
 }
 
 function second (instance, opts, cb) {
