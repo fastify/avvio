@@ -270,7 +270,8 @@ test('close order', (t) => {
         t.is(order.shift(), 2)
       })
       done()
-    }, done)
+    })
+    done()
   })
 
   app.use(function (server, opts, done) {

@@ -4,6 +4,7 @@ const fastq = require('fastq')
 const EE = require('events').EventEmitter
 const inherits = require('util').inherits
 const Plugin = require('./plugin')
+const debug = require('debug')('avvio')
 
 function wrap (server, opts, instance) {
   const expose = opts.expose || {}
@@ -108,11 +109,12 @@ inherits(Boot, EE)
 // the root node is responsible for emitting 'start'
 Boot.prototype._init = function () {
   if (this._current.length === 0) {
-    const main = new Plugin(this, (s, opts, done) => {
+    const main = new Plugin(this, function root (s, opts, done) {
       // we need to wait any call to use() to happen
       process.nextTick(done)
     }, {}, noop)
     Plugin.loadPlugin.call(this, main, (err) => {
+      debug('root plugin ready')
       if (err) {
         this._error = err
         if (this._readyQ.length() === 0) {
@@ -165,8 +167,12 @@ Boot.prototype._addPlugin = function (plugin, opts, callback) {
 
   const obj = new Plugin(this, plugin, opts, callback)
 
+  if (current.loaded) {
+    throw new Error(`Impossible to load (${obj.name}) plugin because the parent (${current.name}) was already loaded`)
+  }
+
   // we add the plugin to be loaded at the end of the current queue
-  current.q.push(obj, (err) => {
+  current.enqueue(obj, (err) => {
     if (err) {
       this._error = err
     }

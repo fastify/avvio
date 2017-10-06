@@ -145,32 +145,25 @@ test('promises and microtask', (t) => {
     })
 })
 
-test('always loads nested plugins in a nextTick', (t) => {
-  t.plan(4)
+test('always loads nested plugins after the current one', (t) => {
+  t.plan(2)
 
   const server = {}
   const app = boot(server)
 
-  var first = false
   var second = false
 
   app.use(function (s, opts, done) {
-    process.nextTick(function () {
-      first = true
-      t.notOk(second)
-    })
-
     app.use(function (s, opts, done) {
-      t.ok(first)
       second = true
       done()
     })
+    t.notOk(second)
 
     done()
   })
 
   app.on('start', () => {
-    t.ok(first)
     t.ok(second)
   })
 })

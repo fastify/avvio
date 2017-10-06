@@ -42,12 +42,55 @@ test('custom inheritance multiple levels', (t) => {
     t.notEqual(s1, server)
     t.ok(server.isPrototypeOf(s1))
     t.equal(s1.count, 1)
-    s1.use(second, cb)
+    s1.use(second)
+
+    cb()
 
     function second (s2, opts, cb) {
       t.notEqual(s2, s1)
       t.ok(s1.isPrototypeOf(s2))
       t.equal(s2.count, 2)
+      cb()
+    }
+  })
+})
+
+test('custom inheritance multiple levels twice', (t) => {
+  t.plan(10)
+
+  const server = { count: 0 }
+  const app = boot(server)
+
+  app.override = function (s) {
+    const res = Object.create(s)
+    res.count = res.count + 1
+
+    return res
+  }
+
+  app.use(function first (s1, opts, cb) {
+    t.notEqual(s1, server)
+    t.ok(server.isPrototypeOf(s1))
+    t.equal(s1.count, 1)
+    s1.use(second)
+    s1.use(third)
+    var prev
+
+    cb()
+
+    function second (s2, opts, cb) {
+      prev = s2
+      t.notEqual(s2, s1)
+      t.ok(s1.isPrototypeOf(s2))
+      t.equal(s2.count, 2)
+      cb()
+    }
+
+    function third (s3, opts, cb) {
+      t.notEqual(s3, s1)
+      t.ok(s1.isPrototypeOf(s3))
+      t.notOk(prev.isPrototypeOf(s3))
+      t.equal(s3.count, 2)
       cb()
     }
   })
@@ -70,7 +113,9 @@ test('custom inheritance multiple levels with multiple heads', (t) => {
     t.notEqual(s1, server)
     t.ok(server.isPrototypeOf(s1))
     t.equal(s1.count, 1)
-    s1.use(second, cb)
+    s1.use(second)
+
+    cb()
 
     function second (s2, opts, cb) {
       t.notEqual(s2, s1)
@@ -84,7 +129,9 @@ test('custom inheritance multiple levels with multiple heads', (t) => {
     t.notEqual(s1, server)
     t.ok(server.isPrototypeOf(s1))
     t.equal(s1.count, 1)
-    s1.use(fourth, cb)
+    s1.use(fourth)
+
+    cb()
 
     function fourth (s2, opts, cb) {
       t.notEqual(s2, s1)
