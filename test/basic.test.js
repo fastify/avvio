@@ -187,3 +187,21 @@ test('always loads nested plugins after the current one', (t) => {
     t.ok(second)
   })
 })
+
+test('promise long resolve', (t) => {
+  t.plan(2)
+
+  const app = boot()
+
+  setTimeout(function () {
+    t.throws(() => {
+      app.use((s, opts, done) => {
+        done()
+      })
+    }, 'root plugin has already booted')
+  })
+
+  app.ready(function (err) {
+    t.notOk(err)
+  })
+})

@@ -86,9 +86,12 @@ function Boot (server, opts, done) {
     this.once('start', done)
   }
 
+  this.booted = false
+
   this._readyQ = fastq(this, callWithCbOrNextTick, 1)
   this._readyQ.pause()
   this._readyQ.drain = () => {
+    this.booted = true
     this.emit('start')
   }
 
@@ -105,9 +108,11 @@ function Boot (server, opts, done) {
 
 inherits(Boot, EE)
 
-// create the root node upon to hold each subsequent call to use()
-// the root node is responsible for emitting 'start'
 Boot.prototype._init = function () {
+  if (this.booted) {
+    throw new Error('root plugin has already booted')
+  }
+
   if (this._current.length === 0) {
     const main = new Plugin(this, function root (s, opts, done) {
       // we need to wait any call to use() to happen
