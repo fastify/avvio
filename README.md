@@ -167,7 +167,7 @@ The functions will be loaded in the same order as they are inside the array.
 #### Error handling
 
 In order to handle errors in the loading plugins, you must use the
-`.reayd()` method, like so:
+`.ready()` method, like so:
 
 ```js
 app.use(function (instance, opts, done) {

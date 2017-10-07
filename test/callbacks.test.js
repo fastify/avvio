@@ -64,7 +64,7 @@ test('reentrant with callbacks deferred', (t) => {
     s.use(second, function () {
       t.throws(() => {
         s.use(third)
-      }, 'Impossible to load (third) because the parent (first) already loaded')
+      }, 'Impossible to load "third" because the parent "first" was already loaded')
     })
     done()
   }

@@ -25,12 +25,14 @@ function Plugin (parent, func, opts, callback) {
 Plugin.prototype.exec = function (server, cb) {
   const func = this.func
   var completed = false
+  var name = this.name
   this.server = this.parent.override(server, func, this.opts)
 
-  debug('exec', this.name)
+  debug('exec', name)
 
   var promise = func(this.server, this.opts, done)
   if (promise && typeof promise.then === 'function') {
+    debug('resolving promise', name)
     promise.then(() => done()).catch(done)
   }
 
@@ -38,6 +40,8 @@ Plugin.prototype.exec = function (server, cb) {
     if (completed) {
       return
     }
+
+    debug('exec completed', name)
 
     completed = true
 

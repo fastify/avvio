@@ -168,7 +168,7 @@ Boot.prototype._addPlugin = function (plugin, opts, callback) {
   const obj = new Plugin(this, plugin, opts, callback)
 
   if (current.loaded) {
-    throw new Error(`Impossible to load (${obj.name}) plugin because the parent (${current.name}) was already loaded`)
+    throw new Error(`Impossible to load "${obj.name}" plugin because the parent "${current.name}" was already loaded`)
   }
 
   // we add the plugin to be loaded at the end of the current queue
