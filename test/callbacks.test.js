@@ -17,7 +17,7 @@ test('use a plugin and wait till that is loaded', (t) => {
   })
 })
 
-test('reentrant with callbacks', (t) => {
+test('reentrant', (t) => {
   t.plan(7)
 
   const app = boot()
@@ -34,7 +34,8 @@ test('reentrant with callbacks', (t) => {
     t.notOk(firstLoaded, 'first is not loaded')
     t.notOk(secondLoaded, 'second is not loaded')
     firstLoaded = true
-    s.use(second, done)
+    s.use(second)
+    done()
   }
 
   function second (s, opts, done) {
@@ -46,7 +47,7 @@ test('reentrant with callbacks', (t) => {
 })
 
 test('reentrant with callbacks deferred', (t) => {
-  t.plan(13)
+  t.plan(11)
 
   const app = boot()
   let firstLoaded = false
@@ -61,8 +62,11 @@ test('reentrant with callbacks deferred', (t) => {
     t.notOk(thirdLoaded, 'third is not loaded')
     firstLoaded = true
     s.use(second, function () {
-      s.use(third, done)
+      t.throws(() => {
+        s.use(third)
+      }, 'Impossible to load "third" because the parent "first" was already loaded')
     })
+    done()
   }
 
   function second (s, opts, done) {
@@ -74,9 +78,6 @@ test('reentrant with callbacks deferred', (t) => {
   }
 
   function third (s, opts, done) {
-    t.ok(firstLoaded, 'first is loaded')
-    t.ok(secondLoaded, 'second is loaded')
-    t.notOk(thirdLoaded, 'third is not loaded')
     thirdLoaded = true
     done()
   }
@@ -84,7 +85,7 @@ test('reentrant with callbacks deferred', (t) => {
   app.on('start', () => {
     t.ok(firstLoaded, 'first is loaded')
     t.ok(secondLoaded, 'second is loaded')
-    t.ok(thirdLoaded, 'third is loaded')
+    t.notOk(thirdLoaded, 'third is not loaded')
     t.pass('booted')
   })
 })

@@ -31,6 +31,26 @@ test('boot an app with a plugin', (t) => {
   })
 })
 
+test('boot an app with a promisified plugin', (t) => {
+  t.plan(4)
+
+  const app = boot()
+  var after = false
+
+  app.use(function (server, opts) {
+    t.equal(server, app, 'the first argument is the server')
+    t.deepEqual(opts, {}, 'no options')
+    t.ok(after, 'delayed execution')
+    return Promise.resolve()
+  })
+
+  after = true
+
+  app.on('start', () => {
+    t.pass('booted')
+  })
+})
+
 test('boot an app with a plugin and a callback', (t) => {
   t.plan(2)
 
@@ -145,32 +165,43 @@ test('promises and microtask', (t) => {
     })
 })
 
-test('always loads nested plugins in a nextTick', (t) => {
-  t.plan(4)
+test('always loads nested plugins after the current one', (t) => {
+  t.plan(2)
 
   const server = {}
   const app = boot(server)
 
-  var first = false
   var second = false
 
   app.use(function (s, opts, done) {
-    process.nextTick(function () {
-      first = true
-      t.notOk(second)
-    })
-
     app.use(function (s, opts, done) {
-      t.ok(first)
       second = true
       done()
     })
+    t.notOk(second)
 
     done()
   })
 
   app.on('start', () => {
-    t.ok(first)
     t.ok(second)
+  })
+})
+
+test('promise long resolve', (t) => {
+  t.plan(2)
+
+  const app = boot()
+
+  setTimeout(function () {
+    t.throws(() => {
+      app.use((s, opts, done) => {
+        done()
+      })
+    }, 'root plugin has already booted')
+  })
+
+  app.ready(function (err) {
+    t.notOk(err)
   })
 })
