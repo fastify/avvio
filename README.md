@@ -7,7 +7,7 @@ Asynchronous bootstrapping is hard, different things can go wrong, *error handli
 
 `avvio` is fully *reentrant* and *graph-based*. You can load
 components/plugins *within* plugins, and be still sure that things will
-happen in the right order. At the end of the loading, you application will start.
+happen in the right order. At the end of the loading, your application will start.
 
 * [Install](#install)
 * [Example](#example)
@@ -34,18 +34,18 @@ It demonstrates how to use `avvio` to load functions / plugins in order.
 ```js
 'use strict'
 
-const avvio = require('avvio')()
+const app = require('avvio')()
 
-avvio
+app
   .use(first, { hello: 'world' })
   .after((err, cb) => {
     console.log('after first and second')
     cb()
   })
 
-avvio.use(third)
+app.use(third)
 
-avvio.ready(function () {
+app.ready(function () {
   console.log('application booted!')
 })
 
@@ -116,7 +116,7 @@ The `avvio` function can be used also as a
 constructor to inherits from.
 ```js
 function Server () {}
-const app = boot(new Server())
+const app = require('avvio')(new Server())
 
 app.use(function (s, opts, done) {
   // your code
@@ -194,20 +194,22 @@ The callback changes basing on the parameters your are giving:
 
 ```js
 const server = {}
+const app = require('avvio')(server)
+
 ...
 // after with one parameter
-boot.after(function (err) {
+app.after(function (err) {
   if (err) throw err
 })
 
 // after with two parameter
-boot.after(function (err, done) {
+app.after(function (err, done) {
   if (err) throw err
   done()
 })
 
 // after with three parameters
-boot.after(function (err, context, done) {
+app.after(function (err, context, done) {
   if (err) throw err
   assert.equal(context, server)
   done()
@@ -232,20 +234,21 @@ The callback changes basing on the parameters your are giving:
 
 ```js
 const server = {}
+const app = require('avvioo')(server)
 ...
 // ready with one parameter
-boot.ready(function (err) {
+app.ready(function (err) {
   if (err) throw err
 })
 
 // ready with two parameter
-boot.ready(function (err, done) {
+app.ready(function (err, done) {
   if (err) throw err
   done()
 })
 
 // ready with three parameters
-boot.ready(function (err, context, done) {
+app.ready(function (err, context, done) {
   if (err) throw err
   assert.equal(context, server)
   done()
@@ -259,14 +262,15 @@ Returns the instance on which `ready` is called, to support a chainable API.
 -------------------------------------------------------
 <a name="express"></a>
 
-### boot.express(app)
+### avioo.express(app)
 
 Same as:
 
 ```js
 const app = express()
+const avvio = require('avvio')
 
-boot(app, {
+avvio(app, {
   expose: {
     use: 'load'
   }
@@ -283,10 +287,9 @@ It allows the creation of an inheritance chain for the server instances.
 The first parameter is the server instance and the second is the plugin function while the third is the options object that you give to use.
 
 ```js
-const boot = require('avvio')
 const assert = require('assert')
 const server = { count: 0 }
-const app = boot(server)
+const app = require('avvio')(server)
 
 console.log(app !== server, 'override must be set on the Avvio instance')
 
@@ -327,14 +330,15 @@ The callback changes basing on the parameters your are giving:
 
 ```js
 const server = {}
+const app = require('avvio')(server)
 ...
 // onClose with one parameter
-boot.onClose(function (context) {
+app.onClose(function (context) {
   // ...
 })
 
 // onClose with two parameter
-boot.onClose(function (context, done) {
+app.onClose(function (context, done) {
   // ...
   done()
 })
@@ -357,20 +361,21 @@ The callback changes basing on the parameters your are giving:
 
 ```js
 const server = {}
+const app = require('avvio')(server)
 ...
 // close with one parameter
-boot.close(function (err) {
+app.close(function (err) {
   if (err) throw err
 })
 
 // close with two parameter
-boot.close(function (err, done) {
+app.close(function (err, done) {
   if (err) throw err
   done()
 })
 
 // close with three parameters
-boot.close(function (err, context, done) {
+app.close(function (err, context, done) {
   if (err) throw err
   assert.equal(context, server)
   done()
