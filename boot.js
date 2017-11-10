@@ -32,21 +32,33 @@ function wrap (server, opts, instance) {
   }
 
   server[afterKey] = function (func) {
+    if (typeof func !== 'function') {
+      throw new Error('not a function')
+    }
     instance.after(encapsulateThreeParam(func, this))
     return this
   }
 
   server[readyKey] = function (func) {
+    if (typeof func !== 'function') {
+      throw new Error('not a function')
+    }
     instance.ready(encapsulateThreeParam(func, this))
     return this
   }
 
   server[onCloseKey] = function (func) {
+    if (typeof func !== 'function') {
+      throw new Error('not a function')
+    }
     instance.onClose(encapsulateTwoParam(func, this))
     return this
   }
 
   server[closeKey] = function (func) {
+    if (func && typeof func !== 'function') {
+      throw new Error('not a function')
+    }
     instance.close(encapsulateThreeParam(func, this))
     return this
   }
@@ -207,6 +219,9 @@ Boot.prototype.onClose = function (func) {
 Boot.prototype.close = function (func) {
   this._error = null
   if (func) {
+    if (typeof func !== 'function') {
+      throw new Error('not a function')
+    }
     this._closeQ.push(func)
     this._thereIsCloseCb = true
   }

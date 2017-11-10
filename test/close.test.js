@@ -301,3 +301,43 @@ test('close without a cb', (t) => {
 
   app.close()
 })
+
+test('close passing not a function', (t) => {
+  t.plan(1)
+
+  const app = boot()
+
+  app.onClose((instance, done) => {
+    t.ok('called')
+    done()
+  })
+
+  t.throws(() => app.close({}), { message: 'not a function' })
+})
+
+test('close passing not a function', (t) => {
+  t.plan(1)
+
+  const app = boot()
+
+  app.onClose((instance, done) => {
+    t.ok('called')
+    done()
+  })
+
+  t.throws(() => app.close({}), { message: 'not a function' })
+})
+
+test('close passing not a function when wrapping', (t) => {
+  t.plan(1)
+
+  const app = {}
+  boot(app)
+
+  app.onClose((instance, done) => {
+    t.ok('called')
+    done()
+  })
+
+  t.throws(() => app.close({}), { message: 'not a function' })
+})
