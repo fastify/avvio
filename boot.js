@@ -219,7 +219,7 @@ Boot.prototype.onClose = function (func) {
 Boot.prototype.close = function (func) {
   this._error = null
   if (func) {
-    if (func && typeof func !== 'function') {
+    if (typeof func !== 'function') {
       throw new Error('not a function')
     }
     this._closeQ.push(func)
