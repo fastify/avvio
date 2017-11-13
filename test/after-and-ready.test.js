@@ -478,3 +478,28 @@ test('ready encapsulation with a server', t => {
     done()
   })
 })
+
+test('after should passthrough the errors', (t) => {
+  t.plan(5)
+
+  const app = boot()
+  let pluginLoaded = false
+  let afterCalled = false
+
+  app.use(function (s, opts, done) {
+    t.notOk(afterCalled, 'after not called')
+    pluginLoaded = true
+    done(new Error('kaboom'))
+  })
+
+  app.after(function () {
+    t.ok(pluginLoaded, 'afterred!')
+    afterCalled = true
+  })
+
+  app.ready(function (err) {
+    t.ok(err)
+    t.ok(afterCalled, 'after called')
+    t.ok(pluginLoaded, 'plugin loaded')
+  })
+})
