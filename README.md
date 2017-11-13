@@ -188,9 +188,10 @@ Calls a function after all the previously defined plugins are loaded, including
 all their dependencies. The `'start'` event is not emitted yet.
 
 The callback changes basing on the parameters your are giving:
-1. If one parameter is given to the callback, that parameter will be the `error` object.
-2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.
-3. If three parameters are given to the callback, the first will be the `error` object, the second will be the top level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, and the third the `done` callback.
+1. If no parameter is given to the callback and there is an error, that error will be passed to the next error handler.
+2. If one parameter is given to the callback, that parameter will be the `error` object.
+3. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.
+4. If three parameters are given to the callback, the first will be the `error` object, the second will be the top level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, and the third the `done` callback.
 
 ```js
 const server = {}
@@ -228,9 +229,10 @@ Returns the instance on which `after` is called, to support a chainable API.
 Calls a function after all the plugins and `after` call are completed, but before `'start'` is emitted. `ready` callbacks are executed one at a time.
 
 The callback changes basing on the parameters your are giving:
-1. If one parameter is given to the callback, that parameter will be the `error` object.
-2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.
-3. If three parameters are given to the callback, the first will be the `error` object, the second will be the top level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, and the third the `done` callback.
+1. If no parameter is given to the callback and there is an error, that error will be passed to the next error handler.
+2. If one parameter is given to the callback, that parameter will be the `error` object.
+3. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.
+4. If three parameters are given to the callback, the first will be the `error` object, the second will be the top level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, and the third the `done` callback.
 
 ```js
 const server = {}
