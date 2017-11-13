@@ -241,8 +241,11 @@ function callWithCbOrNextTick (func, cb, context) {
 
   // with this the error will appear just in the next after/ready callback
   this._error = null
-
-  if (func.length === 0 || func.length === 1) {
+  if (func.length === 0) {
+    this._error = err
+    func()
+    process.nextTick(cb)
+  } else if (func.length === 1) {
     func(err)
     process.nextTick(cb)
   } else if (func.length === 2) {
