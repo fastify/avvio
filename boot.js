@@ -206,6 +206,23 @@ Boot.prototype.after = function (func, cb) {
   return this
 }
 
+Boot.prototype.wait = function () {
+  return new Promise((resolve, reject) => {
+    this.use(_wait.bind(this))
+
+    function _wait (s, opts, done) {
+      process.nextTick(done)
+      var err = this._error
+      this._error = null
+      if (err) {
+        reject(err)
+      } else {
+        resolve()
+      }
+    }
+  })
+}
+
 Boot.prototype.onClose = function (func) {
   this._closeQ.unshift(func, callback.bind(this))
 

@@ -117,3 +117,42 @@ test('multiple reentrant plugin loading', (t) => {
     t.pass('booted')
   })
 })
+
+test('wait plugin registration', async (t) => {
+  const app = boot()
+
+  await app.use(plugin).wait()
+
+  async function plugin (instance, opts) {
+    t.ok('called')
+  }
+})
+
+test('wait plugin registration (multiple)', async (t) => {
+  const app = boot()
+
+  await app
+    .use(plugin)
+    .use(plugin)
+    .use(plugin)
+    .wait()
+
+  async function plugin (instance, opts) {
+    t.ok('called')
+  }
+})
+
+test('wait plugin registration (errored)', async (t) => {
+  const app = boot()
+
+  try {
+    await app.use(plugin).wait()
+  } catch (err) {
+    t.is(err.message, 'kaboom')
+  }
+
+  async function plugin (instance, opts) {
+    t.ok('called')
+    throw new Error('kaboom')
+  }
+})
