@@ -73,6 +73,7 @@ async function third (instance, opts) {
   * <a href="#use"><code>instance.<b>use()</b></code></a>
   * <a href="#after"><code>instance.<b>after()</b></code></a>
   * <a href="#ready"><code>instance.<b>ready()</b></code></a>
+  * <a href="#wait"><code>instance.<b>wait()</b></code></a>
   * <a href="#override"><code>instance.<b>override()</b></code></a>
   * <a href="#onClose"><code>instance.<b>onClose()</b></code></a>
   * <a href="#close"><code>instance.<b>close()</b></code></a>
@@ -262,9 +263,22 @@ app.ready(function (err, context, done) {
 Returns the instance on which `ready` is called, to support a chainable API.
 
 -------------------------------------------------------
+<a name="wait"></a>
+
+### app.wait()
+If you are using async await, you can avoid the use of `after` and `ready`, and just use the `wait` api which returns a promise.
+```js
+
+await app.use(plugin).wait()
+
+async function plugin (instance, opts) {
+  console.log('plugin')  
+}
+```
+-------------------------------------------------------
 <a name="express"></a>
 
-### avioo.express(app)
+### avvio.express(app)
 
 Same as:
 
