@@ -205,3 +205,47 @@ test('promise long resolve', (t) => {
     t.notOk(err)
   })
 })
+
+test('wait plugin registration', (t) => {
+  t.plan(2)
+
+  const app = boot()
+
+  app.use(function (server, opts, done) {
+    done()
+  })
+
+  app.wait()
+    .then(() => {
+      t.pass('called')
+    })
+    .catch(err => {
+      t.fail(err)
+    })
+
+  app.on('start', () => {
+    t.pass('booted')
+  })
+})
+
+test('wait plugin registration (errored)', (t) => {
+  t.plan(2)
+
+  const app = boot()
+
+  app.use(function (server, opts, done) {
+    done(new Error('kaboom'))
+  })
+
+  app.wait()
+    .then(() => {
+      t.fail('we should not be here')
+    })
+    .catch(err => {
+      t.is(err.message, 'kaboom')
+    })
+
+  app.on('start', () => {
+    t.pass('booted')
+  })
+})
