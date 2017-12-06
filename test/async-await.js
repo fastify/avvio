@@ -5,8 +5,8 @@ const sleep = require('then-sleep')
 
 const boot = require('..')
 
-test('one level', (t) => {
-  t.plan(13)
+test('one level', async (t) => {
+  t.plan(14)
 
   const app = boot()
   let firstLoaded = false
@@ -38,15 +38,16 @@ test('one level', (t) => {
     thirdLoaded = true
   }
 
-  app.on('start', () => {
-    t.ok(firstLoaded, 'first is loaded')
-    t.ok(secondLoaded, 'second is loaded')
-    t.ok(thirdLoaded, 'third is loaded')
-    t.pass('booted')
-  })
+  const readyContext = await app.ready()
+
+  t.equal(app, readyContext)
+  t.ok(firstLoaded, 'first is loaded')
+  t.ok(secondLoaded, 'second is loaded')
+  t.ok(thirdLoaded, 'third is loaded')
+  t.pass('booted')
 })
 
-test('multiple reentrant plugin loading', (t) => {
+test('multiple reentrant plugin loading', async (t) => {
   t.plan(31)
 
   const app = boot()
@@ -108,12 +109,29 @@ test('multiple reentrant plugin loading', (t) => {
     fifthLoaded = true
   }
 
-  app.on('start', () => {
-    t.ok(firstLoaded, 'first is loaded')
-    t.ok(secondLoaded, 'second is loaded')
-    t.ok(thirdLoaded, 'third is loaded')
-    t.ok(fourthLoaded, 'fourth is loaded')
-    t.ok(fifthLoaded, 'fifth is loaded')
-    t.pass('booted')
+  await app.ready()
+  t.ok(firstLoaded, 'first is loaded')
+  t.ok(secondLoaded, 'second is loaded')
+  t.ok(thirdLoaded, 'third is loaded')
+  t.ok(fourthLoaded, 'fourth is loaded')
+  t.ok(fifthLoaded, 'fifth is loaded')
+  t.pass('booted')
+})
+
+test('async ready plugin registration (errored)', async (t) => {
+  t.plan(1)
+
+  const app = boot()
+
+  app.use(async (server, opts) => {
+    await sleep(10)
+    throw new Error('kaboom')
   })
+
+  try {
+    await app.ready()
+    t.fail('we should not be here')
+  } catch (err) {
+    t.is(err.message, 'kaboom')
+  }
 })

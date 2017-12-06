@@ -40,11 +40,10 @@ function wrap (server, opts, instance) {
   }
 
   server[readyKey] = function (func) {
-    if (typeof func !== 'function') {
+    if (func && typeof func !== 'function') {
       throw new Error('not a function')
     }
-    instance.ready(encapsulateThreeParam(func, this))
-    return this
+    return instance.ready(func ? encapsulateThreeParam(func, this) : undefined)
   }
 
   server[onCloseKey] = function (func) {
@@ -229,8 +228,26 @@ Boot.prototype.close = function (func) {
 }
 
 Boot.prototype.ready = function (func) {
-  this._readyQ.push(func)
-  return this
+  if (func) {
+    if (typeof func !== 'function') {
+      throw new Error('not a function')
+    }
+    this._readyQ.push(func)
+    return
+  }
+
+  return new Promise((resolve, reject) => {
+    this._readyQ.push(readyPromiseCB)
+
+    function readyPromiseCB (err, context, done) {
+      if (err) {
+        reject(err)
+      } else {
+        resolve(context)
+      }
+      process.nextTick(done)
+    }
+  })
 }
 
 function noop () {}

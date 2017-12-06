@@ -224,7 +224,7 @@ Returns the instance on which `after` is called, to support a chainable API.
 -------------------------------------------------------
 <a name="ready"></a>
 
-### app.ready(func(error, [context], [done]))
+### app.ready([func(error, [context], [done])])
 
 Calls a function after all the plugins and `after` call are completed, but before `'start'` is emitted. `ready` callbacks are executed one at a time.
 
@@ -234,9 +234,11 @@ The callback changes basing on the parameters your are giving:
 3. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.
 4. If three parameters are given to the callback, the first will be the `error` object, the second will be the top level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, and the third the `done` callback.
 
+If no callback is provided `ready` will return a Promise that is resolved or rejected once plugins and `after` calls are completed.  On success `context` is provided to the `.then` callback, if an error occurs it is provided to the `.catch` callback.
+
 ```js
 const server = {}
-const app = require('avvioo')(server)
+const app = require('avvio')(server)
 ...
 // ready with one parameter
 app.ready(function (err) {
@@ -255,11 +257,30 @@ app.ready(function (err, context, done) {
   assert.equal(context, server)
   done()
 })
+
+// ready with Promise
+app.ready()
+  .then(() => console.log('Ready'))
+  .catch(err => {
+    console.error(err)
+    process.exit(1)
+  })
+
+// await ready from an async function.
+async function main () [
+  try {
+    await app.ready()
+    console.log('Ready')
+  } catch(err) {
+    console.error(err)
+    process.exit(1)
+  }
+}
 ```
 
 `done` must be called only once.
 
-Returns the instance on which `ready` is called, to support a chainable API.
+The callback form of this function has no return value.
 
 -------------------------------------------------------
 <a name="express"></a>

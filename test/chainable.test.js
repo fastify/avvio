@@ -6,7 +6,7 @@ const boot = require('..')
 test('chainable standalone', (t) => {
   t.plan(5)
 
-  boot()
+  let readyResult = boot()
     .use(function (ctx, opts, done) {
       t.pass('1st plugin')
       done()
@@ -16,10 +16,8 @@ test('chainable standalone', (t) => {
       done()
     }).ready(function () {
       t.pass('we are ready')
-    }).use(function (ctx, opts, done) {
-      t.pass('3rd plugin')
-      done()
     })
+  t.equal(readyResult, undefined)
 })
 
 test('chainable automatically binded', (t) => {
@@ -28,7 +26,7 @@ test('chainable automatically binded', (t) => {
   const app = {}
   boot(app)
 
-  app
+  let readyResult = app
     .use(function (ctx, opts, done) {
       t.pass('1st plugin')
       done()
@@ -38,10 +36,8 @@ test('chainable automatically binded', (t) => {
       done()
     }).ready(function () {
       t.pass('we are ready')
-    }).use(function (ctx, opts, done) {
-      t.pass('3rd plugin')
-      done()
     })
+  t.equal(readyResult, undefined)
 })
 
 ;['use', 'after', 'ready'].forEach((key) => {
