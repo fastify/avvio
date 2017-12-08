@@ -205,3 +205,53 @@ test('promise long resolve', (t) => {
     t.notOk(err)
   })
 })
+
+test('do not autostart', (t) => {
+  const app = boot(null, {
+    autostart: false
+  })
+  app.on('start', () => {
+    t.fail()
+  })
+  t.end()
+})
+
+test('start with ready', (t) => {
+  t.plan(2)
+
+  const app = boot(null, {
+    autostart: false
+  })
+
+  app.on('start', () => {
+    t.pass()
+  })
+
+  app.ready(function (err) {
+    t.error(err)
+  })
+})
+
+test('load a plugin after start()', (t) => {
+  t.plan(1)
+
+  var startCalled = false
+  const app = boot(null, {
+    autostart: false
+  })
+
+  app.use((s, opts, done) => {
+    t.ok(startCalled)
+    done()
+  })
+
+  // we use a timer because
+  // it is more reliable than
+  // nextTick and setImmediate
+  // this almost always will come
+  // after those are completed
+  setTimeout(() => {
+    app.start()
+    startCalled = true
+  }, 2)
+})
