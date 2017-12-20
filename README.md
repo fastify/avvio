@@ -73,6 +73,7 @@ async function third (instance, opts) {
   * <a href="#use"><code>instance.<b>use()</b></code></a>
   * <a href="#after"><code>instance.<b>after()</b></code></a>
   * <a href="#ready"><code>instance.<b>ready()</b></code></a>
+  * <a href="#start"><code>instance.<b>start()</b></code></a>
   * <a href="#override"><code>instance.<b>override()</b></code></a>
   * <a href="#onClose"><code>instance.<b>onClose()</b></code></a>
   * <a href="#close"><code>instance.<b>close()</b></code></a>
@@ -81,7 +82,7 @@ async function third (instance, opts) {
 -------------------------------------------------------
 <a name="constructor"></a>
 
-### avvio([instance], [started])
+### avvio([instance], [options], [started])
 
 Starts the avvio sequence.
 As the name suggest, `instance` is the object representing your application.
@@ -107,6 +108,9 @@ server.use(function first (s, opts, cb) {
 Options:
 
 * `expose`: a key/value property to change how `use`, `after` and `ready` are exposed.
+* `autostart`: do not start loading plugins automatically, but wait for
+  a call to [`.start()`](#start)  or [`.ready()`](#ready).
+
 
 Events:
 
@@ -260,6 +264,16 @@ app.ready(function (err, context, done) {
 `done` must be called only once.
 
 Returns the instance on which `ready` is called, to support a chainable API.
+
+If `autostart: false` is passed as an option, calling `.ready()`  will
+also start the boot sequence.
+
+-------------------------------------------------------
+<a name="start"></a>
+
+### app.start()
+
+Start the boot sequence, if it was not started yet.
 
 -------------------------------------------------------
 <a name="express"></a>
