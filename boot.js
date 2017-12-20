@@ -108,12 +108,16 @@ function Boot (server, opts, done) {
   this._readyQ.pause()
   this._readyQ.drain = () => {
     this.emit('start')
+    // nooping this, we want to emit start only once
+    this._readyQ.drain = noop
   }
 
   this._closeQ = fastq(this, closeWithCbOrNextTick, 1)
   this._closeQ.pause()
   this._closeQ.drain = () => {
     this.emit('close')
+    // nooping this, we want to emit start only once
+    this._closeQ.drain = noop
   }
   this._thereIsCloseCb = false
 
@@ -222,15 +226,31 @@ Boot.prototype.onClose = function (func) {
 }
 
 Boot.prototype.close = function (func) {
-  this._error = null
+  var promise
+
   if (func) {
     if (typeof func !== 'function') {
       throw new Error('not a function')
     }
+  } else {
+    promise = new Promise(function (resolve, reject) {
+      func = function (err) {
+        if (err) {
+          return reject(err)
+        }
+        resolve()
+      }
+    })
+  }
+
+  this.ready(() => {
+    this._error = null
     this._closeQ.push(func)
     this._thereIsCloseCb = true
-  }
-  process.nextTick(this._closeQ.resume.bind(this._closeQ))
+    process.nextTick(this._closeQ.resume.bind(this._closeQ))
+  })
+
+  return promise
 }
 
 Boot.prototype.ready = function (func) {
