@@ -255,3 +255,26 @@ test('load a plugin after start()', (t) => {
     startCalled = true
   }, 2)
 })
+
+test('booted should be set before ready', (t) => {
+  t.plan(2)
+
+  const app = boot()
+
+  app.ready(function (err) {
+    t.error(err)
+    t.equal(app.booted, true)
+  })
+})
+
+test('throws correctly if registering after ready', (t) => {
+  t.plan(1)
+
+  const app = boot()
+
+  app.ready(function () {
+    t.throws(() => {
+      app.use((a, b, done) => done())
+    }, 'root plugin has already booted')
+  })
+})

@@ -107,7 +107,6 @@ function Boot (server, opts, done) {
   this._readyQ = fastq(this, callWithCbOrNextTick, 1)
   this._readyQ.pause()
   this._readyQ.drain = () => {
-    this.booted = true
     this.emit('start')
   }
 
@@ -134,6 +133,7 @@ function Boot (server, opts, done) {
         throw err
       }
     } else {
+      this.booted = true
       this._readyQ.resume()
     }
   })
