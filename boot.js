@@ -87,6 +87,10 @@ function Boot (server, opts, done) {
     return instance
   }
 
+  if (opts.autostart !== false) {
+    opts.autostart = true
+  }
+
   server = server || this
 
   this._server = server
@@ -97,6 +101,7 @@ function Boot (server, opts, done) {
     this.once('start', done)
   }
 
+  this.started = false
   this.booted = false
 
   this._readyQ = fastq(this, callWithCbOrNextTick, 1)
@@ -113,34 +118,34 @@ function Boot (server, opts, done) {
   }
   this._thereIsCloseCb = false
 
-  // we init, because we need to emit "start" if no use is called
-  this._init()
+  this._doStart = null
+  const main = new Plugin(this, (s, opts, done) => {
+    this._doStart = done
+    if (opts.autostart) {
+      this.start()
+    }
+  }, opts, noop)
+
+  Plugin.loadPlugin.call(this, main, (err) => {
+    debug('root plugin ready')
+    if (err) {
+      this._error = err
+      if (this._readyQ.length() === 0) {
+        throw err
+      }
+    } else {
+      this._readyQ.resume()
+    }
+  })
 }
 
 inherits(Boot, EE)
 
-Boot.prototype._init = function () {
-  if (this.booted) {
-    throw new Error('root plugin has already booted')
-  }
+Boot.prototype.start = function () {
+  this.started = true
 
-  if (this._current.length === 0) {
-    const main = new Plugin(this, function root (s, opts, done) {
-      // we need to wait any call to use() to happen
-      process.nextTick(done)
-    }, {}, noop)
-    Plugin.loadPlugin.call(this, main, (err) => {
-      debug('root plugin ready')
-      if (err) {
-        this._error = err
-        if (this._readyQ.length() === 0) {
-          throw err
-        }
-      } else {
-        this._readyQ.resume()
-      }
-    })
-  }
+  // we need to wait any call to use() to happen
+  process.nextTick(this._doStart)
 }
 
 // allows to override the instance of a server, given a plugin
@@ -175,8 +180,9 @@ Boot.prototype._addPlugin = function (plugin, opts, callback) {
   opts = opts || {}
   callback = callback || null
 
-  // we reinit, if use is called after emitting start once
-  this._init()
+  if (this.booted) {
+    throw new Error('root plugin has already booted')
+  }
 
   // we always add plugins to load at the current element
   const current = this._current[0]
@@ -233,11 +239,13 @@ Boot.prototype.ready = function (func) {
       throw new Error('not a function')
     }
     this._readyQ.push(func)
+    this.start()
     return
   }
 
   return new Promise((resolve, reject) => {
     this._readyQ.push(readyPromiseCB)
+    this.start()
 
     function readyPromiseCB (err, context, done) {
       if (err) {
