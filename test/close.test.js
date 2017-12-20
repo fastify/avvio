@@ -341,3 +341,30 @@ test('close passing not a function when wrapping', (t) => {
 
   t.throws(() => app.close({}), { message: 'not a function' })
 })
+
+test('close should trigger ready()', (t) => {
+  t.plan(2)
+
+  const app = boot(null, {
+    autostart: false
+  })
+
+  app.on('start', () => {
+    // this will be emitted after the
+    // callback in close() is fired
+    t.pass('started')
+  })
+
+  app.close(() => {
+    t.pass('closed')
+  })
+})
+
+test('close without a cb returns a promise', (t) => {
+  t.plan(1)
+
+  const app = boot()
+  app.close().then(() => {
+    t.pass('promise resolves')
+  })
+})
