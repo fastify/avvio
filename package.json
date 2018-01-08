@@ -33,7 +33,7 @@
     "express": "^4.16.2",
     "pre-commit": "^1.2.2",
     "standard": "^10.0.3",
-    "tap": "^10.7.3",
+    "tap": "^11.0.1",
     "then-sleep": "^1.0.1"
   },
   "dependencies": {
