@@ -3,20 +3,6 @@
 const test = require('tap').test
 const boot = require('..')
 
-test('use a plugin and wait till that is loaded', (t) => {
-  t.plan(3)
-
-  const app = boot()
-
-  app.use(function (server, opts, done) {
-    t.equal(server, app, 'the first argument is the server')
-    t.deepEqual(opts, {}, 'no options')
-    done()
-  }, () => {
-    t.pass('booted')
-  })
-})
-
 test('reentrant', (t) => {
   t.plan(7)
 
@@ -24,11 +10,12 @@ test('reentrant', (t) => {
   let firstLoaded = false
   let secondLoaded = false
 
-  app.use(first, () => {
-    t.ok(firstLoaded, 'first is loaded')
-    t.ok(secondLoaded, 'second is loaded')
-    t.pass('booted')
-  })
+  app.use(first)
+      .after(() => {
+        t.ok(firstLoaded, 'first is loaded')
+        t.ok(secondLoaded, 'second is loaded')
+        t.pass('booted')
+      })
 
   function first (s, opts, done) {
     t.notOk(firstLoaded, 'first is not loaded')
@@ -61,11 +48,14 @@ test('reentrant with callbacks deferred', (t) => {
     t.notOk(secondLoaded, 'second is not loaded')
     t.notOk(thirdLoaded, 'third is not loaded')
     firstLoaded = true
-    s.use(second, function () {
-      t.throws(() => {
+    s.use(second)
+    setTimeout(() => {
+      try {
         s.use(third)
-      }, 'Impossible to load "third" because the parent "first" was already loaded')
-    })
+      } catch (err) {
+        t.is(err.message, 'root plugin has already booted')
+      }
+    }, 500)
     done()
   }
 
