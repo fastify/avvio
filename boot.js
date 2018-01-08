@@ -158,17 +158,12 @@ Boot.prototype.override = function (server, func, opts) {
 }
 
 // load a plugin
-Boot.prototype.use = function (plugin, opts, callback) {
-  if (typeof opts === 'function') {
-    callback = opts
-    opts = null
-  }
-
+Boot.prototype.use = function (plugin, opts) {
   if (typeof plugin === 'function') {
-    this._addPlugin(plugin, opts, callback)
+    this._addPlugin(plugin, opts)
   } else if (Array.isArray(plugin)) {
     for (var i = 0; i < plugin.length; i++) {
-      this._addPlugin(plugin[i], opts, callback)
+      this._addPlugin(plugin[i], opts)
     }
   } else {
     throw new Error('plugin must be a function')
@@ -177,12 +172,11 @@ Boot.prototype.use = function (plugin, opts, callback) {
   return this
 }
 
-Boot.prototype._addPlugin = function (plugin, opts, callback) {
+Boot.prototype._addPlugin = function (plugin, opts) {
   if (typeof plugin !== 'function') {
     throw new Error('plugin must be a function')
   }
   opts = opts || {}
-  callback = callback || null
 
   if (this.booted) {
     throw new Error('root plugin has already booted')
@@ -191,7 +185,7 @@ Boot.prototype._addPlugin = function (plugin, opts, callback) {
   // we always add plugins to load at the current element
   const current = this._current[0]
 
-  const obj = new Plugin(this, plugin, opts, callback)
+  const obj = new Plugin(this, plugin, opts)
 
   if (current.loaded) {
     throw new Error(`Impossible to load "${obj.name}" plugin because the parent "${current.name}" was already loaded`)

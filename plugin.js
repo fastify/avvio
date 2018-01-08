@@ -3,10 +3,9 @@
 const fastq = require('fastq')
 const debug = require('debug')('avvio')
 
-function Plugin (parent, func, opts, callback) {
+function Plugin (parent, func, opts) {
   this.func = func
   this.opts = opts
-  this.callback = callback
   this.deferred = false
   this.onFinish = null
   this.parent = parent
@@ -56,7 +55,6 @@ Plugin.prototype.enqueue = function (obj, cb) {
 
 Plugin.prototype.finish = function (err, cb) {
   debug('finish', this.name)
-  const callback = this.callback
   const done = () => {
     if (this.loaded) {
       return
@@ -65,14 +63,7 @@ Plugin.prototype.finish = function (err, cb) {
     debug('loaded', this.name)
     this.loaded = true
 
-    // if 'use' has a callback
-    if (callback) {
-      callback(err)
-      // if 'use' has a callback but does not have parameters
-      cb(callback.length > 0 ? null : err)
-    } else {
-      cb(err)
-    }
+    cb(err)
   }
 
   if (err) {
