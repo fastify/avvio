@@ -161,10 +161,6 @@ Boot.prototype.override = function (server, func, opts) {
 Boot.prototype.use = function (plugin, opts) {
   if (typeof plugin === 'function') {
     this._addPlugin(plugin, opts)
-  } else if (Array.isArray(plugin)) {
-    for (var i = 0; i < plugin.length; i++) {
-      this._addPlugin(plugin[i], opts)
-    }
   } else {
     throw new Error('plugin must be a function')
   }
