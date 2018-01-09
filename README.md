@@ -161,12 +161,6 @@ app.use(plugin)
 
 `use` returns the instance on which `use` is called, to support a chainable API.
 
-If you need to add more than a function and you don't need to use a different options object or callback, you can pass an array of functions to `.use`.
-```js
-app.use([first, second, third], opts)
-```
-The functions will be loaded in the same order as they are inside the array.
-
 <a name="error-handling"></a>
 #### Error handling
 
