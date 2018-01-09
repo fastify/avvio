@@ -186,7 +186,7 @@ app.ready(function (err) {
 -------------------------------------------------------
 <a name="after"></a>
 
-### app.after(func(error, [context], [done]), [cb])
+### app.after(func(error, [context], [done]))
 
 Calls a function after all the previously defined plugins are loaded, including
 all their dependencies. The `'start'` event is not emitted yet.

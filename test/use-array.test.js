@@ -4,15 +4,14 @@ const test = require('tap').test
 const boot = require('..')
 
 test('array of plugins', (t) => {
-  t.plan(21)
+  t.plan(16)
 
   const options = { hello: 'world' }
   const app = boot()
   const order = [1, 2, 3, 4, 5]
 
-  app.use([first, second, third, fourth, fifth], options, (err) => {
-    t.error(err)
-  })
+  app.use([first, second, third, fourth, fifth], options)
+  .after(t.error)
 
   app.on('start', () => {
     t.pass('booted')

@@ -65,9 +65,8 @@ test('verify when a afterred call happens', (t) => {
 
   app.after(function (err, cb) {
     t.error(err)
-    cb()
-  }, function () {
     t.pass('afterred finished')
+    cb()
   })
 
   app.on('start', () => {
@@ -312,19 +311,17 @@ test('error should come in the first ready - three parameters', (t) => {
 })
 
 test('if `use` has a callback with more then one parameter, the error must not reach ready', (t) => {
-  t.plan(2)
+  t.plan(1)
 
   const server = { my: 'server' }
   const app = boot(server)
 
   app.use(function (s, opts, done) {
     done(new Error('err'))
-  }, err => {
-    t.ok(err)
   })
 
   app.ready(function (err) {
-    t.error(err)
+    t.ok(err)
   })
 })
 
