@@ -278,3 +278,16 @@ test('throws correctly if registering after ready', (t) => {
     }, 'root plugin has already booted')
   })
 })
+
+test('`start` event should launch before the ready callback', (t) => {
+  t.plan(1)
+  let startHandlerCounter = 0
+
+  const app = boot()
+  app.on('start', function () {
+    startHandlerCounter += 1
+  })
+  app.ready(function () {
+    t.equal(startHandlerCounter, 1)
+  })
+})
