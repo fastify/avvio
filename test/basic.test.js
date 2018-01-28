@@ -278,3 +278,18 @@ test('throws correctly if registering after ready', (t) => {
     }, 'root plugin has already booted')
   })
 })
+
+test('failure use should stop the chain', (t) => {
+  t.plan(2)
+
+  const app = boot()
+
+  app.use((a, b, done) => {
+    t.pass()
+    done(new Error('Kaboom!'))
+  })
+    .use((a, b, done) => t.fail('This should not be called'))
+  app.ready(function (err) {
+    t.error(err)
+  })
+})
