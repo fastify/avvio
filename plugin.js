@@ -32,7 +32,9 @@ Plugin.prototype.exec = function (server, cb) {
   var promise = func(this.server, this.opts, done)
   if (promise && typeof promise.then === 'function') {
     debug('resolving promise', name)
-    promise.then(() => done()).catch(done)
+    promise
+      .then(() => process.nextTick(done),
+            (e) => process.nextTick(done, e))
   }
 
   function done (err) {
