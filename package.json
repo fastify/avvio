@@ -4,7 +4,7 @@
   "description": "Asynchronous bootstrapping of Node applications",
   "main": "boot.js",
   "scripts": {
-    "test": "standard && tap test/*test.js"
+    "test": "standard && tap -j4 test/*test.js"
   },
   "precommit": "test",
   "repository": {
