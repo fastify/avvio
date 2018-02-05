@@ -213,6 +213,19 @@ app.after(function (err, context, done) {
   assert.equal(context, server)
   done()
 })
+
+// async after with one parameter
+app.after(async function (err) {
+  await sleep(10)
+  if (err) {
+    throw err
+  }
+})
+
+// async after with no parameter
+app.after(async function () {
+  await sleep(10)
+})
 ```
 
 `done` must be called only once.

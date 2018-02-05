@@ -273,16 +273,25 @@ function noop () {}
 function callWithCbOrNextTick (func, cb, context) {
   context = this._server
   var err = this._error
+  var res
 
   // with this the error will appear just in the next after/ready callback
   this._error = null
   if (func.length === 0) {
     this._error = err
-    func()
-    process.nextTick(cb)
+    res = func()
+    if (res && typeof res.then === 'function') {
+      res.then(() => process.nextTick(cb), (e) => process.nextTick(cb, e))
+    } else {
+      process.nextTick(cb)
+    }
   } else if (func.length === 1) {
-    func(err)
-    process.nextTick(cb)
+    res = func(err)
+    if (res && typeof res.then === 'function') {
+      res.then(() => process.nextTick(cb), (e) => process.nextTick(cb, e))
+    } else {
+      process.nextTick(cb)
+    }
   } else if (func.length === 2) {
     func(err, cb)
   } else {
