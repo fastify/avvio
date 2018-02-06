@@ -500,3 +500,135 @@ test('after should passthrough the errors', (t) => {
     t.ok(pluginLoaded, 'plugin loaded')
   })
 })
+
+test('stop loading plugins if it errors', (t) => {
+  t.plan(2)
+
+  const app = boot()
+
+  app.use(function first (server, opts, done) {
+    t.pass('first called')
+    done(new Error('kaboom'))
+  })
+
+  app.use(function second (server, opts, done) {
+    t.fail('this should never be called')
+  })
+
+  app.ready((err) => {
+    t.equal(err.message, 'kaboom')
+  })
+})
+
+test('keep loading if there is an .after', (t) => {
+  t.plan(4)
+
+  const app = boot()
+
+  app.use(function first (server, opts, done) {
+    t.pass('first called')
+    done(new Error('kaboom'))
+  })
+
+  app.after(function (err) {
+    t.equal(err.message, 'kaboom')
+  })
+
+  app.use(function second (server, opts, done) {
+    t.pass('second called')
+    done()
+  })
+
+  app.ready((err) => {
+    t.error(err)
+  })
+})
+
+test('do not load nested plugin if parent errors', (t) => {
+  t.plan(4)
+
+  const app = boot()
+
+  app.use(function first (server, opts, done) {
+    t.pass('first called')
+
+    server.use(function second (_, opts, done) {
+      t.fail('this should never be called')
+    })
+
+    done(new Error('kaboom'))
+  })
+
+  app.after(function (err) {
+    t.equal(err.message, 'kaboom')
+  })
+
+  app.use(function third (server, opts, done) {
+    t.pass('third called')
+    done()
+  })
+
+  app.ready((err) => {
+    t.error(err)
+  })
+})
+
+test('.after nested', (t) => {
+  t.plan(4)
+
+  const app = boot()
+
+  app.use(function outer (app, opts, done) {
+    app.use(function first (app, opts, done) {
+      t.pass('first called')
+      done(new Error('kaboom'))
+    })
+
+    app.after(function (err) {
+      t.equal(err.message, 'kaboom')
+    })
+
+    app.use(function second (app, opts, done) {
+      t.pass('second called')
+      done()
+    })
+
+    done()
+  })
+
+  app.ready((err) => {
+    t.error(err)
+  })
+})
+
+test('nested error', (t) => {
+  t.plan(4)
+
+  const app = boot()
+
+  app.use(function outer (app, opts, done) {
+    app.use(function first (app, opts, done) {
+      t.pass('first called')
+      done(new Error('kaboom'))
+    })
+
+    app.use(function second (app, opts, done) {
+      t.fail('this should never be called')
+    })
+
+    done()
+  })
+
+  app.after(function (err) {
+    t.equal(err.message, 'kaboom')
+  })
+
+  app.use(function third (server, opts, done) {
+    t.pass('third called')
+    done()
+  })
+
+  app.ready((err) => {
+    t.error(err)
+  })
+})

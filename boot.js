@@ -160,7 +160,7 @@ Boot.prototype.override = function (server, func, opts) {
 // load a plugin
 Boot.prototype.use = function (plugin, opts) {
   if (typeof plugin === 'function') {
-    this._addPlugin(plugin, opts)
+    this._addPlugin(plugin, opts, false)
   } else {
     throw new Error('plugin must be a function')
   }
@@ -168,7 +168,7 @@ Boot.prototype.use = function (plugin, opts) {
   return this
 }
 
-Boot.prototype._addPlugin = function (plugin, opts) {
+Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
   if (typeof plugin !== 'function') {
     throw new Error('plugin must be a function')
   }
@@ -181,7 +181,7 @@ Boot.prototype._addPlugin = function (plugin, opts) {
   // we always add plugins to load at the current element
   const current = this._current[0]
 
-  const obj = new Plugin(this, plugin, opts)
+  const obj = new Plugin(this, plugin, opts, isAfter)
 
   if (current.loaded) {
     throw new Error(`Impossible to load "${obj.name}" plugin because the parent "${current.name}" was already loaded`)
@@ -195,8 +195,8 @@ Boot.prototype._addPlugin = function (plugin, opts) {
   })
 }
 
-Boot.prototype.after = function (func, cb) {
-  this.use(_after.bind(this), cb)
+Boot.prototype.after = function (func) {
+  this._addPlugin(_after.bind(this), {}, true)
 
   function _after (s, opts, done) {
     callWithCbOrNextTick.call(this, func, done)
