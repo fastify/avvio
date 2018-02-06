@@ -279,22 +279,3 @@ test('throws correctly if registering after ready', (t) => {
     }, 'root plugin has already booted')
   })
 })
-
-test('stop loading if errors', (t) => {
-  t.plan(2)
-
-  const app = boot()
-
-  app.use(function first (server, opts, done) {
-    t.pass('first called')
-    done(new Error('kaboom'))
-  })
-
-  app.use(function second (server, opts, done) {
-    t.fail('this should never be called')
-  })
-
-  app.ready((err) => {
-    t.equal(err.message, 'kaboom')
-  })
-})

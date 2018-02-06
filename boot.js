@@ -191,7 +191,6 @@ Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
   current.enqueue(obj, (err) => {
     if (err) {
       this._error = err
-      // current.error()
     }
   })
 }
