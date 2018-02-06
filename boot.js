@@ -131,6 +131,7 @@ function Boot (server, opts, done) {
 
   Plugin.loadPlugin.call(this, main, (err) => {
     debug('root plugin ready')
+    this.emit('preReady')
     if (err) {
       this._error = err
       if (this._readyQ.length() === 0) {
