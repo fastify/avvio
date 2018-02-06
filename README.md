@@ -195,7 +195,7 @@ The callback changes basing on the parameters your are giving:
 3. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.
 4. If three parameters are given to the callback, the first will be the `error` object, the second will be the top level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, and the third the `done` callback.
 
-In the no parameter and one parameter variants, the callback can also
+In the "no parameter" and "one parameter" variants, the callback can also
 return a `Promise`.
 
 ```js
