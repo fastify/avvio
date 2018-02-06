@@ -632,3 +632,124 @@ test('nested error', (t) => {
     t.error(err)
   })
 })
+
+test('preReady event', (t) => {
+  t.plan(4)
+
+  const app = boot()
+  const order = [1, 2]
+
+  app.use(function first (server, opts, done) {
+    t.pass('first called')
+    done()
+  })
+
+  app.use(function second (server, opts, done) {
+    t.pass('second called')
+    done()
+  })
+
+  app.on('preReady', () => {
+    t.is(order.shift(), 1)
+  })
+
+  app.ready(() => {
+    t.is(order.shift(), 2)
+  })
+})
+
+test('preReady event (multiple)', (t) => {
+  t.plan(6)
+
+  const app = boot()
+  const order = [1, 2, 3, 4]
+
+  app.use(function first (server, opts, done) {
+    t.pass('first called')
+    done()
+  })
+
+  app.use(function second (server, opts, done) {
+    t.pass('second called')
+    done()
+  })
+
+  app.on('preReady', () => {
+    t.is(order.shift(), 1)
+  })
+
+  app.on('preReady', () => {
+    t.is(order.shift(), 2)
+  })
+
+  app.on('preReady', () => {
+    t.is(order.shift(), 3)
+  })
+
+  app.ready(() => {
+    t.is(order.shift(), 4)
+  })
+})
+
+test('preReady event (nested)', (t) => {
+  t.plan(6)
+
+  const app = boot()
+  const order = [1, 2, 3, 4]
+
+  app.use(function first (server, opts, done) {
+    t.pass('first called')
+    done()
+  })
+
+  app.use(function second (server, opts, done) {
+    t.pass('second called')
+
+    server.on('preReady', () => {
+      t.is(order.shift(), 3)
+    })
+
+    done()
+  })
+
+  app.on('preReady', () => {
+    t.is(order.shift(), 1)
+  })
+
+  app.on('preReady', () => {
+    t.is(order.shift(), 2)
+  })
+
+  app.ready(() => {
+    t.is(order.shift(), 4)
+  })
+})
+
+test('preReady event (errored)', (t) => {
+  t.plan(5)
+
+  const app = boot()
+  const order = [1, 2, 3]
+
+  app.use(function first (server, opts, done) {
+    t.pass('first called')
+    done(new Error('kaboom'))
+  })
+
+  app.use(function second (server, opts, done) {
+    t.fail('We should not be here')
+  })
+
+  app.on('preReady', () => {
+    t.is(order.shift(), 1)
+  })
+
+  app.on('preReady', () => {
+    t.is(order.shift(), 2)
+  })
+
+  app.ready((err) => {
+    t.ok(err)
+    t.is(order.shift(), 3)
+  })
+})
