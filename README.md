@@ -115,6 +115,7 @@ Options:
 Events:
 
 * `'start'`  when the application starts
+* `'preReady'` fired before the ready queue is run
 
 The `avvio` function can be used also as a
 constructor to inherits from.
