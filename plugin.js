@@ -3,13 +3,14 @@
 const fastq = require('fastq')
 const debug = require('debug')('avvio')
 
-function Plugin (parent, func, opts) {
+function Plugin (parent, func, opts, isAfter) {
   this.func = func
   this.opts = opts
   this.deferred = false
   this.onFinish = null
   this.parent = parent
   this.name = func.name
+  this.isAfter = isAfter
 
   this.q = fastq(parent, loadPlugin, 1)
   this.q.pause()
@@ -25,6 +26,13 @@ Plugin.prototype.exec = function (server, cb) {
   const func = this.func
   var completed = false
   var name = this.name
+
+  if (this.parent._error && !this.isAfter) {
+    debug('skipping loading of plugin as parent errored and it is not an after', name)
+    process.nextTick(cb)
+    return
+  }
+
   this.server = this.parent.override(server, func, this.opts)
 
   debug('exec', name)
@@ -39,10 +47,15 @@ Plugin.prototype.exec = function (server, cb) {
 
   function done (err) {
     if (completed) {
+      debug('loading complete', name)
       return
     }
 
-    debug('exec completed', name)
+    if (err) {
+      debug('exec errored', name)
+    } else {
+      debug('exec completed', name)
+    }
 
     completed = true
 
