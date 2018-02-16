@@ -151,6 +151,7 @@ Boot.prototype.start = function () {
 
   // we need to wait any call to use() to happen
   process.nextTick(this._doStart)
+  return this
 }
 
 // allows to override the instance of a server, given a plugin
