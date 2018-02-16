@@ -12,6 +12,16 @@ test('boot an empty app', (t) => {
   })
 })
 
+test('start returns app', (t) => {
+  t.plan(1)
+  const app = boot({}, {autostart: false})
+  app
+    .start()
+    .ready((err) => {
+      t.error(err)
+    })
+})
+
 test('boot an app with a plugin', (t) => {
   t.plan(4)
 
