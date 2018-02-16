@@ -310,11 +310,12 @@ also start the boot sequence.
 ### app.start()
 
 Start the boot sequence, if it was not started yet.
+Returns the `app` instance.
 
 -------------------------------------------------------
 <a name="express"></a>
 
-### avioo.express(app)
+### avvio.express(app)
 
 Same as:
 
