@@ -33,7 +33,11 @@ Plugin.prototype.exec = function (server, cb) {
     return
   }
 
-  this.server = this.parent.override(server, func, this.opts)
+  try {
+    this.server = this.parent.override(server, func, this.opts)
+  } catch (err) {
+    return cb(err)
+  }
 
   debug('exec', name)
 
