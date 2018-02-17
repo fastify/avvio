@@ -97,6 +97,8 @@ function Boot (server, opts, done) {
   this._current = []
   this._error = null
 
+  this.setMaxListeners(0)
+
   if (done) {
     this.once('start', done)
   }
