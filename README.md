@@ -405,7 +405,7 @@ Returns the instance on which `onClose` is called, to support a chainable API.
 <a name="close"></a>
 ### app.close(func(error, [context], [done]))
 
-Starts the shotdown procedure, the callback is called once all the registered callbacks with `onClose` has been executed.
+Starts the shutdown procedure, the callback is called once all the registered callbacks with `onClose` has been executed.
 
 The callback changes basing on the parameters your are giving:
 1. If one parameter is given to the callback, that parameter will be the `error` object.
