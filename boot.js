@@ -122,7 +122,6 @@ function Boot (server, opts, done) {
     // nooping this, we want to emit start only once
     this._closeQ.drain = noop
   }
-  this._thereIsCloseCb = false
 
   this._doStart = null
   const main = new Plugin(this, (s, opts, done) => {
@@ -242,7 +241,6 @@ Boot.prototype.close = function (func) {
   this.ready(() => {
     this._error = null
     this._closeQ.push(func)
-    this._thereIsCloseCb = true
     process.nextTick(this._closeQ.resume.bind(this._closeQ))
   })
 
