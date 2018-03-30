@@ -186,6 +186,32 @@ test('onClose should handle errors', (t) => {
   })
 })
 
+test('#54 close handlers should receive same parameters when queue is not empty', (t) => {
+  t.plan(6)
+
+  const context = { test: true }
+  const app = boot(context)
+
+  app.use(function (server, opts, done) {
+    done()
+  })
+  app.on('start', () => {
+    app.close((err, done) => {
+      t.is(err, null)
+      t.pass('Closed in the correct order')
+      setImmediate(done)
+    })
+    app.close(err => {
+      t.is(err, null)
+      t.pass('Closed in the correct order')
+    })
+    app.close(err => {
+      t.is(err, null)
+      t.pass('Closed in the correct order')
+    })
+  })
+})
+
 test('onClose should handle errors / 2', (t) => {
   t.plan(4)
 
