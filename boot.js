@@ -96,6 +96,7 @@ function Boot (server, opts, done) {
   this._server = server
   this._current = []
   this._error = null
+  this._isOnCloseHandlerKey = Symbol('isOnCloseHandler')
 
   this.setMaxListeners(0)
 
@@ -210,6 +211,7 @@ Boot.prototype.after = function (func) {
 }
 
 Boot.prototype.onClose = function (func) {
+  func[this._isOnCloseHandlerKey] = true
   this._closeQ.unshift(func, callback.bind(this))
 
   function callback (err) {
@@ -305,21 +307,25 @@ function callWithCbOrNextTick (func, cb, context) {
 
 function closeWithCbOrNextTick (func, cb, context) {
   context = this._server
-  if (this._closeQ.length() === 0 && this._thereIsCloseCb) {
-    if (func.length === 0 || func.length === 1) {
-      func(this._error)
-      process.nextTick(cb)
-    } else if (func.length === 2) {
-      func(this._error, cb)
+  var isOnCloseHandler = func[this._isOnCloseHandlerKey]
+  if (func.length === 0 || func.length === 1) {
+    if (isOnCloseHandler) {
+      func(context)
     } else {
-      func(this._error, context, cb)
+      func(this._error)
+    }
+    process.nextTick(cb)
+  } else if (func.length === 2) {
+    if (isOnCloseHandler) {
+      func(context, cb)
+    } else {
+      func(this._error, cb)
     }
   } else {
-    if (func.length === 0 || func.length === 1) {
-      func(context)
-      process.nextTick(cb)
-    } else {
+    if (isOnCloseHandler) {
       func(context, cb)
+    } else {
+      func(this._error, context, cb)
     }
   }
 }

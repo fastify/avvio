@@ -41,3 +41,7 @@ jspm_packages
 
 # vim swap files
 *.swp
+
+# vscode
+*.code-workspace
+.vscode
