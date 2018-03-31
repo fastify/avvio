@@ -10,12 +10,13 @@ test('reentrant', (t) => {
   let firstLoaded = false
   let secondLoaded = false
 
-  app.use(first)
-      .after(() => {
-        t.ok(firstLoaded, 'first is loaded')
-        t.ok(secondLoaded, 'second is loaded')
-        t.pass('booted')
-      })
+  app
+    .use(first)
+    .after(() => {
+      t.ok(firstLoaded, 'first is loaded')
+      t.ok(secondLoaded, 'second is loaded')
+      t.pass('booted')
+    })
 
   function first (s, opts, done) {
     t.notOk(firstLoaded, 'first is not loaded')
