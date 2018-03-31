@@ -96,6 +96,7 @@ function Boot (server, opts, done) {
   this._server = server
   this._current = []
   this._error = null
+  this._isOnCloseHandlerKey = Symbol('isOnCloseHandler')
 
   this.setMaxListeners(0)
 
@@ -121,7 +122,6 @@ function Boot (server, opts, done) {
     // nooping this, we want to emit start only once
     this._closeQ.drain = noop
   }
-  this._thereIsCloseCb = false
 
   this._doStart = null
   const main = new Plugin(this, (s, opts, done) => {
@@ -210,6 +210,9 @@ Boot.prototype.after = function (func) {
 }
 
 Boot.prototype.onClose = function (func) {
+  // this is used to distinguish between onClose and close handlers
+  // because they share the same queue but must be called with different signatures
+  func[this._isOnCloseHandlerKey] = true
   this._closeQ.unshift(func, callback.bind(this))
 
   function callback (err) {
@@ -240,7 +243,6 @@ Boot.prototype.close = function (func) {
   this.ready(() => {
     this._error = null
     this._closeQ.push(func)
-    this._thereIsCloseCb = true
     process.nextTick(this._closeQ.resume.bind(this._closeQ))
   })
 
@@ -305,21 +307,25 @@ function callWithCbOrNextTick (func, cb, context) {
 
 function closeWithCbOrNextTick (func, cb, context) {
   context = this._server
-  if (this._closeQ.length() === 0 && this._thereIsCloseCb) {
-    if (func.length === 0 || func.length === 1) {
-      func(this._error)
-      process.nextTick(cb)
-    } else if (func.length === 2) {
-      func(this._error, cb)
+  var isOnCloseHandler = func[this._isOnCloseHandlerKey]
+  if (func.length === 0 || func.length === 1) {
+    if (isOnCloseHandler) {
+      func(context)
     } else {
-      func(this._error, context, cb)
+      func(this._error)
+    }
+    process.nextTick(cb)
+  } else if (func.length === 2) {
+    if (isOnCloseHandler) {
+      func(context, cb)
+    } else {
+      func(this._error, cb)
     }
   } else {
-    if (func.length === 0 || func.length === 1) {
-      func(context)
-      process.nextTick(cb)
-    } else {
+    if (isOnCloseHandler) {
       func(context, cb)
+    } else {
+      func(this._error, context, cb)
     }
   }
 }
