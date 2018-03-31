@@ -210,6 +210,8 @@ Boot.prototype.after = function (func) {
 }
 
 Boot.prototype.onClose = function (func) {
+  // this is used to distinguish between onClose and close handlers
+  // because they share the same queue but must be called with different signatures
   func[this._isOnCloseHandlerKey] = true
   this._closeQ.unshift(func, callback.bind(this))
 
