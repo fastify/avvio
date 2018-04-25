@@ -394,3 +394,13 @@ test('close without a cb returns a promise', (t) => {
     t.pass('promise resolves')
   })
 })
+
+test('close without a cb returns a promise when attaching to a server', (t) => {
+  t.plan(1)
+
+  const server = {}
+  boot(server)
+  server.close().then(() => {
+    t.pass('promise resolves')
+  })
+})
