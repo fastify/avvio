@@ -58,13 +58,14 @@ function wrap (server, opts, instance) {
     if (func && typeof func !== 'function') {
       throw new Error('not a function')
     }
+
     if (func) {
       instance.close(encapsulateThreeParam(func, this))
       return this
-    } else {
-      // this is a Promise
-      return instance.close()
     }
+
+    // this is a Promise
+    return instance.close()
   }
 }
 
