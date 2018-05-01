@@ -170,7 +170,9 @@ Boot.prototype.override = function (server, func, opts) {
 // load a plugin
 Boot.prototype.use = function (plugin, opts) {
   if (typeof plugin === 'function') {
+    //console.log(`New plugin (${plugin.name}) loading . . .`)
     this._addPlugin(plugin, opts, false)
+    this.emit(`Loaded plugin (${plugin.name})`)
   } else {
     throw new Error('plugin must be a function')
   }

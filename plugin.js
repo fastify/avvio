@@ -9,7 +9,7 @@ function Plugin (parent, func, opts, isAfter) {
   this.deferred = false
   this.onFinish = null
   this.parent = parent
-  this.name = func.name
+  this.name = func.name || '<Anonymous Function>'
   this.isAfter = isAfter
 
   this.q = fastq(parent, loadPlugin, 1)
