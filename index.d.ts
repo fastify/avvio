@@ -22,6 +22,7 @@ declare namespace avvio {
       ready?: string;
     };
     autostart?: boolean;
+    wrap?: boolean;
   }
 
   interface Plugin<O, I> {

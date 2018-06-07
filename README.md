@@ -86,7 +86,7 @@ async function third (instance, opts) {
 
 Starts the avvio sequence.
 As the name suggest, `instance` is the object representing your application.
-Avvio will add the functions `use`, `after` and `ready` to the instance.
+Avvio will add the functions `use`, `after` and `ready` to the instance (see options below).
 
 ```js
 const server = {}
@@ -110,7 +110,7 @@ Options:
 * `expose`: a key/value property to change how `use`, `after` and `ready` are exposed.
 * `autostart`: do not start loading plugins automatically, but wait for
   a call to [`.start()`](#start)  or [`.ready()`](#ready).
-
+* `wrap`: Determines whether avvio must mutate the instance object by adding `use`, `after` and `ready`.
 
 Events:
 

@@ -227,6 +227,19 @@ test('do not autostart', (t) => {
   t.end()
 })
 
+test('do not wrap instance', (t) => {
+  const server = {}
+  boot(server, {
+    wrap: false
+  })
+
+  t.type(server.after, undefined, 'should not wrap instance')
+  t.type(server.ready, undefined, 'should not wrap instance')
+  t.type(server.use, undefined, 'should not wrap instance')
+
+  t.end()
+})
+
 test('start with ready', (t) => {
   t.plan(2)
 

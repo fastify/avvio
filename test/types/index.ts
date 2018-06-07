@@ -346,12 +346,12 @@ import * as avvio from "../../";
 
 {
   const server = { hello: "world" };
-  const options = {
-    autostart: false,
-    expose: { after: "after", ready: "ready", use: "use" }
-  };
   // avvio with server and options
-  const app = avvio(server, options);
+  const app = avvio(server, {
+    autostart: false,
+    expose: { after: "after", ready: "ready", use: "use" },
+    wrap: false
+  });
 }
 
 {

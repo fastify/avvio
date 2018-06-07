@@ -86,7 +86,11 @@ function Boot (server, opts, done) {
   if (!(this instanceof Boot)) {
     const instance = new Boot(server, opts, done)
 
-    if (server) {
+    if (opts.wrap !== false) {
+      opts.wrap = true
+    }
+
+    if (server && opts.wrap) {
       wrap(server, opts, instance)
     }
 
