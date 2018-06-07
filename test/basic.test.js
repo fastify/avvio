@@ -227,6 +227,29 @@ test('do not autostart', (t) => {
   t.end()
 })
 
+test('do not wrap instance', (t) => {
+  const server = { wesh: 'alors' }
+  const app = boot(server, {
+    wrap: false
+  })
+
+  t.type(server.after, undefined, 'should not wrap instance')
+  t.type(server.ready, undefined, 'should not wrap instance')
+  t.type(server.use, undefined, 'should not wrap instance')
+
+  app.use(function (s, opts, done) {
+    t.type(s.after, 'function', 'should wrap instance internally')
+    t.type(s.ready, 'function', 'should wrap instance internally')
+    t.type(s.use, 'function', 'should wrap instance internally')
+
+    done()
+  })
+
+  app.on('start', () => {
+    t.end()
+  })
+})
+
 test('start with ready', (t) => {
   t.plan(2)
 

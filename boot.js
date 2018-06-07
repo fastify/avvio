@@ -84,6 +84,14 @@ function Boot (server, opts, done) {
   opts = opts || {}
 
   if (!(this instanceof Boot)) {
+    if (opts.wrap !== false) {
+      opts.wrap = true
+    }
+
+    if (opts.wrap === false) {
+      server = Object.assign({}, server)
+    }
+
     const instance = new Boot(server, opts, done)
 
     if (server) {
