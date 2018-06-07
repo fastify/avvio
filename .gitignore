@@ -45,3 +45,6 @@ jspm_packages
 # vscode
 *.code-workspace
 .vscode
+
+# package-lock
+package-lock.json

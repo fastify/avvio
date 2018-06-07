@@ -4,7 +4,8 @@
   "description": "Asynchronous bootstrapping of Node applications",
   "main": "boot.js",
   "scripts": {
-    "test": "standard && tap -j4 test/*test.js"
+    "typescript": "tsc --project ./test/types/tsconfig.json",
+    "test": "standard && tap -j4 test/*test.js && npm run typescript"
   },
   "precommit": "test",
   "repository": {
@@ -30,11 +31,13 @@
   },
   "homepage": "https://github.com/mcollina/avvio#readme",
   "devDependencies": {
+    "@types/node": "^10.3.0",
     "express": "^4.16.3",
     "pre-commit": "^1.2.2",
     "standard": "^11.0.0",
     "tap": "^11.1.3",
-    "then-sleep": "^1.0.1"
+    "then-sleep": "^1.0.1",
+    "typescript": "^2.9.1"
   },
   "dependencies": {
     "debug": "^3.1.0",
