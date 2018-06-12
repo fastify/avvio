@@ -70,9 +70,9 @@ declare namespace avvio {
 
   interface Ready<I> {
     (): Promise<context<I>>;
-    (callback: (err?: Error) => void): any;
-    (callback: (err: Error, done: Function) => void): any;
-    (callback: (err: Error, context: context<I>, done: Function) => void): any;
+    (callback: (err?: Error) => void): void;
+    (callback: (err: Error, done: Function) => void): void;
+    (callback: (err: Error, context: context<I>, done: Function) => void): void;
   }
 }
 
