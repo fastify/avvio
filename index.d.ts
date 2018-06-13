@@ -29,18 +29,9 @@ declare namespace avvio {
   }
 
   interface Server<I> {
-    use<O>(fn: avvio.Plugin<O, I>, options?: O): this;
-
-    after(fn: (err: Error) => void): this;
-    after(fn: (err: Error, done: Function) => void): this;
-    after(fn: (err: Error, context: context<I>, done: Function) => void): this;
-
-    ready(): Promise<context<I>>;
-    ready(callback: (err?: Error) => void): any;
-    ready(callback: (err: Error, done: Function) => void): any;
-    ready(
-      callback: (err: Error, context: context<I>, done: Function) => void
-    ): any;
+    use: Use<I>;
+    after: After<I>;
+    ready: Ready<I>;
   }
 
   interface Avvio<I> extends EventEmitter, Server<I> {
@@ -64,6 +55,24 @@ declare namespace avvio {
 
     started: boolean;
     booted: boolean;
+  }
+
+  // Avvio methods
+  interface After<I> {
+    (fn: (err: Error) => void): this;
+    (fn: (err: Error, done: Function) => void): this;
+    (fn: (err: Error, context: context<I>, done: Function) => void): this;
+  }
+
+  interface Use<I> {
+    <O>(fn: avvio.Plugin<O, I>, options?: O): this;
+  }
+
+  interface Ready<I> {
+    (): Promise<context<I>>;
+    (callback: (err?: Error) => void): void;
+    (callback: (err: Error, done: Function) => void): void;
+    (callback: (err: Error, context: context<I>, done: Function) => void): void;
   }
 }
 
