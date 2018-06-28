@@ -309,6 +309,8 @@ import * as avvio from "../../";
       context.use;
       context.after;
       context.ready;
+      context.close;
+      context.onClose;
       context.typescriptIs;
 
       done();
@@ -328,6 +330,8 @@ import * as avvio from "../../";
       context.use;
       context.after;
       context.ready;
+      context.close;
+      context.onClose;
       context.typescriptIs;
 
       done();
@@ -338,6 +342,8 @@ import * as avvio from "../../";
     context.use;
     context.after;
     context.ready;
+    context.close;
+    context.onClose;
     context.typescriptIs;
 
     done();

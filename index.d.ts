@@ -32,6 +32,8 @@ declare namespace avvio {
     use: Use<I>;
     after: After<I>;
     ready: Ready<I>;
+    close: Close<I>;
+    onClose: OnClose<I>;
   }
 
   interface Avvio<I> extends EventEmitter, Server<I> {
@@ -47,32 +49,36 @@ declare namespace avvio {
       options: any
     ) => context<I>;
 
-    onClose(fn: (context: context<I>, done: Function) => void): this;
-
-    close(fn: (err: Error) => void): void;
-    close(fn: (err: Error, done: Function) => void): void;
-    close(fn: (err: Error, context: context<I>, done: Function) => void): void;
-
     started: boolean;
     booted: boolean;
   }
 
   // Avvio methods
-  interface After<I> {
-    (fn: (err: Error) => void): this;
-    (fn: (err: Error, done: Function) => void): this;
-    (fn: (err: Error, context: context<I>, done: Function) => void): this;
+  interface After<I, C = context<I>> {
+    (fn: (err: Error) => void): C;
+    (fn: (err: Error, done: Function) => void): C;
+    (fn: (err: Error, context: C, done: Function) => void): C;
   }
 
-  interface Use<I> {
-    <O>(fn: avvio.Plugin<O, I>, options?: O): this;
+  interface Use<I, C = context<I>> {
+    <O>(fn: avvio.Plugin<O, I>, options?: O): C;
   }
 
-  interface Ready<I> {
-    (): Promise<context<I>>;
+  interface Ready<I, C = context<I>> {
+    (): Promise<C>;
     (callback: (err?: Error) => void): void;
     (callback: (err: Error, done: Function) => void): void;
-    (callback: (err: Error, context: context<I>, done: Function) => void): void;
+    (callback: (err: Error, context: C, done: Function) => void): void;
+  }
+
+  interface Close<I, C = context<I>> {
+    (fn: (err: Error) => void): void;
+    (fn: (err: Error, done: Function) => void): void;
+    (fn: (err: Error, context: C, done: Function) => void): void;
+  }
+
+  interface OnClose<I, C = context<I>> {
+    (fn: (context: C, done: Function) => void): C;
   }
 }
 
