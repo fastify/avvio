@@ -411,18 +411,20 @@ test('close with async onClose handlers', (t) => {
   const app = boot()
   var order = [1, 2, 3, 4]
 
-  app.onClose(async () => {
-    await new Promise(resolve => setTimeout(resolve, 500))
-    t.is(order.shift(), 3)
+  app.onClose(() => {
+    return new Promise(resolve => setTimeout(resolve, 500)).then(() => {
+      t.is(order.shift(), 3)
+    })
   })
 
   app.onClose(() => {
     t.is(order.shift(), 2)
   })
 
-  app.onClose(async (instance) => {
-    await new Promise(resolve => setTimeout(resolve, 500))
-    t.is(order.shift(), 1)
+  app.onClose((instance) => {
+    return new Promise(resolve => setTimeout(resolve, 500)).then(() => {
+      t.is(order.shift(), 1)
+    })
   })
 
   app.on('start', () => {
