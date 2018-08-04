@@ -315,12 +315,20 @@ function closeWithCbOrNextTick (func, cb, context) {
   context = this._server
   var isOnCloseHandler = func[this._isOnCloseHandlerKey]
   if (func.length === 0 || func.length === 1) {
+    var promise
     if (isOnCloseHandler) {
-      func(context)
+      promise = func(context)
     } else {
-      func(this._error)
+      promise = func(this._error)
     }
-    process.nextTick(cb)
+    if (promise && typeof promise.then === 'function') {
+      debug('resolving close/onClose promise')
+      promise.then(
+        () => process.nextTick(cb),
+        (e) => process.nextTick(cb, e))
+    } else {
+      process.nextTick(cb)
+    }
   } else if (func.length === 2) {
     if (isOnCloseHandler) {
       func(context, cb)

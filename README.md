@@ -379,7 +379,8 @@ Registers a new callback that will be fired once then `close` api is called.
 
 The callback changes basing on the parameters your are giving:
 1. If one parameter is given to the callback, that parameter will be the `context`.
-2. If two parameters are given to the callback, the first will be the top level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, the second will be the `done` callback.
+2. If zero or one parameter is given, the callback may return a promise
+3. If two parameters are given to the callback, the first will be the top level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, the second will be the `done` callback.
 
 ```js
 const server = {}
@@ -390,12 +391,28 @@ app.onClose(function (context) {
   // ...
 })
 
+// onClose with one parameter, returning a promise
+app.onClose(function (context) {
+  return new Promise((resolve, reject) => {
+    // ...
+  })
+})
+
+// async onClose with one parameter
+app.onClose(async function (context) {
+  // ...
+  await ...
+})
+
+
 // onClose with two parameter
 app.onClose(function (context, done) {
   // ...
   done()
 })
 ```
+
+If the callback returns a promise, the next onClose callback and the close callback won't run until the promise is either resolved or rejected. 
 
 `done` must be called only once.
 Returns the instance on which `onClose` is called, to support a chainable API.

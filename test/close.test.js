@@ -404,3 +404,33 @@ test('close without a cb returns a promise when attaching to a server', (t) => {
     t.pass('promise resolves')
   })
 })
+
+test('close with async onClose handlers', (t) => {
+  t.plan(5)
+
+  const app = boot()
+  var order = [1, 2, 3, 4]
+
+  app.onClose(() => {
+    return new Promise(resolve => setTimeout(resolve, 500)).then(() => {
+      t.is(order.shift(), 3)
+    })
+  })
+
+  app.onClose(() => {
+    t.is(order.shift(), 2)
+  })
+
+  app.onClose((instance) => {
+    return new Promise(resolve => setTimeout(resolve, 500)).then(() => {
+      t.is(order.shift(), 1)
+    })
+  })
+
+  app.on('start', () => {
+    app.close(() => {
+      t.is(order.shift(), 4)
+      t.pass('Closed in the correct order')
+    })
+  })
+})
