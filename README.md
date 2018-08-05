@@ -429,6 +429,8 @@ The callback changes basing on the parameters your are giving:
 2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.
 3. If three parameters are given to the callback, the first will be the `error` object, the second will be the top level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, and the third the `done` callback.
 
+If no callback is provided `close` will return a Promise.
+
 ```js
 const server = {}
 const app = require('avvio')(server)
@@ -450,6 +452,15 @@ app.close(function (err, context, done) {
   assert.equal(context, server)
   done()
 })
+
+// close with Promise
+app.close()
+  .then(() => console.log('Closed'))
+  .catch(err => {
+    console.error(err)
+    process.exit(1)
+  })
+
 ```
 
 `done` must be called only once.
