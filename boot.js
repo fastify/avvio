@@ -99,6 +99,7 @@ function Boot (server, opts, done) {
 
   server = server || this
 
+  this._timeout = Number(opts.timeout) || 0
   this._server = server
   this._current = []
   this._error = null

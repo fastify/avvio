@@ -45,7 +45,11 @@ app
 
 app.use(third)
 
-app.ready(function () {
+app.ready(function (err) {
+  // the error must be handled somehow
+  if (err) {
+    throw err
+  }
   console.log('application booted!')
 })
 
@@ -110,7 +114,8 @@ Options:
 * `expose`: a key/value property to change how `use`, `after` and `ready` are exposed.
 * `autostart`: do not start loading plugins automatically, but wait for
   a call to [`.start()`](#start)  or [`.ready()`](#ready).
-
+* `timeout`: the number of millis to wait a plugin to load. Default
+  `0` (disabled).
 
 Events:
 

@@ -63,6 +63,15 @@ Plugin.prototype.exec = function (server, cb) {
 
   debug('exec', name)
 
+  var timer
+
+  if (this.parent._timeout > 0) {
+    timer = setTimeout(function () {
+      timer = null
+      done(new Error('plugin did not start in time: ' + name))
+    }, this.parent._timeout)
+  }
+
   var promise = func(this.server, this.opts, done)
   if (promise && typeof promise.then === 'function') {
     debug('resolving promise', name)
@@ -84,6 +93,10 @@ Plugin.prototype.exec = function (server, cb) {
     }
 
     completed = true
+
+    if (timer) {
+      clearTimeout(timer)
+    }
 
     cb(err)
   }
