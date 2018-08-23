@@ -3,13 +3,34 @@
 const fastq = require('fastq')
 const debug = require('debug')('avvio')
 
+function getName (func) {
+  // let's see if this is a file, and in that case use that
+  // this is common for plugins
+  const cache = require.cache
+  const keys = Object.keys(cache)
+
+  for (var i = 0; i < keys.length; i++) {
+    if (cache[keys[i]].exports === func) {
+      return keys[i]
+    }
+  }
+
+  // if not maybe it's a named function, so use that
+  if (func.name) {
+    return func.name
+  }
+
+  // takes the first two lines of the function if nothing else works
+  return func.toString().split('\n').slice(2).map(s => s.trim()).join(' -- ')
+}
+
 function Plugin (parent, func, opts, isAfter) {
   this.func = func
   this.opts = opts
   this.deferred = false
   this.onFinish = null
   this.parent = parent
-  this.name = func.name
+  this.name = getName(func)
   this.isAfter = isAfter
 
   this.q = fastq(parent, loadPlugin, 1)
