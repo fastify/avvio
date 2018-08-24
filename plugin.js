@@ -2,6 +2,28 @@
 
 const fastq = require('fastq')
 const debug = require('debug')('avvio')
+const CODE_PLUGIN_TIMEOUT = 'ERR_AVVIO_PLUGIN_TIMEOUT'
+
+function getName (func) {
+  // let's see if this is a file, and in that case use that
+  // this is common for plugins
+  const cache = require.cache
+  const keys = Object.keys(cache)
+
+  for (var i = 0; i < keys.length; i++) {
+    if (cache[keys[i]].exports === func) {
+      return keys[i]
+    }
+  }
+
+  // if not maybe it's a named function, so use that
+  if (func.name) {
+    return func.name
+  }
+
+  // takes the first two lines of the function if nothing else works
+  return func.toString().split('\n').slice(0, 2).map(s => s.trim()).join(' -- ')
+}
 
 function Plugin (parent, func, opts, isAfter) {
   this.func = func
@@ -9,7 +31,7 @@ function Plugin (parent, func, opts, isAfter) {
   this.deferred = false
   this.onFinish = null
   this.parent = parent
-  this.name = func.name
+  this.name = getName(func)
   this.isAfter = isAfter
 
   this.q = fastq(parent, loadPlugin, 1)
@@ -42,6 +64,19 @@ Plugin.prototype.exec = function (server, cb) {
 
   debug('exec', name)
 
+  var timer
+
+  if (this.parent._timeout > 0) {
+    timer = setTimeout(function () {
+      debug('timed out', name)
+      timer = null
+      const err = new Error(`${CODE_PLUGIN_TIMEOUT}: plugin did not start in time: ${name}`)
+      err.code = CODE_PLUGIN_TIMEOUT
+      err.fn = func
+      done(err)
+    }, this.parent._timeout)
+  }
+
   var promise = func(this.server, this.opts, done)
   if (promise && typeof promise.then === 'function') {
     debug('resolving promise', name)
@@ -63,6 +98,10 @@ Plugin.prototype.exec = function (server, cb) {
     }
 
     completed = true
+
+    if (timer) {
+      clearTimeout(timer)
+    }
 
     cb(err)
   }

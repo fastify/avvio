@@ -99,6 +99,7 @@ function Boot (server, opts, done) {
 
   server = server || this
 
+  this._timeout = Number(opts.timeout) || 0
   this._server = server
   this._current = []
   this._error = null
@@ -130,12 +131,12 @@ function Boot (server, opts, done) {
   }
 
   this._doStart = null
-  const main = new Plugin(this, (s, opts, done) => {
+  const main = new Plugin(this, function root (s, opts, done) {
     this._doStart = done
     if (opts.autostart) {
       this.start()
     }
-  }, opts, noop)
+  }.bind(this), opts, noop)
 
   Plugin.loadPlugin.call(this, main, (err) => {
     debug('root plugin ready')

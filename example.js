@@ -20,7 +20,10 @@ avvio
 
     console.log('third plugin loaded')
   })
-  .ready(function () {
+  .ready(function (err) {
+    if (err) {
+      throw err
+    }
     console.log('application booted!')
   })
 
