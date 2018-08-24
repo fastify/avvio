@@ -114,7 +114,8 @@ Options:
 * `expose`: a key/value property to change how `use`, `after` and `ready` are exposed.
 * `autostart`: do not start loading plugins automatically, but wait for
   a call to [`.start()`](#start)  or [`.ready()`](#ready).
-* `timeout`: the number of millis to wait a plugin to load. Default
+* `timeout`: the number of millis to wait a plugin to load after which
+  it will error with code `ERR_AVVIO_PLUGIN_TIMEOUT`. Default
   `0` (disabled).
 
 Events:
@@ -167,6 +168,7 @@ app.use(plugin)
 
 `use` returns the instance on which `use` is called, to support a chainable API.
 
+-------------------------------------------------------
 <a name="error-handling"></a>
 #### Error handling
 

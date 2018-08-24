@@ -16,7 +16,8 @@ test('timeout without calling next - callbacks', (t) => {
   app.ready((err) => {
     t.ok(err)
     t.strictEqual(err.fn, one)
-    t.strictEqual(err.message, 'plugin did not start in time: one')
+    t.strictEqual(err.message, 'ERR_AVVIO_PLUGIN_TIMEOUT: plugin did not start in time: one')
+    t.strictEqual(err.code, 'ERR_AVVIO_PLUGIN_TIMEOUT')
   })
 })
 
@@ -34,6 +35,7 @@ test('timeout without calling next - promises', (t) => {
   app.ready((err) => {
     t.ok(err)
     t.strictEqual(err.fn, one)
-    t.strictEqual(err.message, 'plugin did not start in time: one')
+    t.strictEqual(err.message, 'ERR_AVVIO_PLUGIN_TIMEOUT: plugin did not start in time: one')
+    t.strictEqual(err.code, 'ERR_AVVIO_PLUGIN_TIMEOUT')
   })
 })
