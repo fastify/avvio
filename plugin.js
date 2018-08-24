@@ -67,6 +67,7 @@ Plugin.prototype.exec = function (server, cb) {
 
   if (this.parent._timeout > 0) {
     timer = setTimeout(function () {
+      debug('timed out', name)
       timer = null
       done(new Error('plugin did not start in time: ' + name))
     }, this.parent._timeout)
