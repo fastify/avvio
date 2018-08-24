@@ -22,7 +22,7 @@ function getName (func) {
   }
 
   // takes the first two lines of the function if nothing else works
-  return func.toString().split('\n').slice(2).map(s => s.trim()).join(' -- ')
+  return func.toString().split('\n').slice(0, 2).map(s => s.trim()).join(' -- ')
 }
 
 function Plugin (parent, func, opts, isAfter) {
