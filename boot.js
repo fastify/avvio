@@ -131,12 +131,7 @@ function Boot (server, opts, done) {
   }
 
   this._doStart = null
-  const main = new Plugin(this, function root (s, opts, done) {
-    this._doStart = done
-    if (opts.autostart) {
-      this.start()
-    }
-  }.bind(this), opts, noop)
+  const main = new Plugin(this, root.bind(this), opts, noop, 0)
 
   Plugin.loadPlugin.call(this, main, (err) => {
     debug('root plugin ready')
@@ -151,6 +146,13 @@ function Boot (server, opts, done) {
       this._readyQ.resume()
     }
   })
+}
+
+function root (s, opts, done) {
+  this._doStart = done
+  if (opts.autostart) {
+    this.start()
+  }
 }
 
 inherits(Boot, EE)
