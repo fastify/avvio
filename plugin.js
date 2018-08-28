@@ -25,12 +25,13 @@ function getName (func) {
   return func.toString().split('\n').slice(0, 2).map(s => s.trim()).join(' -- ')
 }
 
-function Plugin (parent, func, opts, isAfter) {
+function Plugin (parent, func, opts, isAfter, timeout) {
   this.func = func
   this.opts = opts
   this.deferred = false
   this.onFinish = null
   this.parent = parent
+  this.timeout = timeout === undefined ? parent._timeout : timeout
   this.name = getName(func)
   this.isAfter = isAfter
 
@@ -66,7 +67,8 @@ Plugin.prototype.exec = function (server, cb) {
 
   var timer
 
-  if (this.parent._timeout > 0) {
+  if (this.timeout > 0) {
+    debug('setting up timeout', name, this.timeout)
     timer = setTimeout(function () {
       debug('timed out', name)
       timer = null
@@ -74,7 +76,7 @@ Plugin.prototype.exec = function (server, cb) {
       err.code = CODE_PLUGIN_TIMEOUT
       err.fn = func
       done(err)
-    }, this.parent._timeout)
+    }, this.timeout)
   }
 
   var promise = func(this.server, this.opts, done)
