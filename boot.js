@@ -364,7 +364,10 @@ function encapsulateThreeParam (func, that) {
   function _encapsulateThreeParam (err, cb) {
     if (!func) {
       process.nextTick(cb)
-    } else if (func.length === 0 || func.length === 1) {
+    } else if (func.length === 0) {
+      func()
+      process.nextTick(cb, err)
+    } else if (func.length === 1) {
       func(err)
       process.nextTick(cb)
     } else if (func.length === 2) {
