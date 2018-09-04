@@ -362,11 +362,27 @@ function encapsulateTwoParam (func, that) {
 function encapsulateThreeParam (func, that) {
   return _encapsulateThreeParam.bind(that)
   function _encapsulateThreeParam (err, cb) {
+    var res
     if (!func) {
       process.nextTick(cb)
-    } else if (func.length === 0 || func.length === 1) {
-      func(err)
-      process.nextTick(cb)
+    } else if (func.length === 0) {
+      res = func()
+      if (res && res.then) {
+        res.then(function () {
+          process.nextTick(cb, err)
+        }, cb)
+      } else {
+        process.nextTick(cb, err)
+      }
+    } else if (func.length === 1) {
+      res = func(err)
+      if (res && res.then) {
+        res.then(function () {
+          process.nextTick(cb)
+        }, cb)
+      } else {
+        process.nextTick(cb)
+      }
     } else if (func.length === 2) {
       func(err, cb)
     } else {

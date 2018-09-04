@@ -180,3 +180,49 @@ test('after', async (t) => {
   t.ok(thirdLoaded, 'third is loaded')
   t.pass('booted')
 })
+
+test('after wrapped', async (t) => {
+  t.plan(15)
+
+  const app = {}
+  boot(app)
+  let firstLoaded = false
+  let secondLoaded = false
+  let thirdLoaded = false
+
+  app.use(first)
+
+  async function first (s, opts) {
+    t.notOk(firstLoaded, 'first is not loaded')
+    t.notOk(secondLoaded, 'second is not loaded')
+    t.notOk(thirdLoaded, 'third is not loaded')
+    firstLoaded = true
+    s.after(second)
+    s.after(third)
+  }
+
+  async function second (err) {
+    t.error(err)
+    t.ok(firstLoaded, 'first is loaded')
+    t.notOk(secondLoaded, 'second is not loaded')
+    t.notOk(thirdLoaded, 'third is not loaded')
+    await sleep(10)
+    secondLoaded = true
+  }
+
+  async function third () {
+    t.ok(firstLoaded, 'first is loaded')
+    t.ok(secondLoaded, 'second is loaded')
+    t.notOk(thirdLoaded, 'third is not loaded')
+    await sleep(10)
+    thirdLoaded = true
+  }
+
+  const readyContext = await app.ready()
+
+  t.equal(app, readyContext)
+  t.ok(firstLoaded, 'first is loaded')
+  t.ok(secondLoaded, 'second is loaded')
+  t.ok(thirdLoaded, 'third is loaded')
+  t.pass('booted')
+})
