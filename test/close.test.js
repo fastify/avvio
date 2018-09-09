@@ -328,6 +328,20 @@ test('close without a cb', (t) => {
   app.close()
 })
 
+test('close without an instance', (t) => {
+  t.plan(2)
+
+  const app = boot()
+
+  app.onClose((done) => {
+    t.ok('called')
+  })
+
+  app.close(() => {
+    t.pass('closed')
+  })
+})
+
 test('close passing not a function', (t) => {
   t.plan(1)
 
