@@ -48,3 +48,4 @@ jspm_packages
 
 # package-lock
 package-lock.json
+yarn.lock
