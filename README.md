@@ -155,7 +155,8 @@ function plugin (server, opts, done) {
 
 app.use(plugin)
 ```
-`done` must be called only once, when your plugin is ready to go.
+`done` should be called only once, when your plugin is ready to go.  Additional
+calls to `done` are ignored.
 
 async/await is also supported:
 
