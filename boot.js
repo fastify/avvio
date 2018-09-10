@@ -351,7 +351,7 @@ function encapsulateTwoParam (func, that) {
   return _encapsulateTwoParam.bind(that)
   function _encapsulateTwoParam (context, cb) {
     if (func.length === 0) {
-      func(this)
+      func()
       process.nextTick(cb)
     } else if (func.length === 1) {
       func(cb)
