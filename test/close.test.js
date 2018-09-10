@@ -328,17 +328,44 @@ test('close without a cb', (t) => {
   app.close()
 })
 
-test('close without an instance', (t) => {
-  t.plan(2)
+test('onClose with 0 parameters', (t) => {
+  t.plan(4)
 
-  const app = boot()
+  const server = { my: 'server' }
+  const app = boot(server)
 
-  app.onClose((done) => {
-    t.ok('called')
+  app.use(function (instance, opts, next) {
+    instance.onClose(function () {
+      t.ok('called')
+      t.is(arguments.length, 0)
+    })
+    next()
   })
 
-  app.close(() => {
-    t.pass('closed')
+  app.close(err => {
+    t.error(err)
+    t.pass('Closed')
+  })
+})
+
+test('onClose with 1 parameter', (t) => {
+  t.plan(4)
+
+  const server = { my: 'server' }
+  const app = boot(server)
+
+  app.use(function (instance, opts, next) {
+    instance.test = true
+    instance.onClose(function (i) {
+      t.is(arguments.length, 1)
+      t.ok(i.test)
+    })
+    next()
+  })
+
+  app.close(err => {
+    t.error(err)
+    t.pass('Closed')
   })
 })
 
