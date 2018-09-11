@@ -3,7 +3,7 @@
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](http://standardjs.com/)
  [![Build Status](https://travis-ci.org/mcollina/avvio.svg)](https://travis-ci.org/mcollina/avvio)
 
-Asynchronous bootstrapping is hard, different things can go wrong, *error handling* and *load order* just to name a few. The aim of this module is to made it simple.
+Asynchronous bootstrapping is hard, different things can go wrong, *error handling* and *load order* just to name a few. The aim of this module is to make it simple.
 
 `avvio` is fully *reentrant* and *graph-based*. You can load
 components/plugins *within* plugins, and be still sure that things will
@@ -27,7 +27,7 @@ npm install avvio --save
 <a name="example"></a>
 ## Example
 
-The example below can be found [here][example] and ran using `node example.js`.
+The example below can be found [here][example] and run using `node example.js`.
 It demonstrates how to use `avvio` to load functions / plugins in order.
 
 
@@ -123,8 +123,8 @@ Events:
 * `'start'`  when the application starts
 * `'preReady'` fired before the ready queue is run
 
-The `avvio` function can be used also as a
-constructor to inherits from.
+The `avvio` function can also be used as a
+constructor to inherit from.
 ```js
 function Server () {}
 const app = require('avvio')(new Server())
@@ -432,7 +432,7 @@ Returns the instance on which `onClose` is called, to support a chainable API.
 
 Starts the shutdown procedure, the callback is called once all the registered callbacks with `onClose` has been executed.
 
-The callback changes basing on the parameters your are giving:
+The callback changes based on the parameters your are giving:
 1. If one parameter is given to the callback, that parameter will be the `error` object.
 2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.
 3. If three parameters are given to the callback, the first will be the `error` object, the second will be the top level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, and the third the `done` callback.
