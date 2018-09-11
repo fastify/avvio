@@ -354,8 +354,7 @@ function encapsulateTwoParam (func, that) {
       func()
       process.nextTick(cb)
     } else if (func.length === 1) {
-      func(this)
-      process.nextTick(cb)
+      func(cb)
     } else {
       func(this, cb)
     }

@@ -77,8 +77,9 @@ test('onClose arguments - fastify encapsulation test case', (t) => {
 
   app.use(function (instance, opts, next) {
     t.notOk(instance.test)
-    instance.onClose((i) => {
+    instance.onClose((i, done) => {
       t.notOk(i.test)
+      done()
     })
     next()
   })
@@ -113,8 +114,9 @@ test('onClose arguments - fastify encapsulation test case / 2', (t) => {
 
   server.use(function (instance, opts, next) {
     t.notOk(instance.test)
-    instance.onClose((i) => {
+    instance.onClose((i, done) => {
       t.notOk(i.test)
+      done()
     })
     next()
   })
@@ -349,16 +351,15 @@ test('onClose with 0 parameters', (t) => {
 })
 
 test('onClose with 1 parameter', (t) => {
-  t.plan(4)
+  t.plan(3)
 
   const server = { my: 'server' }
   const app = boot(server)
 
   app.use(function (instance, opts, next) {
-    instance.test = true
-    instance.onClose(function (i) {
+    instance.onClose(function (done) {
       t.is(arguments.length, 1)
-      t.ok(i.test)
+      done()
     })
     next()
   })
