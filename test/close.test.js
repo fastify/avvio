@@ -77,8 +77,9 @@ test('onClose arguments - fastify encapsulation test case', (t) => {
 
   app.use(function (instance, opts, next) {
     t.notOk(instance.test)
-    instance.onClose((i) => {
+    instance.onClose((i, done) => {
       t.notOk(i.test)
+      done()
     })
     next()
   })
@@ -113,8 +114,9 @@ test('onClose arguments - fastify encapsulation test case / 2', (t) => {
 
   server.use(function (instance, opts, next) {
     t.notOk(instance.test)
-    instance.onClose((i) => {
+    instance.onClose((i, done) => {
       t.notOk(i.test)
+      done()
     })
     next()
   })
@@ -326,6 +328,46 @@ test('close without a cb', (t) => {
   })
 
   app.close()
+})
+
+test('onClose with 0 parameters', (t) => {
+  t.plan(4)
+
+  const server = { my: 'server' }
+  const app = boot(server)
+
+  app.use(function (instance, opts, next) {
+    instance.onClose(function () {
+      t.ok('called')
+      t.is(arguments.length, 0)
+    })
+    next()
+  })
+
+  app.close(err => {
+    t.error(err)
+    t.pass('Closed')
+  })
+})
+
+test('onClose with 1 parameter', (t) => {
+  t.plan(3)
+
+  const server = { my: 'server' }
+  const app = boot(server)
+
+  app.use(function (instance, opts, next) {
+    instance.onClose(function (done) {
+      t.is(arguments.length, 1)
+      done()
+    })
+    next()
+  })
+
+  app.close(err => {
+    t.error(err)
+    t.pass('Closed')
+  })
 })
 
 test('close passing not a function', (t) => {

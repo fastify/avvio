@@ -283,7 +283,7 @@ Boot.prototype.ready = function (func) {
   })
 }
 
-function noop () {}
+function noop () { }
 
 function callWithCbOrNextTick (func, cb, context) {
   context = this._server
@@ -350,9 +350,11 @@ function closeWithCbOrNextTick (func, cb, context) {
 function encapsulateTwoParam (func, that) {
   return _encapsulateTwoParam.bind(that)
   function _encapsulateTwoParam (context, cb) {
-    if (func.length === 0 || func.length === 1) {
-      func(this)
+    if (func.length === 0) {
+      func()
       process.nextTick(cb)
+    } else if (func.length === 1) {
+      func(cb)
     } else {
       func(this, cb)
     }
