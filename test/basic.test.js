@@ -14,7 +14,7 @@ test('boot an empty app', (t) => {
 
 test('start returns app', (t) => {
   t.plan(1)
-  const app = boot({}, {autostart: false})
+  const app = boot({}, { autostart: false })
   app
     .start()
     .ready((err) => {
