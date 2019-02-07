@@ -476,3 +476,14 @@ test('close with async onClose handlers', (t) => {
     })
   })
 })
+
+test('onClose callback must be a function', (t) => {
+  t.plan(1)
+
+  const app = boot()
+
+  app.use(function (server, opts, done) {
+    t.throws(() => app.onClose({}), { message: 'not a function' })
+    done()
+  })
+})
