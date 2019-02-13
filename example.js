@@ -2,6 +2,8 @@
 
 const avvio = require('.')()
 
+avvio.on('preReady', () => avvio.prettyPrint())
+
 avvio
   .use(first, { hello: 'world' })
   .after((err, cb) => {
