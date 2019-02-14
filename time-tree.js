@@ -1,19 +1,23 @@
 'use strict'
 const archy = require('archy')
 
-function TimeTree () {
+function TimeTree (rootName = 'boot') {
   this.timeTable = {}
+  this.root = rootName
 }
 
-TimeTree.prototype.get = function (parent = 'boot', child) {
+TimeTree.prototype.get = function (parent = this.root, child) {
   const p = this.timeTable[parent]
   if (p) {
-    return p.children.find(_ => _.label === child)
+    if (child !== null) {
+      return p.children.find(_ => _.label === child)
+    }
+    return p
   }
   return undefined
 }
 
-TimeTree.prototype.add = function (parent = 'boot', track) {
+TimeTree.prototype.add = function (parent = this.root, track) {
   let p = this.timeTable[parent]
   if (!p) {
     this.timeTable[parent] = {
@@ -23,7 +27,7 @@ TimeTree.prototype.add = function (parent = 'boot', track) {
     p = this.timeTable[parent]
   }
 
-  if (!this.get(parent, track)) {
+  if (track && !this.get(parent, track)) {
     p.children.push({ label: track })
   }
 }
@@ -45,6 +49,10 @@ TimeTree.prototype.stop = function (parent, track, stop) {
   }
 }
 
+TimeTree.prototype.toJSON = function () {
+  return this.timeTable
+}
+
 TimeTree.prototype.prittyPrint = function () {
   const analyzePlugin = (node) => {
     let nodes = []
@@ -58,9 +66,14 @@ TimeTree.prototype.prittyPrint = function () {
   }
 
   const plugins = Object.keys(this.timeTable).map(_ => analyzePlugin(this.timeTable[_]))
-  const out = {
-    label: 'avvio',
-    nodes: plugins
+  let out
+  if (plugins.length === 1) {
+    out = plugins[0]
+  } else {
+    out = {
+      label: this.root,
+      nodes: plugins
+    }
   }
   console.log(archy(out))
 }

@@ -2,8 +2,6 @@
 
 const avvio = require('.')()
 
-avvio.on('preReady', () => avvio.prettyPrint())
-
 avvio
   .use(first, { hello: 'world' })
   .after((err, cb) => {
@@ -29,10 +27,14 @@ avvio
     console.log('application booted!')
   })
 
+avvio.on('preReady', () => {
+  avvio.prettyPrint()
+})
+
 function first (instance, opts, cb) {
   console.log('first loaded', opts)
   instance.use(second)
-  cb()
+  setTimeout(cb, 42)
 }
 
 function second (instance, opts, cb) {

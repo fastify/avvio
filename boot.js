@@ -114,7 +114,8 @@ function Boot (server, opts, done) {
 
   this.started = false
   this.booted = false
-  this.pluginTree = new TimeTree()
+  this.name = 'avvio'
+  this.pluginTree = new TimeTree(this.name)
 
   this._readyQ = fastq(this, callWithCbOrNextTick, 1)
   this._readyQ.pause()
@@ -135,9 +136,15 @@ function Boot (server, opts, done) {
   this._doStart = null
   const main = new Plugin(this, root.bind(this), opts, noop, 0)
 
-  main.on('enqueue', this.pluginTree.add.bind(this.pluginTree))
-  main.on('start', this.pluginTree.start.bind(this.pluginTree))
-  main.on('loaded', this.pluginTree.stop.bind(this.pluginTree))
+  main.on('enqueue', (serverName, funcName, time) => {
+    this.pluginTree.add(this.name, null, time)
+  })
+  main.on('start', (serverName, funcName, time) => {
+    this.pluginTree.start(this.name, null, time)
+  })
+  main.on('loaded', (serverName, funcName, time) => {
+    this.pluginTree.stop(this.name, null, time)
+  })
 
   Plugin.loadPlugin.call(this, main, (err) => {
     debug('root plugin ready')
@@ -299,6 +306,10 @@ Boot.prototype.ready = function (func) {
 
 Boot.prototype.prettyPrint = function () {
   this.pluginTree.prittyPrint()
+}
+
+Boot.prototype.toJSON = function () {
+  return this.pluginTree.toJSON()
 }
 
 function noop () { }
