@@ -82,6 +82,8 @@ async function third (instance, opts) {
   * <a href="#onClose"><code>instance.<b>onClose()</b></code></a>
   * <a href="#close"><code>instance.<b>close()</b></code></a>
   * <a href="#express"><code>avvio.<b>express()</b></code></a>
+  * <a href="#toJSON"><code>avvio.<b>toJSON()</b></code></a>
+  * <a href="#prettyPrint"><code>avvio.<b>prettyPrint()</b></code></a>
 
 -------------------------------------------------------
 <a name="constructor"></a>
@@ -472,6 +474,73 @@ app.close()
 ```
 
 `done` must be called only once.
+
+-------------------------------------------------------
+
+<a name="toJSON"></a>
+
+### avvio.toJSON()
+
+Return a JSON tree rappresenting the state of the plugins and the loading time.
+Call it on `preReady` to get the complete tree.
+
+```js
+const avvio = require('avvio')()
+avvio.on('preReady', () => {
+  avvio.toJSON()
+})
+```
+
+The ouput is like this:
+```json
+{
+   "avvio":{
+      "label":"avvio",
+      "start":1550165276637,
+      "stop":1550165276639,
+      "diff":2,
+      "children":[
+         {
+            "label":"one",
+            "start":1550165276639,
+            "stop":1550165276639,
+            "diff":0
+         },
+         {
+            "label":"two",
+            "start":1550165276639,
+            "stop":1550165276639,
+            "diff":0
+         }
+      ]
+   }
+}
+```
+
+-------------------------------------------------------
+
+<a name="prettyPrint"></a>
+
+### avvio.prettyPrint()
+
+Print to `console.log` the tree returned by the `toJSON()` method.
+
+```js
+const avvio = require('avvio')()
+avvio.on('preReady', () => {
+  avvio.prettyPrint()
+})
+```
+
+The ouput will be like:
+
+```
+avvio 56 ms
+├── first 52 ms
+├── second 1 ms
+├── bound _after 0 ms
+└── third 2 ms
+```
 
 -------------------------------------------------------
 

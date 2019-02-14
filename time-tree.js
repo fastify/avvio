@@ -50,7 +50,7 @@ TimeTree.prototype.stop = function (parent, track, stop) {
 }
 
 TimeTree.prototype.toJSON = function () {
-  return this.timeTable
+  return Object.assign({}, this.timeTable)
 }
 
 TimeTree.prototype.prittyPrint = function () {
