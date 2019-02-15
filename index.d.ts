@@ -43,6 +43,10 @@ declare namespace avvio {
 
     start(): this;
 
+    toJSON(): Object;
+
+    prettyPrint(): void;
+
     override: (
       server: context<I>,
       fn: Plugin<any, I>,
