@@ -13,13 +13,11 @@ test('to json', (t) => {
     .use(three)
 
   const outJson = {
-    avvio: {
-      label: 'avvio',
-      start: /\d*/,
-      stop: /\d*/,
-      diff: /\d*/,
-      children: []
-    }
+    label: 'bound root',
+    start: /\d*/,
+    stop: /\d*/,
+    diff: /\d*/,
+    nodes: []
   }
 
   app.on('preReady', function show () {
@@ -29,7 +27,8 @@ test('to json', (t) => {
 
   function one (s, opts, done) {
     const json = app.toJSON()
-    outJson.avvio.children.push({
+    outJson.nodes.push({
+      parent: outJson.label,
       label: 'one',
       start: /\d*/,
       stop: /\d*/,
@@ -40,7 +39,8 @@ test('to json', (t) => {
   }
   function two (s, opts, done) {
     const json = app.toJSON()
-    outJson.avvio.children.push({
+    outJson.nodes.push({
+      parent: outJson.label,
       label: 'two',
       start: /\d*/,
       stop: /\d*/,
@@ -51,7 +51,8 @@ test('to json', (t) => {
   }
   function three (s, opts, done) {
     const json = app.toJSON()
-    outJson.avvio.children.push({
+    outJson.nodes.push({
+      parent: outJson.label,
       label: 'three',
       start: /\d*/,
       stop: /\d*/,
@@ -60,4 +61,88 @@ test('to json', (t) => {
     t.like(json, outJson)
     done()
   }
+})
+
+test('to json multi-level hierarchy', (t) => {
+  t.plan(4)
+
+  const server = { name: 'asd', count: 0 }
+  const app = boot(server)
+
+  const outJson = {
+    label: 'bound root',
+    start: /\d*/,
+    nodes: [
+      {
+        parent: 'bound root',
+        start: /\d*/,
+        label: 'first',
+        nodes: [
+          {
+            parent: 'first',
+            start: /\d*/,
+            label: 'second',
+            nodes: [],
+            stop: /\d*/,
+            diff: /\d*/
+          },
+          {
+            parent: 'first',
+            start: /\d*/,
+            label: 'third',
+            nodes: [
+              {
+                parent: 'third',
+                start: /\d*/,
+                label: 'fourth',
+                nodes: [],
+                stop: /\d*/,
+                diff: /\d*/
+              }
+            ],
+            stop: /\d*/,
+            diff: /\d*/
+          }
+        ],
+        stop: /\d*/,
+        diff: /\d*/
+      }
+    ],
+    stop: /\d*/,
+    diff: /\d*/
+  }
+
+  app.on('preReady', function show () {
+    const json = app.toJSON()
+    t.like(json, outJson)
+  })
+
+  app.override = function (s) {
+    const res = Object.create(s)
+    res.count = res.count + 1
+    res.name = 'qwe'
+    return res
+  }
+
+  app.use(function first (s1, opts, cb) {
+    s1.use(second)
+    s1.use(third)
+    cb()
+
+    function second (s2, opts, cb) {
+      t.equal(s2.count, 2)
+      cb()
+    }
+
+    function third (s3, opts, cb) {
+      s3.use(fourth)
+      t.equal(s3.count, 2)
+      cb()
+    }
+
+    function fourth (s4, opts, cb) {
+      t.equal(s4.count, 3)
+      cb()
+    }
+  })
 })

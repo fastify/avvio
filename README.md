@@ -494,26 +494,45 @@ avvio.on('preReady', () => {
 The ouput is like this:
 ```json
 {
-   "avvio":{
-      "label":"avvio",
-      "start":1550165276637,
-      "stop":1550165276639,
-      "diff":2,
-      "children":[
-         {
-            "label":"one",
-            "start":1550165276639,
-            "stop":1550165276639,
-            "diff":0
-         },
-         {
-            "label":"two",
-            "start":1550165276639,
-            "stop":1550165276639,
-            "diff":0
-         }
-      ]
-   }
+  "label": "bound root",
+  "start": 1550245184665,
+  "nodes": [
+    {
+      "parent": "bound root",
+      "start": 1550245184665,
+      "label": "first",
+      "nodes": [
+        {
+          "parent": "first",
+          "start": 1550245184708,
+          "label": "second",
+          "nodes": [],
+          "stop": 1550245184709,
+          "diff": 1
+        }
+      ],
+      "stop": 1550245184709,
+      "diff": 44
+    },
+    {
+      "parent": "bound root",
+      "start": 1550245184709,
+      "label": "bound _after",
+      "nodes": [],
+      "stop": 1550245184709,
+      "diff": 0
+    },
+    {
+      "parent": "bound root",
+      "start": 1550245184709,
+      "label": "third",
+      "nodes": [],
+      "stop": 1550245184709,
+      "diff": 0
+    }
+  ],
+  "stop": 1550245184709,
+  "diff": 44
 }
 ```
 

@@ -1,80 +1,80 @@
 'use strict'
 const archy = require('archy')
 
-function TimeTree (rootName = 'boot') {
-  this.timeTable = {}
-  this.root = rootName
+function TimeTree () {
+  this.root = null
 }
 
-TimeTree.prototype.get = function (parent = this.root, child) {
-  const p = this.timeTable[parent]
-  if (p) {
-    if (child !== null) {
-      return p.children.find(_ => _.label === child)
+TimeTree.prototype.get = function (parent) {
+  if (parent === null) {
+    return this.root
+  }
+
+  const seachNode = (node, name) => {
+    const isMe = node.label === name
+    if (!isMe) {
+      return node.nodes
+        .map(_ => seachNode(_, name))
+        .filter(_ => _ !== null)
+        .pop()
     }
-    return p
+    return node
   }
-  return undefined
+  return seachNode(this.root, parent)
 }
 
-TimeTree.prototype.add = function (parent = this.root, track) {
-  let p = this.timeTable[parent]
-  if (!p) {
-    this.timeTable[parent] = {
-      children: [],
-      label: parent
+TimeTree.prototype.add = function (parent, child, start) {
+  const isRoot = parent === null
+  if (isRoot) {
+    this.root = {
+      label: child,
+      start,
+      nodes: []
     }
-    p = this.timeTable[parent]
+    return
   }
 
-  if (track && !this.get(parent, track)) {
-    p.children.push({ label: track })
-  }
+  const node = this.get(parent)
+  node.nodes.push({
+    parent,
+    start,
+    label: child,
+    nodes: []
+  })
 }
 
-TimeTree.prototype.start = function (parent, track, start) {
-  const tm = this.get(parent, track)
-  if (!tm) {
-    this.add(parent, track)
-  }
-
-  this.get(parent, track).start = start || Date.now()
+TimeTree.prototype.start = function (parent, child, start) {
+  this.add(parent, child, start || Date.now())
 }
 
-TimeTree.prototype.stop = function (parent, track, stop) {
-  const tm = this.get(parent, track)
-  if (tm) {
-    tm.stop = stop || Date.now()
-    tm.diff = (tm.stop - tm.start) || 0
+TimeTree.prototype.stop = function (parent, child, stop) {
+  if (parent === null) {
+    this.root.stop = stop || Date.now()
+    this.root.diff = (this.root.stop - this.root.start) || 0
+    return
+  }
+  const parentNode = this.get(parent)
+  if (parentNode) {
+    // TODO manage better (stop on error event)
+    const node = parentNode.nodes.find(_ => _.label === child) || {}
+    node.stop = stop || Date.now()
+    node.diff = (node.stop - node.start) || 0
   }
 }
 
 TimeTree.prototype.toJSON = function () {
-  return Object.assign({}, this.timeTable)
+  return Object.assign({}, this.root)
 }
 
 TimeTree.prototype.prittyPrint = function () {
-  const analyzePlugin = (node) => {
-    let nodes = []
-    if (node.children && node.children.length > 0) {
-      nodes = node.children.map(_ => analyzePlugin(_))
+  const decorateText = (node) => {
+    node.label = `${node.label} ${node.diff} ms`
+    if (node.nodes.length > 0) {
+      node.nodes = node.nodes.map(_ => decorateText(_))
     }
-    return {
-      label: `${node.label} ${node.diff} ms`,
-      nodes
-    }
+    return node
   }
-
-  const plugins = Object.keys(this.timeTable).map(_ => analyzePlugin(this.timeTable[_]))
-  let out
-  if (plugins.length === 1) {
-    out = plugins[0]
-  } else {
-    out = {
-      label: this.root,
-      nodes: plugins
-    }
-  }
+  const out = decorateText(this.toJSON())
   console.log(archy(out))
 }
 

@@ -114,8 +114,7 @@ function Boot (server, opts, done) {
 
   this.started = false
   this.booted = false
-  this.name = 'avvio'
-  this.pluginTree = new TimeTree(this.name)
+  this.pluginTree = new TimeTree()
 
   this._readyQ = fastq(this, callWithCbOrNextTick, 1)
   this._readyQ.pause()
@@ -136,14 +135,11 @@ function Boot (server, opts, done) {
   this._doStart = null
   const main = new Plugin(this, root.bind(this), opts, noop, 0)
 
-  main.on('enqueue', (serverName, funcName, time) => {
-    this.pluginTree.add(this.name, null, time)
+  main.once('start', (serverName, funcName, time) => {
+    this.pluginTree.start(null, funcName, time)
   })
-  main.on('start', (serverName, funcName, time) => {
-    this.pluginTree.start(this.name, null, time)
-  })
-  main.on('loaded', (serverName, funcName, time) => {
-    this.pluginTree.stop(this.name, null, time)
+  main.once('loaded', (serverName, funcName, time) => {
+    this.pluginTree.stop(null, funcName, time)
   })
 
   Plugin.loadPlugin.call(this, main, (err) => {
@@ -208,9 +204,12 @@ Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
   const current = this._current[0]
 
   const obj = new Plugin(this, plugin, opts, isAfter)
-  obj.on('enqueue', this.pluginTree.add.bind(this.pluginTree))
-  obj.on('start', this.pluginTree.start.bind(this.pluginTree))
-  obj.on('loaded', this.pluginTree.stop.bind(this.pluginTree))
+  obj.once('start', (serverName, funcName, time) => {
+    this.pluginTree.start(current.name, funcName, time)
+  })
+  obj.once('loaded', (serverName, funcName, time) => {
+    this.pluginTree.stop(current.name, funcName, time)
+  })
 
   if (current.loaded) {
     throw new Error(`Impossible to load "${obj.name}" plugin because the parent "${current.name}" was already loaded`)
