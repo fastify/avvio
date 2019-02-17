@@ -136,10 +136,10 @@ function Boot (server, opts, done) {
   const main = new Plugin(this, root.bind(this), opts, noop, 0)
 
   main.once('start', (serverName, funcName, time) => {
-    this.pluginTree.start(null, funcName, time)
-  })
-  main.once('loaded', (serverName, funcName, time) => {
-    this.pluginTree.stop(null, funcName, time)
+    const nodeId = this.pluginTree.start(null, funcName, time)
+    main.once('loaded', (serverName, funcName, time) => {
+      this.pluginTree.stop(nodeId, time)
+    })
   })
 
   Plugin.loadPlugin.call(this, main, (err) => {
@@ -205,10 +205,10 @@ Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
 
   const obj = new Plugin(this, plugin, opts, isAfter)
   obj.once('start', (serverName, funcName, time) => {
-    this.pluginTree.start(current.name, funcName, time)
-  })
-  obj.once('loaded', (serverName, funcName, time) => {
-    this.pluginTree.stop(current.name, funcName, time)
+    const nodeId = this.pluginTree.start(current.name, funcName, time)
+    obj.once('loaded', (serverName, funcName, time) => {
+      this.pluginTree.stop(nodeId, time)
+    })
   })
 
   if (current.loaded) {

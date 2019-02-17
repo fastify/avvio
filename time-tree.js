@@ -5,58 +5,63 @@ function TimeTree () {
   this.root = null
 }
 
-TimeTree.prototype.get = function (parent) {
-  if (parent === null) {
-    return this.root
-  }
-
-  const seachNode = (node, name) => {
-    const isMe = node.label === name
+TimeTree.prototype.search = function (filter) {
+  const seachNode = (node) => {
+    const isMe = filter(node)
     if (!isMe) {
       return node.nodes
-        .map(_ => seachNode(_, name))
+        .map(_ => seachNode(_))
         .filter(_ => _ !== null)
         .pop()
     }
     return node
   }
-  return seachNode(this.root, parent)
+  return seachNode(this.root)
+}
+
+TimeTree.prototype.getParent = function (parent, nodeId) {
+  if (parent === null) {
+    return this.root
+  }
+
+  return this.search(node => node.label === parent)
+}
+
+TimeTree.prototype.getNode = function (nodeId) {
+  return this.search(node => node.id === nodeId)
 }
 
 TimeTree.prototype.add = function (parent, child, start) {
   const isRoot = parent === null
   if (isRoot) {
     this.root = {
+      id: 'root',
       label: child,
       start,
       nodes: []
     }
-    return
+    return this.root.id
   }
 
-  const node = this.get(parent)
+  const node = this.getParent(parent)
+  const nodeId = `${child}-${Math.random()}`
   node.nodes.push({
+    id: nodeId,
     parent,
     start,
     label: child,
     nodes: []
   })
+  return nodeId
 }
 
 TimeTree.prototype.start = function (parent, child, start) {
-  this.add(parent, child, start || Date.now())
+  return this.add(parent, child, start || Date.now())
 }
 
-TimeTree.prototype.stop = function (parent, child, stop) {
-  if (parent === null) {
-    this.root.stop = stop || Date.now()
-    this.root.diff = (this.root.stop - this.root.start) || 0
-    return
-  }
-  const parentNode = this.get(parent)
-  if (parentNode) {
-    // TODO manage better (stop on error event)
-    const node = parentNode.nodes.find(_ => _.label === child) || {}
+TimeTree.prototype.stop = function (nodeId, stop) {
+  const node = this.getNode(nodeId)
+  if (node) {
     node.stop = stop || Date.now()
     node.diff = (node.stop - node.start) || 0
   }
