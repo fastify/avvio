@@ -204,12 +204,14 @@ Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
   const current = this._current[0]
 
   const obj = new Plugin(this, plugin, opts, isAfter)
-  obj.once('start', (serverName, funcName, time) => {
-    const nodeId = this.pluginTree.start(current.name, funcName, time)
-    obj.once('loaded', (serverName, funcName, time) => {
-      this.pluginTree.stop(nodeId, time)
+  if (!isAfter) {
+    obj.once('start', (serverName, funcName, time) => {
+      const nodeId = this.pluginTree.start(current.name, funcName, time)
+      obj.once('loaded', (serverName, funcName, time) => {
+        this.pluginTree.stop(nodeId, time)
+      })
     })
-  })
+  }
 
   if (current.loaded) {
     throw new Error(`Impossible to load "${obj.name}" plugin because the parent "${current.name}" was already loaded`)

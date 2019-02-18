@@ -517,14 +517,6 @@ The ouput is like this:
     {
       "parent": "bound root",
       "start": 1550245184709,
-      "label": "bound _after",
-      "nodes": [],
-      "stop": 1550245184709,
-      "diff": 0
-    },
-    {
-      "parent": "bound root",
-      "start": 1550245184709,
       "label": "third",
       "nodes": [],
       "stop": 1550245184709,
@@ -557,7 +549,6 @@ The ouput will be like:
 avvio 56 ms
 ├── first 52 ms
 ├── second 1 ms
-├── bound _after 0 ms
 └── third 2 ms
 ```
 
