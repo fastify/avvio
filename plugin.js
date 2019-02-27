@@ -2,6 +2,7 @@
 
 const fastq = require('fastq')
 const debug = require('debug')('avvio')
+const deepClone = require('fast-deepclone')
 const CODE_PLUGIN_TIMEOUT = 'ERR_AVVIO_PLUGIN_TIMEOUT'
 
 function getName (func) {
@@ -25,9 +26,9 @@ function getName (func) {
   return func.toString().split('\n').slice(0, 2).map(s => s.trim()).join(' -- ')
 }
 
-function Plugin (parent, func, opts, isAfter, timeout) {
+function Plugin (parent, func, optsOrFunc, isAfter, timeout) {
   this.func = func
-  this.opts = opts
+  this.opts = isFunction(optsOrFunc) ? deepClone(optsOrFunc()) : optsOrFunc
   this.deferred = false
   this.onFinish = null
   this.parent = parent
@@ -172,6 +173,11 @@ function loadPlugin (toLoad, cb) {
 }
 
 function noop () {}
+
+// Checks if a variable is a function, taken from https://stackoverflow.com/a/7356528
+function isFunction (functionToCheck) {
+  return functionToCheck && {}.toString.call(functionToCheck) === '[object Function]'
+}
 
 module.exports = Plugin
 module.exports.loadPlugin = loadPlugin

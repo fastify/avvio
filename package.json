@@ -41,6 +41,7 @@
   },
   "dependencies": {
     "debug": "^4.0.0",
+    "fast-deepclone": "^1.0.1",
     "fastq": "^1.6.0"
   }
 }

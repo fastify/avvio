@@ -147,6 +147,50 @@ test('boot a plugin with options', (t) => {
   })
 })
 
+test('boot a plugin with a function that returns the options', (t) => {
+  t.plan(3)
+
+  const server = {}
+  const app = boot(server)
+  const myOpts = {
+    hello: 'world'
+  }
+
+  app.use(function (s, opts, done) {
+    t.equal(s, server, 'the first argument is the server')
+    t.deepEqual(opts, myOpts, 'passed options via function')
+    done()
+  }, () => myOpts)
+
+  app.on('start', () => {
+    t.pass('booted')
+  })
+})
+
+test('boot a plugin with a function that returns options without referencing the returned object', (t) => {
+  t.plan(4)
+
+  const server = {}
+  const app = boot(server)
+  const myOpts = {
+    hello: {
+      there: 'world'
+    }
+  }
+
+  app.use(function (s, opts, done) {
+    t.equal(s, server, 'the first argument is the server')
+    t.deepEqual(opts, myOpts, 'passed options')
+    myOpts.hello.there = 'mundo'
+    t.notEqual(opts.hello.there, myOpts.hello.there, 'created new option references')
+    done()
+  }, () => myOpts)
+
+  app.on('start', () => {
+    t.pass('booted')
+  })
+})
+
 test('throw on non-function use', (t) => {
   t.plan(1)
   const app = boot()
