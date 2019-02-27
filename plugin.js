@@ -28,7 +28,7 @@ function getName (func) {
 
 function Plugin (parent, func, optsOrFunc, isAfter, timeout) {
   this.func = func
-  this.opts = isFunction(optsOrFunc) ? deepClone(optsOrFunc()) : optsOrFunc
+  this.opts = optsOrFunc instanceof Function ? deepClone(optsOrFunc()) : optsOrFunc
   this.deferred = false
   this.onFinish = null
   this.parent = parent
@@ -173,11 +173,6 @@ function loadPlugin (toLoad, cb) {
 }
 
 function noop () {}
-
-// Checks if a variable is a function, taken from https://stackoverflow.com/a/7356528
-function isFunction (functionToCheck) {
-  return functionToCheck && {}.toString.call(functionToCheck) === '[object Function]'
-}
 
 module.exports = Plugin
 module.exports.loadPlugin = loadPlugin
