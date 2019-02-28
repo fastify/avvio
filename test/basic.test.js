@@ -148,19 +148,23 @@ test('boot a plugin with options', (t) => {
 })
 
 test('boot a plugin with a function that returns the options', (t) => {
-  t.plan(3)
+  t.plan(4)
 
   const server = {}
   const app = boot(server)
   const myOpts = {
     hello: 'world'
   }
+  const myOptsAsFunc = parent => {
+    t.strictEqual(parent, app)
+    return myOpts
+  }
 
   app.use(function (s, opts, done) {
     t.equal(s, server, 'the first argument is the server')
     t.deepEqual(opts, myOpts, 'passed options via function')
     done()
-  }, () => myOpts)
+  }, myOptsAsFunc)
 
   app.on('start', () => {
     t.pass('booted')
