@@ -27,7 +27,7 @@ function getName (func) {
 
 function Plugin (parent, func, optsOrFunc, isAfter, timeout) {
   this.func = func
-  this.opts = typeof optsOrFunc === 'function' ? optsOrFunc.bind(optsOrFunc, parent) : optsOrFunc
+  this.opts = typeof optsOrFunc === 'function' ? optsOrFunc.bind(null, parent) : optsOrFunc
   this.deferred = false
   this.onFinish = null
   this.parent = parent
