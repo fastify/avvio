@@ -2,7 +2,6 @@
 
 const fastq = require('fastq')
 const debug = require('debug')('avvio')
-const deepClone = require('fast-deepclone')
 const CODE_PLUGIN_TIMEOUT = 'ERR_AVVIO_PLUGIN_TIMEOUT'
 
 function getName (func) {
@@ -28,7 +27,7 @@ function getName (func) {
 
 function Plugin (parent, func, optsOrFunc, isAfter, timeout) {
   this.func = func
-  this.opts = optsOrFunc instanceof Function ? deepClone(optsOrFunc()) : optsOrFunc
+  this.opts = typeof optsOrFunc === 'function' ? optsOrFunc() : optsOrFunc
   this.deferred = false
   this.onFinish = null
   this.parent = parent
