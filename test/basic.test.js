@@ -147,6 +147,35 @@ test('boot a plugin with options', (t) => {
   })
 })
 
+test('boot a plugin with a function that returns the options', (t) => {
+  t.plan(4)
+
+  const server = {}
+  const app = boot(server)
+  const myOpts = {
+    hello: 'world'
+  }
+  const myOptsAsFunc = parent => {
+    t.strictEqual(parent, app)
+    return parent.myOpts
+  }
+
+  app.use(function (s, opts, done) {
+    app.myOpts = opts
+    done()
+  }, myOpts)
+
+  app.use(function (s, opts, done) {
+    t.equal(s, server, 'the first argument is the server')
+    t.deepEqual(opts, myOpts, 'passed options via function accessing parent injected variable')
+    done()
+  }, myOptsAsFunc)
+
+  app.on('start', () => {
+    t.pass('booted')
+  })
+})
+
 test('throw on non-function use', (t) => {
   t.plan(1)
   const app = boot()

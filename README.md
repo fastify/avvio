@@ -142,10 +142,13 @@ app.on('start', () => {
 -------------------------------------------------------
 <a name="use"></a>
 
-### app.use(func, [opts])
+### app.use(func, [optsOrFunc])
 
 Loads one or more functions asynchronously.
+
 The function **must** have the signature: `instance, options, done`
+
+However, if the function returns a `Promise` (i.e. `async`), the above function signature is not required.
 
 Plugin example:
 ```js
@@ -164,10 +167,34 @@ async/await is also supported:
 async function plugin (server, opts) {
   await sleep(10)
 }
+
 app.use(plugin)
 ```
 
 `use` returns the instance on which `use` is called, to support a chainable API.
+
+A function that returns the options argument instead of an object is supported as well:
+
+```js
+function plugin (server, opts, done) {
+  console.log(opts) // Evaluates to: { hello: 'world' }
+  done()
+}
+
+/**
+ * If the options argument is a function, it has access to the parent
+ * instance via the first positional variable
+ */
+const func = parent => {
+  return {
+    hello: 'world'
+  }
+}
+
+app.use(plugin, func)
+```
+
+This is useful in cases where an injected variable from a plugin needs to be made available to another.
 
 -------------------------------------------------------
 <a name="error-handling"></a>
@@ -420,7 +447,7 @@ app.onClose(function (context, done) {
 })
 ```
 
-If the callback returns a promise, the next onClose callback and the close callback won't run until the promise is either resolved or rejected. 
+If the callback returns a promise, the next onClose callback and the close callback won't run until the promise is either resolved or rejected.
 
 `done` must be called only once.
 Returns the instance on which `onClose` is called, to support a chainable API.

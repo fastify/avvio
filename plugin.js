@@ -25,9 +25,9 @@ function getName (func) {
   return func.toString().split('\n').slice(0, 2).map(s => s.trim()).join(' -- ')
 }
 
-function Plugin (parent, func, opts, isAfter, timeout) {
+function Plugin (parent, func, optsOrFunc, isAfter, timeout) {
   this.func = func
-  this.opts = opts
+  this.opts = typeof optsOrFunc === 'function' ? optsOrFunc.bind(null, parent) : optsOrFunc
   this.deferred = false
   this.onFinish = null
   this.parent = parent
@@ -46,6 +46,8 @@ function Plugin (parent, func, opts, isAfter, timeout) {
 }
 
 Plugin.prototype.exec = function (server, cb) {
+  this.opts = typeof this.opts === 'function' ? this.opts() : this.opts
+
   const func = this.func
   var completed = false
   var name = this.name
