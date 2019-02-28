@@ -157,12 +157,17 @@ test('boot a plugin with a function that returns the options', (t) => {
   }
   const myOptsAsFunc = parent => {
     t.strictEqual(parent, app)
-    return myOpts
+    return parent.myOpts
   }
 
   app.use(function (s, opts, done) {
+    app.myOpts = opts
+    done()
+  }, myOpts)
+
+  app.use(function (s, opts, done) {
     t.equal(s, server, 'the first argument is the server')
-    t.deepEqual(opts, myOpts, 'passed options via function')
+    t.deepEqual(opts, myOpts, 'passed options via function accessing parent injected variable')
     done()
   }, myOptsAsFunc)
 

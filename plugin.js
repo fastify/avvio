@@ -27,7 +27,7 @@ function getName (func) {
 
 function Plugin (parent, func, optsOrFunc, isAfter, timeout) {
   this.func = func
-  this.opts = typeof optsOrFunc === 'function' ? optsOrFunc(parent) : optsOrFunc
+  this.opts = typeof optsOrFunc === 'function' ? optsOrFunc.bind(optsOrFunc, parent) : optsOrFunc
   this.deferred = false
   this.onFinish = null
   this.parent = parent
@@ -46,6 +46,8 @@ function Plugin (parent, func, optsOrFunc, isAfter, timeout) {
 }
 
 Plugin.prototype.exec = function (server, cb) {
+  this.opts = typeof this.opts === 'function' ? this.opts() : this.opts
+
   const func = this.func
   var completed = false
   var name = this.name
