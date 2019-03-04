@@ -156,12 +156,12 @@ test('boot a plugin with a function that returns the options', (t) => {
     hello: 'world'
   }
   const myOptsAsFunc = parent => {
-    t.strictEqual(parent, app)
+    t.strictEqual(parent, server)
     return parent.myOpts
   }
 
   app.use(function (s, opts, done) {
-    app.myOpts = opts
+    s.myOpts = opts
     done()
   }, myOpts)
 

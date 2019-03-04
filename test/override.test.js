@@ -254,3 +254,38 @@ test('override can receive options object', (t) => {
     cb()
   }, options)
 })
+
+test('override can receive options function', (t) => {
+  t.plan(8)
+
+  const server = { my: 'server' }
+  const options = { hello: 'world' }
+  const app = boot(server)
+
+  app.override = function (s, fn, opts) {
+    t.equal(s, server)
+    if (typeof opts !== 'function') {
+      t.deepEqual(opts, options)
+    }
+
+    const res = Object.create(s)
+    res.b = 42
+    res.bar = 'world'
+
+    return res
+  }
+
+  app.use(function first (s, opts, cb) {
+    t.notEqual(s, server)
+    t.ok(server.isPrototypeOf(s))
+    s.foo = 'bar'
+    cb()
+  }, options)
+
+  app.use(function second (s, opts, cb) {
+    t.notOk(s.foo)
+    t.deepEqual(opts, { hello: 'world' })
+    t.ok(server.isPrototypeOf(s))
+    cb()
+  }, p => ({ hello: p.bar }))
+})

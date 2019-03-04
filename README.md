@@ -176,8 +176,13 @@ app.use(plugin)
 A function that returns the options argument instead of an object is supported as well:
 
 ```js
-function plugin (server, opts, done) {
-  console.log(opts) // Evaluates to: { hello: 'world' }
+function first (server, opts, done) {
+  server.foo = 'bar'
+  done()
+}
+
+function second (server, opts, done) {
+  console.log(opts.foo === 'bar') // Evaluates to true
   done()
 }
 
@@ -187,11 +192,12 @@ function plugin (server, opts, done) {
  */
 const func = parent => {
   return {
-    hello: 'world'
+    foo: parent.foo
   }
 }
 
-app.use(plugin, func)
+app.use(first)
+app.use(second, func)
 ```
 
 This is useful in cases where an injected variable from a plugin needs to be made available to another.
