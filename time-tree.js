@@ -4,20 +4,17 @@ const archy = require('archy')
 function TimeTree () {
   this.root = null
   this.tableId = new Map()
+  this.tableLabel = new Map()
 }
 
-TimeTree.prototype.search = function (filter) {
-  const seachNode = (node) => {
-    const isMe = filter(node)
-    if (!isMe) {
-      return node.nodes
-        .map(_ => seachNode(_))
-        .filter(_ => _ !== null)
-        .pop()
-    }
-    return node
-  }
-  return seachNode(this.root)
+TimeTree.prototype.trackNode = function (node) {
+  this.tableId.set(node.id, node)
+  this.tableLabel.set(node.label, node)
+}
+
+TimeTree.prototype.untrackNode = function (node) {
+  this.tableId.delete(node.id)
+  this.tableLabel.delete(node.label)
 }
 
 TimeTree.prototype.getParent = function (parent) {
@@ -25,7 +22,7 @@ TimeTree.prototype.getParent = function (parent) {
     return this.root
   }
 
-  return this.search(node => node.label === parent)
+  return this.tableLabel.get(parent)
 }
 
 TimeTree.prototype.getNode = function (nodeId) {
@@ -41,7 +38,7 @@ TimeTree.prototype.add = function (parent, child, start) {
       start,
       nodes: []
     }
-    this.tableId.set(this.root.id, this.root)
+    this.trackNode(this.root)
     return this.root.id
   }
 
@@ -55,7 +52,7 @@ TimeTree.prototype.add = function (parent, child, start) {
     nodes: []
   }
   parentNode.nodes.push(childNode)
-  this.tableId.set(nodeId, childNode)
+  this.trackNode(childNode)
   return nodeId
 }
 
@@ -68,6 +65,7 @@ TimeTree.prototype.stop = function (nodeId, stop) {
   if (node) {
     node.stop = stop || Date.now()
     node.diff = (node.stop - node.start) || 0
+    this.untrackNode(node)
   }
 }
 
