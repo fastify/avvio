@@ -13,8 +13,9 @@ test('to json', (t) => {
     .use(three)
 
   const outJson = {
+    id: 'root',
     label: 'bound root',
-    start: /\d*/,
+    start: /\d+/,
     stop: /\d*/,
     diff: /\d*/,
     nodes: []
@@ -28,11 +29,10 @@ test('to json', (t) => {
   function one (s, opts, done) {
     const json = app.toJSON()
     outJson.nodes.push({
+      id: /.+/,
       parent: outJson.label,
       label: 'one',
-      start: /\d*/,
-      stop: /\d*/,
-      diff: /\d*/
+      start: /\d+/
     })
     t.like(json, outJson)
     done()
@@ -40,11 +40,10 @@ test('to json', (t) => {
   function two (s, opts, done) {
     const json = app.toJSON()
     outJson.nodes.push({
+      id: /.+/,
       parent: outJson.label,
       label: 'two',
-      start: /\d*/,
-      stop: /\d*/,
-      diff: /\d*/
+      start: /\d+/
     })
     t.like(json, outJson)
     done()
@@ -52,11 +51,10 @@ test('to json', (t) => {
   function three (s, opts, done) {
     const json = app.toJSON()
     outJson.nodes.push({
+      id: /.+/,
       parent: outJson.label,
       label: 'three',
-      start: /\d*/,
-      stop: /\d*/,
-      diff: /\d*/
+      start: /\d+/
     })
     t.like(json, outJson)
     done()
@@ -70,46 +68,51 @@ test('to json multi-level hierarchy', (t) => {
   const app = boot(server)
 
   const outJson = {
+    id: 'root',
     label: 'bound root',
-    start: /\d*/,
+    start: /\d+/,
     nodes: [
       {
+        id: /.+/,
         parent: 'bound root',
-        start: /\d*/,
+        start: /\d+/,
         label: 'first',
         nodes: [
           {
+            id: /.+/,
             parent: 'first',
-            start: /\d*/,
+            start: /\d+/,
             label: 'second',
             nodes: [],
-            stop: /\d*/,
-            diff: /\d*/
+            stop: /\d+/,
+            diff: /\d+/
           },
           {
+            id: /.+/,
             parent: 'first',
-            start: /\d*/,
+            start: /\d+/,
             label: 'third',
             nodes: [
               {
+                id: /.+/,
                 parent: 'third',
-                start: /\d*/,
+                start: /\d+/,
                 label: 'fourth',
                 nodes: [],
-                stop: /\d*/,
-                diff: /\d*/
+                stop: /\d+/,
+                diff: /\d+/
               }
             ],
-            stop: /\d*/,
-            diff: /\d*/
+            stop: /\d+/,
+            diff: /\d+/
           }
         ],
-        stop: /\d*/,
-        diff: /\d*/
+        stop: /\d+/,
+        diff: /\d+/
       }
     ],
-    stop: /\d*/,
-    diff: /\d*/
+    stop: /\d+/,
+    diff: /\d+/
   }
 
   app.on('preReady', function show () {
