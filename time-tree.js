@@ -3,6 +3,7 @@ const archy = require('archy')
 
 function TimeTree () {
   this.root = null
+  this.tableId = new Map()
 }
 
 TimeTree.prototype.search = function (filter) {
@@ -19,7 +20,7 @@ TimeTree.prototype.search = function (filter) {
   return seachNode(this.root)
 }
 
-TimeTree.prototype.getParent = function (parent, nodeId) {
+TimeTree.prototype.getParent = function (parent) {
   if (parent === null) {
     return this.root
   }
@@ -28,7 +29,7 @@ TimeTree.prototype.getParent = function (parent, nodeId) {
 }
 
 TimeTree.prototype.getNode = function (nodeId) {
-  return this.search(node => node.id === nodeId)
+  return this.tableId.get(nodeId)
 }
 
 TimeTree.prototype.add = function (parent, child, start) {
@@ -40,18 +41,21 @@ TimeTree.prototype.add = function (parent, child, start) {
       start,
       nodes: []
     }
+    this.tableId.set(this.root.id, this.root)
     return this.root.id
   }
 
-  const node = this.getParent(parent)
+  const parentNode = this.getParent(parent)
   const nodeId = `${child}-${Math.random()}`
-  node.nodes.push({
+  const childNode = {
     id: nodeId,
     parent,
     start,
     label: child,
     nodes: []
-  })
+  }
+  parentNode.nodes.push(childNode)
+  this.tableId.set(nodeId, childNode)
   return nodeId
 }
 
