@@ -16,16 +16,16 @@ test('pretty print', t => {
     .use(duplicate, { count: 1 })
 
   const linesExpected = [ /bound root \d+ ms/,
-    /├── first \d{1} ms/,
+    /├── first \d+ ms/,
     /├─┬ duplicate \d+ ms/,
     /│ └─┬ duplicate \d+ ms/,
     /│ {3}└─┬ duplicate \d+ ms/,
     /│ {5}└── duplicate \d+ ms/,
-    /├── second \d{1} ms/,
+    /├── second \d+ ms/,
     /├─┬ duplicate \d+ ms/,
     /│ └─┬ duplicate \d+ ms/,
     /│ {3}└── duplicate \d+ ms/,
-    /├── third \d{1} ms/,
+    /├── third \d+ ms/,
     /└─┬ duplicate \d+ ms/,
     / {2}└── duplicate \d+ ms/,
     ''
