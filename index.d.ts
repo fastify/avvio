@@ -45,7 +45,7 @@ declare namespace avvio {
 
     toJSON(): Object;
 
-    prettyPrint(): void;
+    prettyPrint(): string;
 
     override: (
       server: context<I>,

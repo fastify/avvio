@@ -82,7 +82,7 @@ TimeTree.prototype.prittyPrint = function () {
     return node
   }
   const out = decorateText(this.toJSON())
-  console.log(archy(out))
+  return archy(out)
 }
 
 module.exports = TimeTree

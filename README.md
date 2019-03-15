@@ -534,16 +534,16 @@ The ouput is like this:
 
 ### avvio.prettyPrint()
 
-Print to `console.log` the tree returned by the `toJSON()` method.
+This method will return a printable string with the tree returned by the `toJSON()` method.
 
 ```js
 const avvio = require('avvio')()
 avvio.on('preReady', () => {
-  avvio.prettyPrint()
+  console.log(avvio.prettyPrint())
 })
 ```
 
-The ouput will be like:
+The output will be like:
 
 ```
 avvio 56 ms

@@ -306,7 +306,7 @@ Boot.prototype.ready = function (func) {
 }
 
 Boot.prototype.prettyPrint = function () {
-  this.pluginTree.prittyPrint()
+  return this.pluginTree.prittyPrint()
 }
 
 Boot.prototype.toJSON = function () {

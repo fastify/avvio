@@ -30,7 +30,7 @@ avvio
   })
 
 avvio.on('preReady', () => {
-  avvio.prettyPrint()
+  console.log(avvio.prettyPrint())
 })
 
 function first (instance, opts, cb) {
