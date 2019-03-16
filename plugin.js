@@ -1,6 +1,8 @@
 'use strict'
 
 const fastq = require('fastq')
+const EE = require('events').EventEmitter
+const inherits = require('util').inherits
 const debug = require('debug')('avvio')
 const CODE_PLUGIN_TIMEOUT = 'ERR_AVVIO_PLUGIN_TIMEOUT'
 
@@ -45,6 +47,8 @@ function Plugin (parent, func, optsOrFunc, isAfter, timeout) {
   // or they will end up at the top of _current
 }
 
+inherits(Plugin, EE)
+
 Plugin.prototype.exec = function (server, cb) {
   const func = this.func
   var completed = false
@@ -81,6 +85,7 @@ Plugin.prototype.exec = function (server, cb) {
     }, this.timeout)
   }
 
+  this.emit('start', this.server ? this.server.name : null, this.name, Date.now())
   var promise = func(this.server, this.opts, done)
   if (promise && typeof promise.then === 'function') {
     debug('resolving promise', name)
@@ -113,6 +118,7 @@ Plugin.prototype.exec = function (server, cb) {
 
 Plugin.prototype.enqueue = function (obj, cb) {
   debug('enqueue', this.name, obj.name)
+  this.emit('enqueue', this.server ? this.server.name : null, this.name, Date.now())
   this.q.push(obj, cb)
 }
 
@@ -124,6 +130,7 @@ Plugin.prototype.finish = function (err, cb) {
     }
 
     debug('loaded', this.name)
+    this.emit('loaded', this.server ? this.server.name : null, this.name, Date.now())
     this.loaded = true
 
     cb(err)

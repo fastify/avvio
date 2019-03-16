@@ -3,6 +3,7 @@
 const fastq = require('fastq')
 const EE = require('events').EventEmitter
 const inherits = require('util').inherits
+const TimeTree = require('./time-tree')
 const Plugin = require('./plugin')
 const debug = require('debug')('avvio')
 
@@ -113,6 +114,7 @@ function Boot (server, opts, done) {
 
   this.started = false
   this.booted = false
+  this.pluginTree = new TimeTree()
 
   this._readyQ = fastq(this, callWithCbOrNextTick, 1)
   this._readyQ.pause()
@@ -132,6 +134,13 @@ function Boot (server, opts, done) {
 
   this._doStart = null
   const main = new Plugin(this, root.bind(this), opts, noop, 0)
+
+  main.once('start', (serverName, funcName, time) => {
+    const nodeId = this.pluginTree.start(null, funcName, time)
+    main.once('loaded', (serverName, funcName, time) => {
+      this.pluginTree.stop(nodeId, time)
+    })
+  })
 
   Plugin.loadPlugin.call(this, main, (err) => {
     debug('root plugin ready')
@@ -195,6 +204,14 @@ Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
   const current = this._current[0]
 
   const obj = new Plugin(this, plugin, opts, isAfter)
+  if (!isAfter) {
+    obj.once('start', (serverName, funcName, time) => {
+      const nodeId = this.pluginTree.start(current.name, funcName, time)
+      obj.once('loaded', (serverName, funcName, time) => {
+        this.pluginTree.stop(nodeId, time)
+      })
+    })
+  }
 
   if (current.loaded) {
     throw new Error(`Impossible to load "${obj.name}" plugin because the parent "${current.name}" was already loaded`)
@@ -286,6 +303,14 @@ Boot.prototype.ready = function (func) {
       process.nextTick(done)
     }
   })
+}
+
+Boot.prototype.prettyPrint = function () {
+  return this.pluginTree.prittyPrint()
+}
+
+Boot.prototype.toJSON = function () {
+  return this.pluginTree.toJSON()
 }
 
 function noop () { }

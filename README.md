@@ -82,6 +82,8 @@ async function third (instance, opts) {
   * <a href="#onClose"><code>instance.<b>onClose()</b></code></a>
   * <a href="#close"><code>instance.<b>close()</b></code></a>
   * <a href="#express"><code>avvio.<b>express()</b></code></a>
+  * <a href="#toJSON"><code>avvio.<b>toJSON()</b></code></a>
+  * <a href="#prettyPrint"><code>avvio.<b>prettyPrint()</b></code></a>
 
 -------------------------------------------------------
 <a name="constructor"></a>
@@ -505,6 +507,83 @@ app.close()
 ```
 
 `done` must be called only once.
+
+-------------------------------------------------------
+
+<a name="toJSON"></a>
+
+### avvio.toJSON()
+
+Return a JSON tree rappresenting the state of the plugins and the loading time.
+Call it on `preReady` to get the complete tree.
+
+```js
+const avvio = require('avvio')()
+avvio.on('preReady', () => {
+  avvio.toJSON()
+})
+```
+
+The ouput is like this:
+```json
+{
+  "label": "bound root",
+  "start": 1550245184665,
+  "nodes": [
+    {
+      "parent": "bound root",
+      "start": 1550245184665,
+      "label": "first",
+      "nodes": [
+        {
+          "parent": "first",
+          "start": 1550245184708,
+          "label": "second",
+          "nodes": [],
+          "stop": 1550245184709,
+          "diff": 1
+        }
+      ],
+      "stop": 1550245184709,
+      "diff": 44
+    },
+    {
+      "parent": "bound root",
+      "start": 1550245184709,
+      "label": "third",
+      "nodes": [],
+      "stop": 1550245184709,
+      "diff": 0
+    }
+  ],
+  "stop": 1550245184709,
+  "diff": 44
+}
+```
+
+-------------------------------------------------------
+
+<a name="prettyPrint"></a>
+
+### avvio.prettyPrint()
+
+This method will return a printable string with the tree returned by the `toJSON()` method.
+
+```js
+const avvio = require('avvio')()
+avvio.on('preReady', () => {
+  console.log(avvio.prettyPrint())
+})
+```
+
+The output will be like:
+
+```
+avvio 56 ms
+├── first 52 ms
+├── second 1 ms
+└── third 2 ms
+```
 
 -------------------------------------------------------
 
