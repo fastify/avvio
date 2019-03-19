@@ -23,6 +23,7 @@ avvio
   .use(duplicate, { count: 0 })
   .use(function a (instance, opts, cb) {
     instance.use(pointer, { use: [b], subUse: [c] })
+      .use(b)
     setTimeout(cb, 42)
   })
   .after((err, cb) => {
