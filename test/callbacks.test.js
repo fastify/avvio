@@ -80,3 +80,34 @@ test('reentrant with callbacks deferred', (t) => {
     t.pass('booted')
   })
 })
+
+test('multiple loading time', t => {
+  t.plan(1)
+  const app = boot()
+
+  function a (instance, opts, done) {
+    (opts.use || []).forEach(_ => { instance.use(_, { use: opts.subUse || [] }) })
+    setTimeout(done, 10)
+  }
+  const pointer = a
+
+  function b (instance, opts, done) {
+    (opts.use || []).forEach(_ => { instance.use(_, { use: opts.subUse || [] }) })
+    setTimeout(done, 20)
+  }
+
+  function c (instance, opts, done) {
+    (opts.use || []).forEach(_ => { instance.use(_, { use: opts.subUse || [] }) })
+    setTimeout(done, 30)
+  }
+
+  app
+    .use(function a (instance, opts, done) {
+      instance.use(pointer, { use: [b], subUse: [c] })
+        .use(b)
+      setTimeout(done, 0)
+    })
+    .after(() => {
+      t.pass('booted')
+    })
+})

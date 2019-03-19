@@ -9,12 +9,26 @@ function TimeTree () {
 
 TimeTree.prototype.trackNode = function (node) {
   this.tableId.set(node.id, node)
-  this.tableLabel.set(node.label, node)
+  if (this.tableLabel.has(node.label)) {
+    this.tableLabel.get(node.label).push(node)
+  } else {
+    this.tableLabel.set(node.label, [node])
+  }
 }
 
 TimeTree.prototype.untrackNode = function (node) {
   this.tableId.delete(node.id)
-  this.tableLabel.delete(node.label)
+
+  const labelNode = this.tableLabel.get(node.label)
+  if (labelNode.id) {
+    this.tableLabel.delete(node.label)
+    return
+  }
+  labelNode.pop()
+
+  if (labelNode.length === 0) {
+    this.tableLabel.delete(node.label)
+  }
 }
 
 TimeTree.prototype.getParent = function (parent) {
@@ -22,7 +36,11 @@ TimeTree.prototype.getParent = function (parent) {
     return this.root
   }
 
-  return this.tableLabel.get(parent)
+  const parentNode = this.tableLabel.get(parent)
+  if (parentNode.id) {
+    return parentNode
+  }
+  return parentNode[parentNode.length - 1]
 }
 
 TimeTree.prototype.getNode = function (nodeId) {
