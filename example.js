@@ -2,9 +2,29 @@
 
 const avvio = require('.')()
 
+function a (instance, opts, cb) {
+  (opts.use || []).forEach(_ => { instance.use(_, { use: opts.subUse || [] }) })
+  setTimeout(cb, 10)
+}
+const pointer = a
+
+function b (instance, opts, cb) {
+  (opts.use || []).forEach(_ => { instance.use(_, { use: opts.subUse || [] }) })
+  setTimeout(cb, 20)
+}
+
+function c (instance, opts, cb) {
+  (opts.use || []).forEach(_ => { instance.use(_, { use: opts.subUse || [] }) })
+  setTimeout(cb, 30)
+}
+
 avvio
   .use(first, { hello: 'world' })
   .use(duplicate, { count: 0 })
+  .use(function a (instance, opts, cb) {
+    instance.use(pointer, { use: [b], subUse: [c] })
+    setTimeout(cb, 42)
+  })
   .after((err, cb) => {
     if (err) {
       console.log('something bad happened')
