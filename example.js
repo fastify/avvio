@@ -26,7 +26,7 @@ avvio
       .use(b)
     setTimeout(cb, 42)
   })
-  .after((err, cb) => {
+  .after(function (err, cb) {
     if (err) {
       console.log('something bad happened')
       console.log(err)
@@ -35,14 +35,7 @@ avvio
     cb()
   })
   .use(duplicate, { count: 4 })
-  .use(third, (err) => {
-    if (err) {
-      console.log('something bad happened')
-      console.log(err)
-    }
-
-    console.log('third plugin loaded')
-  })
+  .use(third)
   .ready(function (err) {
     if (err) {
       throw err
