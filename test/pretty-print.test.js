@@ -4,7 +4,7 @@ const test = require('tap').test
 const boot = require('..')
 
 test('pretty print', t => {
-  t.plan(14)
+  t.plan(16)
 
   const app = boot()
   app
@@ -12,7 +12,7 @@ test('pretty print', t => {
     .use(duplicate, { count: 3 })
     .use(second)
     .use(duplicate, { count: 2 })
-    .use(third)
+    .use(third).after(after)
     .use(duplicate, { count: 1 })
 
   const linesExpected = [ /bound root \d+ ms/,
@@ -26,6 +26,7 @@ test('pretty print', t => {
     /│ └─┬ duplicate \d+ ms/,
     /│ {3}└── duplicate \d+ ms/,
     /├── third \d+ ms/,
+    /├── bound _after \d+ ms/,
     /└─┬ duplicate \d+ ms/,
     / {2}└── duplicate \d+ ms/,
     ''
@@ -33,7 +34,12 @@ test('pretty print', t => {
 
   app.on('preReady', function show () {
     const print = app.prettyPrint()
-    print.split('\n').forEach((l, i) => {
+    const lines = print.split('\n')
+
+    console.log(print)
+
+    t.equals(lines.length, linesExpected.length)
+    lines.forEach((l, i) => {
       t.match(l, linesExpected[i])
     })
   })
@@ -46,6 +52,9 @@ test('pretty print', t => {
   }
   function third (s, opts, done) {
     done()
+  }
+  function after (err, cb) {
+    cb(err)
   }
 
   function duplicate (instance, opts, cb) {
