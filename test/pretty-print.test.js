@@ -4,13 +4,13 @@ const test = require('tap').test
 const boot = require('..')
 
 test('pretty print', t => {
-  t.plan(16)
+  t.plan(18)
 
   const app = boot()
   app
     .use(first)
     .use(duplicate, { count: 3 })
-    .use(second)
+    .use(second).after(after).after(after)
     .use(duplicate, { count: 2 })
     .use(third).after(after)
     .use(duplicate, { count: 1 })
@@ -22,6 +22,8 @@ test('pretty print', t => {
     /│ {3}└─┬ duplicate \d+ ms/,
     /│ {5}└── duplicate \d+ ms/,
     /├── second \d+ ms/,
+    /├── bound _after \d+ ms/,
+    /├── bound _after \d+ ms/,
     /├─┬ duplicate \d+ ms/,
     /│ └─┬ duplicate \d+ ms/,
     /│ {3}└── duplicate \d+ ms/,
@@ -35,8 +37,6 @@ test('pretty print', t => {
   app.on('preReady', function show () {
     const print = app.prettyPrint()
     const lines = print.split('\n')
-
-    console.log(print)
 
     t.equals(lines.length, linesExpected.length)
     lines.forEach((l, i) => {
