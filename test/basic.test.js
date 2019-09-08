@@ -355,9 +355,10 @@ test('boot a promise plugin with onRegister', (t) => {
     hello: 'world'
   }
 
-  async function plugin (s, opts) {
+  function plugin (s, opts) {
     t.equal(s, server, 'the first argument is the server')
     t.deepEqual(opts, myOpts, 'passed options')
+    return Promise.resolve()
   }
   plugin[Symbol.for('plugin-meta')] = {
     onRegister (app, opts) {
