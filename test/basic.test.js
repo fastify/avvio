@@ -345,3 +345,30 @@ test('boot a plugin with onRegister', (t) => {
     t.pass('booted')
   })
 })
+
+test('boot a promise plugin with onRegister', (t) => {
+  t.plan(5)
+
+  const server = {}
+  const app = boot(server)
+  const myOpts = {
+    hello: 'world'
+  }
+
+  async function plugin (s, opts) {
+    t.equal(s, server, 'the first argument is the server')
+    t.deepEqual(opts, myOpts, 'passed options')
+  }
+  plugin[Symbol.for('plugin-meta')] = {
+    onRegister (app, opts) {
+      t.equal(app, server, 'the first argument is the server')
+      t.deepEqual(opts, myOpts, 'passed options')
+    }
+  }
+  app.use(plugin, myOpts)
+
+  app.on('start', () => {
+    t.pass('booted')
+  })
+})
+
