@@ -371,4 +371,3 @@ test('boot a promise plugin with onRegister', (t) => {
     t.pass('booted')
   })
 })
-
