@@ -226,3 +226,81 @@ test('after wrapped', async (t) => {
   t.ok(thirdLoaded, 'third is loaded')
   t.pass('booted')
 })
+
+test('promise plugins', async (t) => {
+  t.plan(14)
+
+  const app = boot()
+  let firstLoaded = false
+  let secondLoaded = false
+  let thirdLoaded = false
+
+  app.use(first())
+  app.use(third())
+
+  async function first () {
+    return async function (s, opts) {
+      t.notOk(firstLoaded, 'first is not loaded')
+      t.notOk(secondLoaded, 'second is not loaded')
+      t.notOk(thirdLoaded, 'third is not loaded')
+      firstLoaded = true
+      s.use(second())
+    }
+  }
+
+  async function second () {
+    return async function (s, opts) {
+      t.ok(firstLoaded, 'first is loaded')
+      t.notOk(secondLoaded, 'second is not loaded')
+      t.notOk(thirdLoaded, 'third is not loaded')
+      secondLoaded = true
+    }
+  }
+
+  async function third () {
+    return async function (s, opts) {
+      t.ok(firstLoaded, 'first is loaded')
+      t.ok(secondLoaded, 'second is loaded')
+      t.notOk(thirdLoaded, 'third is not loaded')
+      thirdLoaded = true
+    }
+  }
+
+  const readyContext = await app.ready()
+
+  t.equal(app, readyContext)
+  t.ok(firstLoaded, 'first is loaded')
+  t.ok(secondLoaded, 'second is loaded')
+  t.ok(thirdLoaded, 'third is loaded')
+  t.pass('booted')
+})
+
+test('skip override with promise', (t) => {
+  t.plan(3)
+
+  const server = { my: 'server' }
+  const app = boot(server)
+
+  app.override = function (s, func) {
+    console.log(func.toString())
+    t.pass('override called')
+
+    if (func[Symbol.for('skip-override')]) {
+      return s
+    }
+    return Object.create(s)
+  }
+
+  app.use(first())
+
+  async function first () {
+    async function fn (s, opts) {
+      t.equal(s, server)
+      t.notOk(server.isPrototypeOf(s))
+    }
+
+    fn[Symbol.for('skip-override')] = true
+
+    return fn
+  }
+})
