@@ -187,7 +187,6 @@ function assertPlugin (plugin) {
 
 // load a plugin
 Boot.prototype.use = function (plugin, opts) {
-  assertPlugin(plugin)
   this._addPlugin(plugin, opts, false)
 
   return this
