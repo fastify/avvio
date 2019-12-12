@@ -1,5 +1,7 @@
 'use strict'
 
+/* eslint no-prototype-builtins: off */
+
 const test = require('tap').test
 const boot = require('..')
 

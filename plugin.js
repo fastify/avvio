@@ -170,6 +170,9 @@ Plugin.prototype.finish = function (err, cb) {
 function loadPlugin (toLoad, cb) {
   if (typeof toLoad.func.then === 'function') {
     toLoad.func.then((fn) => {
+      if (typeof fn.default === 'function') {
+        fn = fn.default
+      }
       toLoad.func = fn
       loadPlugin.call(this, toLoad, cb)
     }, cb)

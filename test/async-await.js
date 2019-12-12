@@ -1,5 +1,7 @@
 'use strict'
 
+/* eslint no-prototype-builtins: off */
+
 const test = require('tap').test
 const sleep = require('then-sleep')
 
@@ -282,7 +284,6 @@ test('skip override with promise', (t) => {
   const app = boot(server)
 
   app.override = function (s, func) {
-    console.log(func.toString())
     t.pass('override called')
 
     if (func[Symbol.for('skip-override')]) {
