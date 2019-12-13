@@ -204,6 +204,15 @@ app.use(second, func)
 
 This is useful in cases where an injected variable from a plugin needs to be made available to another.
 
+It is also possible to use [esm](https://nodejs.org/api/esm.html) with `import('./file.mjs')`:
+
+```js
+import boot from 'avvio'
+
+const app = boot()
+app.use(import('./fixtures/esm.mjs'))
+```
+
 -------------------------------------------------------
 <a name="error-handling"></a>
 #### Error handling

@@ -179,21 +179,21 @@ Boot.prototype.override = function (server, func, opts) {
   return server
 }
 
+function assertPlugin (plugin) {
+  if (!(plugin && (typeof plugin === 'function' || typeof plugin.then === 'function'))) {
+    throw new Error('plugin must be a function or a promise')
+  }
+}
+
 // load a plugin
 Boot.prototype.use = function (plugin, opts) {
-  if (typeof plugin === 'function') {
-    this._addPlugin(plugin, opts, false)
-  } else {
-    throw new Error('plugin must be a function')
-  }
+  this._addPlugin(plugin, opts, false)
 
   return this
 }
 
 Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
-  if (typeof plugin !== 'function') {
-    throw new Error('plugin must be a function')
-  }
+  assertPlugin(plugin)
   opts = opts || {}
 
   if (this.booted) {
