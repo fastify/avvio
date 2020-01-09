@@ -95,10 +95,13 @@ Plugin.prototype.exec = function (server, cb) {
 
   if (promise && typeof promise.then === 'function') {
     queueMicrotask(() => {
-      this.server.after(() => {
-        this.asyncQ.resume()
-      })
-      this.q.resume()
+      if (this.asyncQ.length() > 0) {
+        this.server.after(() => {
+          this.asyncQ.resume()
+        })
+
+        this.q.resume()
+      }
     })
     debug('resolving promise', name)
 
