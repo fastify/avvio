@@ -163,17 +163,22 @@ app.use(plugin)
 `done` should be called only once, when your plugin is ready to go.  Additional
 calls to `done` are ignored.
 
-async/await is also supported:
+
+`use` returns a thenable wrapped instance on which `use` is called, to support a chainable API that can also be awaited.
+
+This way, async/await is also supported and `use` can be awaited instead of using `after`:
 
 ```js
-async function plugin (server, opts) {
-  await sleep(10)
+async function main () {
+  await app.use(async function (server, opts) {
+    await sleep(10)
+    console.log('this first')
+  })
+  console.log('then this')
+  await app.ready()
 }
-
-app.use(plugin)
+main().catch((err) => console.error(err))
 ```
-
-`use` returns the instance on which `use` is called, to support a chainable API.
 
 A function that returns the options argument instead of an object is supported as well:
 
@@ -241,6 +246,8 @@ in [`ready`](#ready).
 
 Calls a function after all the previously defined plugins are loaded, including
 all their dependencies. The `'start'` event is not emitted yet.
+
+Note: `app.use` can be awaited or used as a promise as an alternative to using `after`.
 
 The callback changes basing on the parameters your are giving:
 1. If no parameter is given to the callback and there is an error, that error will be passed to the next error handler.

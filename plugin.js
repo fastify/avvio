@@ -1,5 +1,5 @@
 'use strict'
-
+const queueMicrotask = require('queue-microtask')
 const fastq = require('fastq')
 const EE = require('events').EventEmitter
 const inherits = require('util').inherits
@@ -36,9 +36,14 @@ function Plugin (parent, func, optsOrFunc, isAfter, timeout) {
   this.timeout = timeout === undefined ? parent._timeout : timeout
   this.name = getName(func)
   this.isAfter = isAfter
-
+  this.asyncQ = fastq(parent, (resolve, cb) => {
+    resolve(this.server)
+    cb()
+  }, 1)
+  this.asyncQ.pause()
   this.q = fastq(parent, loadPlugin, 1)
   this.q.pause()
+
   this.loaded = false
 
   // always start the queue in the next tick
@@ -87,8 +92,16 @@ Plugin.prototype.exec = function (server, cb) {
 
   this.emit('start', this.server ? this.server.name : null, this.name, Date.now())
   var promise = func(this.server, this.opts, done)
+
   if (promise && typeof promise.then === 'function') {
+    queueMicrotask(() => {
+      this.server.after(() => {
+        this.asyncQ.resume()
+      })
+      this.q.resume()
+    })
     debug('resolving promise', name)
+
     promise.then(
       () => process.nextTick(done),
       (e) => process.nextTick(done, e))
@@ -143,6 +156,7 @@ Plugin.prototype.finish = function (err, cb) {
 
   const check = () => {
     debug('check', this.name, this.q.length(), this.q.running())
+    this.asyncQ.resume()
     if (this.q.length() === 0 && this.q.running() === 0) {
       done()
     } else {

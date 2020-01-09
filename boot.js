@@ -26,10 +26,26 @@ function wrap (server, opts, instance) {
   if (server[readyKey]) {
     throw new Error(readyKey + '() is already defined, specify an expose option')
   }
-
   server[useKey] = function (a, b, c) {
     instance.use(a, b, c)
-    return this
+    return {
+      __proto__: this,
+      then (resolve) {
+        const next = () => {
+          const result = resolve(server)
+          if (chainResolve) chainResolve(result)
+        }
+        var chainResolve = null
+        if (instance._current.length === 0) {
+          next()
+        } else {
+          instance._current[0].asyncQ.push(next)
+        }
+        return new Promise((resolve) => {
+          chainResolve = resolve
+        })
+      }
+    }
   }
 
   server[afterKey] = function (func) {
