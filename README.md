@@ -166,7 +166,27 @@ calls to `done` are ignored.
 
 `use` returns a thenable wrapped instance on which `use` is called, to support a chainable API that can also be awaited.
 
-This way, async/await is also supported and `use` can be awaited instead of using `after`:
+This way, async/await is also supported and `use` can be awaited instead of using `after`.
+
+Example using `after`:
+
+```js
+async function main () {
+  app.use(async function (server, opts) {
+    await sleep(10)
+    console.log('this first')
+  })
+  app.after(async (err) => {
+    if (err) throw err
+    console.log('then this')
+  })
+  await app.ready()
+  console.log('ready')
+}
+main().catch((err) => console.error(err))
+```
+
+Example using `await use`:
 
 ```js
 async function main () {
@@ -176,6 +196,7 @@ async function main () {
   })
   console.log('then this')
   await app.ready()
+  console.log('ready')
 }
 main().catch((err) => console.error(err))
 ```
