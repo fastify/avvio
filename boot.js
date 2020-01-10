@@ -26,11 +26,10 @@ function wrap (server, opts, instance) {
   if (server[readyKey]) {
     throw new Error(readyKey + '() is already defined, specify an expose option')
   }
-  server[useKey] = function (a, b, c) {
-    instance.use(a, b, c)
-    return {
-      __proto__: this,
-      then (resolve) {
+
+  const thenableDescriptor = {
+    then: {
+      value (resolve) {
         const next = () => {
           const result = resolve(server)
           if (chainResolve) chainResolve(result)
@@ -46,6 +45,11 @@ function wrap (server, opts, instance) {
         })
       }
     }
+  }
+
+  server[useKey] = function (a, b, c) {
+    instance.use(a, b, c)
+    return Object.create(this, thenableDescriptor)
   }
 
   server[afterKey] = function (func) {
