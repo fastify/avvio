@@ -27,28 +27,23 @@ function wrap (server, opts, instance) {
     throw new Error(readyKey + '() is already defined, specify an expose option')
   }
 
-  const thenableDescriptor = {
-    then: {
-      value (resolve) {
-        const next = () => {
-          const result = resolve(server)
-          if (chainResolve) chainResolve(result)
+  server[useKey] = function (fn, opts) {
+    const plugin = instance._addPlugin(fn, opts, false)
+    const thenableDescriptor = {
+      then: {
+        value (resolve) {
+          const next = () => {
+            const result = resolve(server)
+            if (chainResolve) chainResolve(result)
+          }
+          var chainResolve = null
+          plugin.asyncQ.push(next)
+          return new Promise((resolve) => {
+            chainResolve = resolve
+          })
         }
-        var chainResolve = null
-        if (instance._current.length === 0) {
-          next()
-        } else {
-          instance._current[0].asyncQ.push(next)
-        }
-        return new Promise((resolve) => {
-          chainResolve = resolve
-        })
       }
     }
-  }
-
-  server[useKey] = function (a, b, c) {
-    instance.use(a, b, c)
     return Object.create(this, thenableDescriptor)
   }
 
@@ -154,7 +149,6 @@ function Boot (server, opts, done) {
 
   this._doStart = null
   const main = new Plugin(this, root.bind(this), opts, noop, 0)
-
   main.once('start', (serverName, funcName, time) => {
     const nodeId = this.pluginTree.start(null, funcName, time)
     main.once('loaded', (serverName, funcName, time) => {
@@ -208,7 +202,6 @@ function assertPlugin (plugin) {
 // load a plugin
 Boot.prototype.use = function (plugin, opts) {
   this._addPlugin(plugin, opts, false)
-
   return this
 }
 
@@ -241,6 +234,8 @@ Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
       this._error = err
     }
   })
+
+  return obj
 }
 
 Boot.prototype.after = function (func) {

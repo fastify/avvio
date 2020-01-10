@@ -36,14 +36,13 @@ function Plugin (parent, func, optsOrFunc, isAfter, timeout) {
   this.timeout = timeout === undefined ? parent._timeout : timeout
   this.name = getName(func)
   this.isAfter = isAfter
+  this.q = fastq(parent, loadPlugin, 1)
+  this.q.pause()
   this.asyncQ = fastq(parent, (resolve, cb) => {
     resolve(this.server)
     cb()
   }, 1)
   this.asyncQ.pause()
-  this.q = fastq(parent, loadPlugin, 1)
-  this.q.pause()
-
   this.loaded = false
 
   // always start the queue in the next tick
@@ -78,6 +77,29 @@ Plugin.prototype.exec = function (server, cb) {
 
   var timer
 
+  const done = (err) => {
+    if (completed) {
+      debug('loading complete', name)
+      return
+    }
+
+    if (err) {
+      debug('exec errored', name)
+    } else {
+      debug('exec completed', name)
+    }
+
+    this.asyncQ.resume()
+
+    completed = true
+
+    if (timer) {
+      clearTimeout(timer)
+    }
+
+    cb(err)
+  }
+
   if (this.timeout > 0) {
     debug('setting up timeout', name, this.timeout)
     timer = setTimeout(function () {
@@ -99,36 +121,13 @@ Plugin.prototype.exec = function (server, cb) {
         this.server.after(() => {
           this.asyncQ.resume()
         })
-
-        this.q.resume()
       }
+      this.q.resume()
     })
     debug('resolving promise', name)
-
     promise.then(
       () => process.nextTick(done),
       (e) => process.nextTick(done, e))
-  }
-
-  function done (err) {
-    if (completed) {
-      debug('loading complete', name)
-      return
-    }
-
-    if (err) {
-      debug('exec errored', name)
-    } else {
-      debug('exec completed', name)
-    }
-
-    completed = true
-
-    if (timer) {
-      clearTimeout(timer)
-    }
-
-    cb(err)
   }
 }
 
@@ -159,7 +158,6 @@ Plugin.prototype.finish = function (err, cb) {
 
   const check = () => {
     debug('check', this.name, this.q.length(), this.q.running())
-    this.asyncQ.resume()
     if (this.q.length() === 0 && this.q.running() === 0) {
       done()
     } else {

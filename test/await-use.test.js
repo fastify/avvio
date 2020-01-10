@@ -209,3 +209,52 @@ test('await use - error handling, future tick cb err, nested', async (t) => {
 
   t.rejects(() => app.ready(), Error('kaboom'))
 })
+
+test('mixed await use and non-awaited use ', async (t) => {
+  const app = {}
+  boot(app)
+  t.plan(16)
+
+  let firstLoaded = false
+  let secondLoaded = false
+  let thirdLoaded = false
+  let fourthLoaded = false
+
+  await app.use(first)
+  t.ok(firstLoaded, 'first is loaded')
+  t.notOk(secondLoaded, 'second is not loaded')
+  t.notOk(thirdLoaded, 'third is not loaded')
+  t.notOk(fourthLoaded, 'fourth is not loaded')
+  app.use(second)
+  t.ok(firstLoaded, 'first is loaded')
+  t.notOk(secondLoaded, 'second is not loaded')
+  t.notOk(thirdLoaded, 'third is not loaded')
+  t.notOk(fourthLoaded, 'fourth is not loaded')
+  await app.use(third)
+  t.ok(firstLoaded, 'first is loaded')
+  t.ok(secondLoaded, 'second is loaded')
+  t.ok(thirdLoaded, 'third is loaded')
+  t.ok(fourthLoaded, 'fourth is loaded')
+  await app.ready()
+  t.ok(firstLoaded, 'first is loaded')
+  t.ok(secondLoaded, 'second is loaded')
+  t.ok(thirdLoaded, 'third is loaded')
+  t.ok(fourthLoaded, 'fourth is loaded')
+
+  async function first () {
+    firstLoaded = true
+  }
+
+  async function second () {
+    secondLoaded = true
+  }
+
+  async function third (app) {
+    thirdLoaded = true
+    app.use(fourth)
+  }
+
+  async function fourth () {
+    fourthLoaded = true
+  }
+})
