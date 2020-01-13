@@ -33,7 +33,7 @@ function wrap (server, opts, instance) {
     const thenableDescriptor = {
       then: {
         value (resolve) {
-          return instance.assimilate(plugin).then(resolve)
+          return instance._loadRegistered(plugin).then(resolve)
         }
       }
     }
@@ -42,7 +42,7 @@ function wrap (server, opts, instance) {
 
   server[afterKey] = function (func) {
     if (typeof func !== 'function') {
-      return instance.assimilate()
+      return instance._loadRegistered()
     }
     instance.after(encapsulateThreeParam(func, this))
     return this
@@ -199,7 +199,7 @@ Boot.prototype.use = function (plugin, opts) {
   return this
 }
 
-Boot.prototype.assimilate = function (plugin) {
+Boot.prototype._loadRegistered = function (plugin) {
   plugin = plugin || this._lastUsed
   return new Promise((resolve) => {
     if (plugin) {
