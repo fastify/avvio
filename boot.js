@@ -201,7 +201,7 @@ Boot.prototype.use = function (plugin, opts) {
 
 Boot.prototype.assimilate = function (plugin) {
   plugin = plugin || this._lastUsed
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     if (plugin) {
       plugin.asyncQ.push(() => resolve(this._server))
     } else resolve(this._server)
