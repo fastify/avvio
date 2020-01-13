@@ -76,6 +76,7 @@ async function third (instance, opts) {
   * <a href="#constructor"><code><b>avvio()</b></code></a>
   * <a href="#use"><code>instance.<b>use()</b></code></a>
   * <a href="#after"><code>instance.<b>after()</b></code></a>
+  * <a href="#assimilate"><code>instance.<b>assimilate()</b></code></a>
   * <a href="#ready"><code>instance.<b>ready()</b></code></a>
   * <a href="#start"><code>instance.<b>start()</b></code></a>
   * <a href="#override"><code>instance.<b>override()</b></code></a>
@@ -144,7 +145,7 @@ app.on('start', () => {
 -------------------------------------------------------
 <a name="use"></a>
 
-### app.use(func, [optsOrFunc])
+### app.use(func, [optsOrFunc]) => Thenable
 
 Loads one or more functions asynchronously.
 
@@ -200,6 +201,24 @@ async function main () {
 }
 main().catch((err) => console.error(err))
 ```
+
+This is functionally equivalent of using `await assimilate`:
+
+
+```js
+async function main () {
+  app.use(async function (server, opts) {
+    await sleep(10)
+    console.log('this first')
+  })
+  await app.assimilate()
+  console.log('then this')
+  await app.ready()
+  console.log('ready')
+}
+main().catch((err) => console.error(err))
+```
+
 
 A function that returns the options argument instead of an object is supported as well:
 
@@ -268,7 +287,7 @@ in [`ready`](#ready).
 Calls a function after all the previously defined plugins are loaded, including
 all their dependencies. The `'start'` event is not emitted yet.
 
-Note: `app.use` can be awaited or used as a promise as an alternative to using `after`.
+Note: `app.assimilate` can be used as an awaitable alternative to `after`, or `app.use` can be also awaited to the same effect.
 
 The callback changes basing on the parameters your are giving:
 1. If no parameter is given to the callback and there is an error, that error will be passed to the next error handler.
@@ -319,6 +338,37 @@ app.after(async function () {
 `done` must be called only once.
 
 Returns the instance on which `after` is called, to support a chainable API.
+
+-------------------------------------------------------
+<a name="assimilate"></a>
+
+### app.assimilate() => Promise 
+
+Loads any plugins previously registered via `use` and returns a promise which resolves when all plugins registered so far have loaded. This can be used as a promise based (e.g. awaitable) alternative to after. 
+
+```js
+async function main () {
+  app.use(async function (server, opts) {
+    await sleep(10)
+    console.log('this first')
+  })
+  app.use(async function (server, opts) {
+    await sleep(10)
+    console.log('this second')
+  })
+  await app.assimilate()
+  console.log('after assimilate')
+  app.use(async function (server, opts) {
+    await sleep(10)
+    console.log('this third')
+  })
+  await app.ready()
+  console.log('ready')
+}
+main().catch((err) => console.error(err))
+```
+
+Unlike `after` and `use`, `assimilate` is *not* chainable. However the resolved promise value will be the app instance so it is still async chainable.
 
 -------------------------------------------------------
 <a name="ready"></a>

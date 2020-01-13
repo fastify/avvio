@@ -14,6 +14,7 @@ function wrap (server, opts, instance) {
   const readyKey = expose.ready || 'ready'
   const onCloseKey = expose.onClose || 'onClose'
   const closeKey = expose.close || 'close'
+  const assimilateKey = expose.assimilate || 'assimilate'
 
   if (server[useKey]) {
     throw new Error(useKey + '() is already defined, specify an expose option')
@@ -27,20 +28,17 @@ function wrap (server, opts, instance) {
     throw new Error(readyKey + '() is already defined, specify an expose option')
   }
 
+  server[assimilateKey] = function () {
+    return instance.assimilate()
+  }
+
   server[useKey] = function (fn, opts) {
-    const plugin = instance._addPlugin(fn, opts, false)
+    instance.use(fn, opts)
+    const plugin = instance._lastUsed
     const thenableDescriptor = {
       then: {
         value (resolve) {
-          const next = () => {
-            const result = resolve(server)
-            if (chainResolve) chainResolve(result)
-          }
-          var chainResolve = null
-          plugin.asyncQ.push(next)
-          return new Promise((resolve) => {
-            chainResolve = resolve
-          })
+          return instance.assimilate(plugin).then(resolve)
         }
       }
     }
@@ -120,6 +118,7 @@ function Boot (server, opts, done) {
   this._current = []
   this._error = null
   this._isOnCloseHandlerKey = Symbol('isOnCloseHandler')
+  this._lastUsed = null
 
   this.setMaxListeners(0)
 
@@ -201,8 +200,17 @@ function assertPlugin (plugin) {
 
 // load a plugin
 Boot.prototype.use = function (plugin, opts) {
-  this._addPlugin(plugin, opts, false)
+  this._lastUsed = this._addPlugin(plugin, opts, false)
   return this
+}
+
+Boot.prototype.assimilate = function (plugin) {
+  plugin = plugin || this._lastUsed
+  return new Promise((resolve, reject) => {
+    if (plugin) {
+      plugin.asyncQ.push(() => resolve(this._server))
+    } else resolve(this._server)
+  })
 }
 
 Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
