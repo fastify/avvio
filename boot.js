@@ -14,7 +14,6 @@ function wrap (server, opts, instance) {
   const readyKey = expose.ready || 'ready'
   const onCloseKey = expose.onClose || 'onClose'
   const closeKey = expose.close || 'close'
-  const assimilateKey = expose.assimilate || 'assimilate'
 
   if (server[useKey]) {
     throw new Error(useKey + '() is already defined, specify an expose option')
@@ -26,10 +25,6 @@ function wrap (server, opts, instance) {
 
   if (server[readyKey]) {
     throw new Error(readyKey + '() is already defined, specify an expose option')
-  }
-
-  server[assimilateKey] = function () {
-    return instance.assimilate()
   }
 
   server[useKey] = function (fn, opts) {
@@ -47,7 +42,7 @@ function wrap (server, opts, instance) {
 
   server[afterKey] = function (func) {
     if (typeof func !== 'function') {
-      throw new Error('not a function')
+      return instance.assimilate()
     }
     instance.after(encapsulateThreeParam(func, this))
     return this

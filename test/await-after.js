@@ -3,7 +3,7 @@
 const { test } = require('tap')
 const boot = require('..')
 
-test('await assimilate - nested plugins with same tick callbacks', async (t) => {
+test('await after - nested plugins with same tick callbacks', async (t) => {
   const app = {}
   boot(app)
 
@@ -17,14 +17,14 @@ test('await assimilate - nested plugins with same tick callbacks', async (t) => 
     })
     cb()
   })
-  await app.assimilate()
+  await app.after()
   t.pass('reachable')
 
   await app.ready()
   t.pass('reachable')
 })
 
-test('await assimilate - nested plugins with future tick callbacks', async (t) => {
+test('await after - nested plugins with future tick callbacks', async (t) => {
   const app = {}
   boot(app)
 
@@ -38,14 +38,14 @@ test('await assimilate - nested plugins with future tick callbacks', async (t) =
     })
     setImmediate(cb)
   })
-  await app.assimilate()
+  await app.after()
   t.pass('reachable')
 
   await app.ready()
   t.pass('reachable')
 })
 
-test('await assimilate - nested async function plugins', async (t) => {
+test('await after - nested async function plugins', async (t) => {
   const app = {}
   boot(app)
 
@@ -58,14 +58,14 @@ test('await assimilate - nested async function plugins', async (t) => {
     })
     t.pass('reachable')
   })
-  await app.assimilate()
+  await app.after()
   t.pass('reachable')
 
   await app.ready()
   t.pass('reachable')
 })
 
-test('await assimilate - promise resolves to instance', async (t) => {
+test('await after - promise resolves to instance', async (t) => {
   const app = {}
   boot(app)
 
@@ -76,7 +76,7 @@ test('await assimilate - promise resolves to instance', async (t) => {
       t.pass('plugin init')
       cb()
     })
-    const instance = await app.assimilate()
+    const instance = await app.after()
     t.is(instance, app)
   })
   t.pass('reachable')
@@ -85,7 +85,7 @@ test('await assimilate - promise resolves to instance', async (t) => {
   t.pass('reachable')
 })
 
-test('await assimilate - promise returning function plugins + promise chaining', async (t) => {
+test('await after - promise returning function plugins + promise chaining', async (t) => {
   const app = {}
   boot(app)
 
@@ -103,14 +103,14 @@ test('await assimilate - promise returning function plugins + promise chaining',
       t.is(val, 'test')
     })
   })
-  await app.assimilate()
+  await app.after()
   t.pass('reachable')
 
   await app.ready()
   t.pass('reachable')
 })
 
-test('await assimilate - error handling, async throw', async (t) => {
+test('await after - error handling, async throw', async (t) => {
   const app = {}
   boot(app)
 
@@ -120,12 +120,12 @@ test('await assimilate - error handling, async throw', async (t) => {
     throw Error('kaboom')
   })
 
-  await app.assimilate()
+  await app.after()
 
   t.rejects(() => app.ready(), Error('kaboom'))
 })
 
-test('await assimilate - error handling, async throw, nested', async (t) => {
+test('await after - error handling, async throw, nested', async (t) => {
   const app = {}
   boot(app)
 
@@ -136,12 +136,12 @@ test('await assimilate - error handling, async throw, nested', async (t) => {
       throw Error('kaboom')
     })
   })
-  await app.assimilate()
+  await app.after()
 
   t.rejects(() => app.ready(), Error('kaboom'))
 })
 
-test('await assimilate - error handling, same tick cb err', async (t) => {
+test('await after - error handling, same tick cb err', async (t) => {
   const app = {}
   boot(app)
 
@@ -150,11 +150,11 @@ test('await assimilate - error handling, same tick cb err', async (t) => {
   app.use((f, opts, cb) => {
     cb(Error('kaboom'))
   })
-  await app.assimilate()
+  await app.after()
   t.rejects(() => app.ready(), Error('kaboom'))
 })
 
-test('await assimilate - error handling, same tick cb err, nested', async (t) => {
+test('await after - error handling, same tick cb err, nested', async (t) => {
   const app = {}
   boot(app)
 
@@ -166,11 +166,11 @@ test('await assimilate - error handling, same tick cb err, nested', async (t) =>
     })
     cb()
   })
-  await app.assimilate()
+  await app.after()
   t.rejects(() => app.ready(), Error('kaboom'))
 })
 
-test('await assimilate - error handling, future tick cb err', async (t) => {
+test('await after - error handling, future tick cb err', async (t) => {
   const app = {}
   boot(app)
 
@@ -179,11 +179,11 @@ test('await assimilate - error handling, future tick cb err', async (t) => {
   app.use((f, opts, cb) => {
     setImmediate(() => { cb(Error('kaboom')) })
   })
-  await app.assimilate()
+  await app.after()
   t.rejects(() => app.ready(), Error('kaboom'))
 })
 
-test('await assimilate - error handling, future tick cb err, nested', async (t) => {
+test('await after - error handling, future tick cb err, nested', async (t) => {
   const app = {}
   boot(app)
 
@@ -195,11 +195,11 @@ test('await assimilate - error handling, future tick cb err, nested', async (t) 
     })
     cb()
   })
-  await app.assimilate()
+  await app.after()
   t.rejects(() => app.ready(), Error('kaboom'))
 })
 
-test('await assimilate complex scenario', async (t) => {
+test('await after complex scenario', async (t) => {
   const app = {}
   boot(app)
   t.plan(16)
@@ -210,7 +210,7 @@ test('await assimilate complex scenario', async (t) => {
   let fourthLoaded = false
 
   app.use(first)
-  await app.assimilate()
+  await app.after()
   t.ok(firstLoaded, 'first is loaded')
   t.notOk(secondLoaded, 'second is not loaded')
   t.notOk(thirdLoaded, 'third is not loaded')
@@ -221,7 +221,7 @@ test('await assimilate complex scenario', async (t) => {
   t.notOk(thirdLoaded, 'third is not loaded')
   t.notOk(fourthLoaded, 'fourth is not loaded')
   app.use(third)
-  await app.assimilate()
+  await app.after()
   t.ok(firstLoaded, 'first is loaded')
   t.ok(secondLoaded, 'second is loaded')
   t.ok(thirdLoaded, 'third is loaded')
