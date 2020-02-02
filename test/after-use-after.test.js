@@ -54,7 +54,9 @@ test('after grouping - use called after after called', (t) => {
     f.test = TEST_VALUE
 
     next()
-  })).after(function (err, f, done) {
+  }))
+
+  app.after(function (err, f, done) {
     t.error(err)
     t.equal(f.test, TEST_VALUE)
 
@@ -69,7 +71,9 @@ test('after grouping - use called after after called', (t) => {
     f.test3 = NEW_TEST_VALUE
 
     next()
-  })).after(function (err, f, done) {
+  }))
+
+  app.after(function (err, f, done) {
     t.error(err)
     t.equal(f.test, TEST_VALUE)
     t.equal(f.test2, OTHER_TEST_VALUE)
@@ -79,7 +83,8 @@ test('after grouping - use called after after called', (t) => {
 
   app.ready().then(() => {
     t.pass('ready')
-  }).catch(() => {
+  }).catch((e) => {
+    console.log(e)
     t.fail('this should not be called')
   })
 })

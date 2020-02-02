@@ -30,14 +30,11 @@ function wrap (server, opts, instance) {
   server[useKey] = function (fn, opts) {
     instance.use(fn, opts)
     const plugin = instance._lastUsed
-    const thenableDescriptor = {
-      then: {
-        value (resolve) {
-          return instance._loadRegistered(plugin).then(resolve)
-        }
-      }
+    instance.then = (resolve) => {
+      return instance._loadRegistered(plugin).then(resolve)
     }
-    return Object.create(this, thenableDescriptor)
+
+    return instance
   }
 
   server[afterKey] = function (func) {
