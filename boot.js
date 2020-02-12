@@ -32,20 +32,7 @@ function wrap (server, opts, instance) {
     return instance
   }
 
-  Object.defineProperty(server, 'then', {
-    get () {
-      // If the instance is ready, then there is
-      // nothing to await. This is true during
-      // await server.ready() as ready() resolves
-      // with the server, end we will end up here
-      // because of automatic promise chaining.
-      if (instance.booted) {
-        return undefined
-      }
-      const p = instance._loadRegistered()
-      return p.then.bind(p)
-    }
-  })
+  Object.defineProperty(server, 'then', { get: thenify.bind(instance) })
 
   server[afterKey] = function (func) {
     if (typeof func !== 'function') {
@@ -211,8 +198,7 @@ Boot.prototype._loadRegistered = function (plugin) {
   plugin = plugin || this._lastUsed
   return new Promise((resolve) => {
     if (plugin && !plugin.loaded) {
-      plugin.asyncQ.push((s) => {
-        // TODO check for override support
+      plugin.asyncQ.push(() => {
         resolve()
       })
     } else {
@@ -227,20 +213,7 @@ Boot.prototype._loadRegistered = function (plugin) {
   })
 }
 
-Object.defineProperty(Boot.prototype, 'then', {
-  get () {
-    // If the instance is ready, then there is
-    // nothing to await. This is true during
-    // await server.ready() as ready() resolves
-    // with the server, end we will end up here
-    // because of automatic promise chaining.
-    if (this.booted) {
-      return undefined
-    }
-    const p = this._loadRegistered()
-    return p.then.bind(p)
-  }
-})
+Object.defineProperty(Boot.prototype, 'then', { get: thenify })
 
 Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
   assertPlugin(plugin)
@@ -364,6 +337,17 @@ Boot.prototype.toJSON = function () {
 }
 
 function noop () { }
+
+function thenify () {
+  // If the instance is ready, then there is
+  // nothing to await. This is true during
+  // await server.ready() as ready() resolves
+  // with the server, end we will end up here
+  // because of automatic promise chaining.
+  if (this.booted) return
+  const p = this._loadRegistered()
+  return p.then.bind(p)
+}
 
 function callWithCbOrNextTick (func, cb, context) {
   context = this._server
