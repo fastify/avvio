@@ -16,13 +16,13 @@ test('to json', (t) => {
     id: 'root',
     label: 'bound root',
     start: /\d+/,
-    stop: /\d*/,
-    diff: /\d*/,
     nodes: []
   }
 
   app.on('preReady', function show () {
     const json = app.toJSON()
+    outJson.stop = /\d*/
+    outJson.diff = /\d*/
     t.like(json, outJson)
   })
 
