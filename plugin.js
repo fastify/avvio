@@ -1,5 +1,5 @@
 'use strict'
-
+const queueMicrotask = require('queue-microtask')
 const fastq = require('fastq')
 const EE = require('events').EventEmitter
 const inherits = require('util').inherits
@@ -36,9 +36,13 @@ function Plugin (parent, func, optsOrFunc, isAfter, timeout) {
   this.timeout = timeout === undefined ? parent._timeout : timeout
   this.name = getName(func)
   this.isAfter = isAfter
-
   this.q = fastq(parent, loadPlugin, 1)
   this.q.pause()
+  this.asyncQ = fastq(parent, (resolve, cb) => {
+    resolve(this.server)
+    cb()
+  }, 1)
+  this.asyncQ.pause()
   this.loaded = false
 
   // always start the queue in the next tick
@@ -73,6 +77,31 @@ Plugin.prototype.exec = function (server, cb) {
 
   var timer
 
+  const done = (err) => {
+    if (completed) {
+      debug('loading complete', name)
+      return
+    }
+
+    if (err) {
+      debug('exec errored', name)
+
+      // In case of errors, we need to kickstart
+      // the asyncQ as it won't get started otherwise
+      this.asyncQ.resume()
+    } else {
+      debug('exec completed', name)
+    }
+
+    completed = true
+
+    if (timer) {
+      clearTimeout(timer)
+    }
+
+    cb(err)
+  }
+
   if (this.timeout > 0) {
     debug('setting up timeout', name, this.timeout)
     timer = setTimeout(function () {
@@ -87,32 +116,21 @@ Plugin.prototype.exec = function (server, cb) {
 
   this.emit('start', this.server ? this.server.name : null, this.name, Date.now())
   var promise = func(this.server, this.opts, done)
+
   if (promise && typeof promise.then === 'function') {
     debug('resolving promise', name)
+    queueMicrotask(() => {
+      if (this.asyncQ.length() > 0) {
+        this.server.after(() => {
+          this.asyncQ.resume()
+        })
+      }
+      this.q.resume()
+    })
+
     promise.then(
       () => process.nextTick(done),
       (e) => process.nextTick(done, e))
-  }
-
-  function done (err) {
-    if (completed) {
-      debug('loading complete', name)
-      return
-    }
-
-    if (err) {
-      debug('exec errored', name)
-    } else {
-      debug('exec completed', name)
-    }
-
-    completed = true
-
-    if (timer) {
-      clearTimeout(timer)
-    }
-
-    cb(err)
   }
 }
 
@@ -144,7 +162,16 @@ Plugin.prototype.finish = function (err, cb) {
   const check = () => {
     debug('check', this.name, this.q.length(), this.q.running())
     if (this.q.length() === 0 && this.q.running() === 0) {
-      done()
+      if (this.asyncQ.length() > 0) {
+        this.asyncQ.drain = () => {
+          this.asyncQ.drain = noop
+          this.asyncQ.pause()
+          check()
+        }
+        this.asyncQ.resume()
+      } else {
+        done()
+      }
     } else {
       debug('delayed', this.name)
       // finish when the queue of nested plugins to load is empty

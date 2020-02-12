@@ -76,6 +76,7 @@ async function third (instance, opts) {
   * <a href="#constructor"><code><b>avvio()</b></code></a>
   * <a href="#use"><code>instance.<b>use()</b></code></a>
   * <a href="#after"><code>instance.<b>after()</b></code></a>
+  * <a href="#await-after"><code>await instance.<b>after()</b></code></a>
   * <a href="#ready"><code>instance.<b>ready()</b></code></a>
   * <a href="#start"><code>instance.<b>start()</b></code></a>
   * <a href="#override"><code>instance.<b>override()</b></code></a>
@@ -144,7 +145,7 @@ app.on('start', () => {
 -------------------------------------------------------
 <a name="use"></a>
 
-### app.use(func, [optsOrFunc])
+### app.use(func, [optsOrFunc]) => Thenable
 
 Loads one or more functions asynchronously.
 
@@ -163,17 +164,62 @@ app.use(plugin)
 `done` should be called only once, when your plugin is ready to go.  Additional
 calls to `done` are ignored.
 
-async/await is also supported:
+`use` returns a thenable wrapped instance on which `use` is called, to support a chainable API that can also be awaited.
+
+This way, async/await is also supported and `use` can be awaited instead of using `after`.
+
+Example using `after`:
 
 ```js
-async function plugin (server, opts) {
-  await sleep(10)
+async function main () {
+  console.log('begin')
+  app.use(async function (server, opts) {
+    await sleep(10)
+    console.log('this first')
+  })
+  app.after(async (err) => {
+    if (err) throw err
+    console.log('then this')
+  })
+  await app.ready()
+  console.log('ready')
 }
-
-app.use(plugin)
+main().catch((err) => console.error(err))
 ```
 
-`use` returns the instance on which `use` is called, to support a chainable API.
+Example using `await after`:
+
+
+```js
+async function main () {
+  console.log('begin')
+  app.use(async function (server, opts) {
+    await sleep(10)
+    console.log('this first')
+  })
+  await app.after()
+  console.log('then this')
+  await app.ready()
+  console.log('ready')
+}
+main().catch((err) => console.error(err))
+```
+
+Example using `await use`:
+
+```js
+async function main () {
+  console.log('begin')
+  await app.use(async function (server, opts) {
+    await sleep(10)
+    console.log('this first')
+  })
+  console.log('then this')
+  await app.ready()
+  console.log('ready')
+}
+main().catch((err) => console.error(err))
+```
 
 A function that returns the options argument instead of an object is supported as well:
 
@@ -242,6 +288,8 @@ in [`ready`](#ready).
 Calls a function after all the previously defined plugins are loaded, including
 all their dependencies. The `'start'` event is not emitted yet.
 
+Note: `await after` can be used as an awaitable alternative to `after(func)`, or `await use` can be also as a shorthand for `use(plugin); await after()`.
+
 The callback changes basing on the parameters your are giving:
 1. If no parameter is given to the callback and there is an error, that error will be passed to the next error handler.
 2. If one parameter is given to the callback, that parameter will be the `error` object.
@@ -290,7 +338,39 @@ app.after(async function () {
 
 `done` must be called only once.
 
-Returns the instance on which `after` is called, to support a chainable API.
+If called with a function, it returns the instance on which `after` is called, to support a chainable API.
+
+-------------------------------------------------------
+<a name="await-after"></a>
+
+### await app.after() | app.after() => Promise
+
+Calling after with no function argument loads any plugins previously registered via `use` and returns a promise which resolves when all plugins registered so far have loaded.
+
+```js
+async function main () {
+  app.use(async function (server, opts) {
+    await sleep(10)
+    console.log('this first')
+  })
+  app.use(async function (server, opts) {
+    await sleep(10)
+    console.log('this second')
+  })
+  console.log('before after')
+  await app.after()
+  console.log('after after')
+  app.use(async function (server, opts) {
+    await sleep(10)
+    console.log('this third')
+  })
+  await app.ready()
+  console.log('ready')
+}
+main().catch((err) => console.error(err))
+```
+
+Unlike `after` and `use`, `await after` is *not* chainable.
 
 -------------------------------------------------------
 <a name="ready"></a>

@@ -27,14 +27,16 @@ function wrap (server, opts, instance) {
     throw new Error(readyKey + '() is already defined, specify an expose option')
   }
 
-  server[useKey] = function (a, b, c) {
-    instance.use(a, b, c)
-    return this
+  server[useKey] = function (fn, opts) {
+    instance.use(fn, opts)
+    return instance
   }
+
+  Object.defineProperty(server, 'then', { get: thenify.bind(instance) })
 
   server[afterKey] = function (func) {
     if (typeof func !== 'function') {
-      throw new Error('not a function')
+      return instance._loadRegistered()
     }
     instance.after(encapsulateThreeParam(func, this))
     return this
@@ -105,6 +107,7 @@ function Boot (server, opts, done) {
   this._current = []
   this._error = null
   this._isOnCloseHandlerKey = Symbol('isOnCloseHandler')
+  this._lastUsed = null
 
   this.setMaxListeners(0)
 
@@ -133,18 +136,18 @@ function Boot (server, opts, done) {
   }
 
   this._doStart = null
-  const main = new Plugin(this, root.bind(this), opts, noop, 0)
-
-  main.once('start', (serverName, funcName, time) => {
+  this._root = new Plugin(this, root.bind(this), opts, noop, 0)
+  this._root.once('start', (serverName, funcName, time) => {
     const nodeId = this.pluginTree.start(null, funcName, time)
-    main.once('loaded', (serverName, funcName, time) => {
+    this._root.once('loaded', (serverName, funcName, time) => {
       this.pluginTree.stop(nodeId, time)
     })
   })
 
-  Plugin.loadPlugin.call(this, main, (err) => {
+  Plugin.loadPlugin.call(this, this._root, (err) => {
     debug('root plugin ready')
     this.emit('preReady')
+    this._root = null
     if (err) {
       this._error = err
       if (this._readyQ.length() === 0) {
@@ -187,10 +190,30 @@ function assertPlugin (plugin) {
 
 // load a plugin
 Boot.prototype.use = function (plugin, opts) {
-  this._addPlugin(plugin, opts, false)
-
+  this._lastUsed = this._addPlugin(plugin, opts, false)
   return this
 }
+
+Boot.prototype._loadRegistered = function (plugin) {
+  plugin = plugin || this._lastUsed
+  return new Promise((resolve) => {
+    if (plugin && !plugin.loaded) {
+      plugin.asyncQ.push(() => {
+        resolve()
+      })
+    } else {
+      resolve()
+    }
+
+    // if the root plugin is not loaded, let's resume that
+    // so one can use after() befor calling ready
+    if (!this.started && !this.booted) {
+      this._root.q.resume()
+    }
+  })
+}
+
+Object.defineProperty(Boot.prototype, 'then', { get: thenify })
 
 Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
   assertPlugin(plugin)
@@ -221,6 +244,8 @@ Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
       this._error = err
     }
   })
+
+  return obj
 }
 
 Boot.prototype.after = function (func) {
@@ -312,6 +337,17 @@ Boot.prototype.toJSON = function () {
 }
 
 function noop () { }
+
+function thenify () {
+  // If the instance is ready, then there is
+  // nothing to await. This is true during
+  // await server.ready() as ready() resolves
+  // with the server, end we will end up here
+  // because of automatic promise chaining.
+  if (this.booted) return
+  const p = this._loadRegistered()
+  return p.then.bind(p)
+}
 
 function callWithCbOrNextTick (func, cb, context) {
   context = this._server
