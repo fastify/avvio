@@ -338,14 +338,14 @@ app.after(async function () {
 
 `done` must be called only once.
 
-Returns the instance on which `after` is called, to support a chainable API.
+If called with a function, it returns the instance on which `after` is called, to support a chainable API.
 
 -------------------------------------------------------
 <a name="await-after"></a>
 
 ### await app.after() | app.after() => Promise
 
-Calling after with no function argument loads any plugins previously registered via `use` and returns a promise which resolves when all plugins registered so far have loaded.  
+Calling after with no function argument loads any plugins previously registered via `use` and returns a promise which resolves when all plugins registered so far have loaded.
 
 ```js
 async function main () {
@@ -370,7 +370,7 @@ async function main () {
 main().catch((err) => console.error(err))
 ```
 
-Unlike `after` and `use`, `await after` is *not* chainable. However the resolved promise value will be the app instance so it is still async chainable.
+Unlike `after` and `use`, `await after` is *not* chainable.
 
 -------------------------------------------------------
 <a name="ready"></a>

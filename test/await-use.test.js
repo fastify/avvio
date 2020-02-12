@@ -86,26 +86,6 @@ test('await use - promise returning function plugins + promise chaining', async 
   t.pass('reachable')
 })
 
-test('await use - promise resolves to instance', async (t) => {
-  const app = {}
-  boot(app)
-
-  t.plan(4)
-
-  app.use(async (f, opts, cb) => {
-    const instance = await app.use((f, opts, cb) => {
-      t.pass('plugin init')
-      cb()
-    })
-
-    t.is(instance, app)
-  })
-  t.pass('reachable')
-
-  await app.ready()
-  t.pass('reachable')
-})
-
 test('await use - await and use chaining', async (t) => {
   const app = {}
   boot(app)

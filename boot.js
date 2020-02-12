@@ -29,13 +29,23 @@ function wrap (server, opts, instance) {
 
   server[useKey] = function (fn, opts) {
     instance.use(fn, opts)
-    const plugin = instance._lastUsed
-    instance.then = (resolve) => {
-      return instance._loadRegistered(plugin).then(resolve)
-    }
-
     return instance
   }
+
+  Object.defineProperty(server, 'then', {
+    get () {
+      // If the instance is ready, then there is
+      // nothing to await. This is true during
+      // await server.ready() as ready() resolves
+      // with the server, end we will end up here
+      // because of automatic promise chaining.
+      if (instance.booted) {
+        return undefined
+      }
+      const p = instance._loadRegistered()
+      return p.then.bind(p)
+    }
+  })
 
   server[afterKey] = function (func) {
     if (typeof func !== 'function') {
@@ -201,12 +211,12 @@ Boot.prototype._loadRegistered = function (plugin) {
   plugin = plugin || this._lastUsed
   return new Promise((resolve) => {
     if (plugin && !plugin.loaded) {
-      plugin.asyncQ.push(() => {
+      plugin.asyncQ.push((s) => {
         // TODO check for override support
-        resolve(this._server)
+        resolve()
       })
     } else {
-      resolve(this._server)
+      resolve()
     }
 
     // if the root plugin is not loaded, let's resume that
@@ -216,6 +226,21 @@ Boot.prototype._loadRegistered = function (plugin) {
     }
   })
 }
+
+Object.defineProperty(Boot.prototype, 'then', {
+  get () {
+    // If the instance is ready, then there is
+    // nothing to await. This is true during
+    // await server.ready() as ready() resolves
+    // with the server, end we will end up here
+    // because of automatic promise chaining.
+    if (this.booted) {
+      return undefined
+    }
+    const p = this._loadRegistered()
+    return p.then.bind(p)
+  }
+})
 
 Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
   assertPlugin(plugin)

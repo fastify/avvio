@@ -68,7 +68,7 @@ test('await after - nested async function plugins', async (t) => {
   t.pass('reachable')
 })
 
-test('await after - promise resolves to instance', async (t) => {
+test('await after - promise resolves to undefined', async (t) => {
   const app = {}
   boot(app)
 
@@ -80,7 +80,7 @@ test('await after - promise resolves to instance', async (t) => {
       cb()
     })
     const instance = await app.after()
-    t.is(instance, app)
+    t.is(instance, undefined)
   })
   t.pass('reachable')
 
@@ -277,6 +277,35 @@ test('without autostart', async (t) => {
   })
 
   t.is(thirdLoaded, true)
+
+  await app.ready()
+})
+
+test('without autostart and with override', async (t) => {
+  const app = {}
+  const _ = boot(app, { autostart: false })
+  let count = 0
+
+  _.override = function (s) {
+    const res = Object.create(s)
+    res.count = ++count
+
+    return res
+  }
+
+  app.use(async function first (app) {
+    t.is(app.count, 1)
+    app.use(async (app) => {
+      t.is(app.count, 2)
+      await app.after()
+    })
+  })
+
+  await app.after()
+
+  await app.use(async (app) => {
+    t.is(app.count, 5) // 5 because there are 2 after()
+  })
 
   await app.ready()
 })
