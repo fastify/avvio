@@ -139,17 +139,18 @@ function Boot (server, opts, done) {
   }
 
   this._doStart = null
-  const main = new Plugin(this, root.bind(this), opts, noop, 0)
-  main.once('start', (serverName, funcName, time) => {
+  this._root = new Plugin(this, root.bind(this), opts, noop, 0)
+  this._root.once('start', (serverName, funcName, time) => {
     const nodeId = this.pluginTree.start(null, funcName, time)
-    main.once('loaded', (serverName, funcName, time) => {
+    this._root.once('loaded', (serverName, funcName, time) => {
       this.pluginTree.stop(nodeId, time)
     })
   })
 
-  Plugin.loadPlugin.call(this, main, (err) => {
+  Plugin.loadPlugin.call(this, this._root, (err) => {
     debug('root plugin ready')
     this.emit('preReady')
+    this._root = null
     if (err) {
       this._error = err
       if (this._readyQ.length() === 0) {
@@ -199,9 +200,20 @@ Boot.prototype.use = function (plugin, opts) {
 Boot.prototype._loadRegistered = function (plugin) {
   plugin = plugin || this._lastUsed
   return new Promise((resolve) => {
-    if (plugin) {
-      plugin.asyncQ.push(() => resolve(this._server))
-    } else resolve(this._server)
+    if (plugin && !plugin.loaded) {
+      plugin.asyncQ.push(() => {
+        // TODO check for override support
+        resolve(this._server)
+      })
+    } else {
+      resolve(this._server)
+    }
+
+    // if the root plugin is not loaded, let's resume that
+    // so one can use after() befor calling ready
+    if (!this.started && !this.booted) {
+      this._root.q.resume()
+    }
   })
 }
 

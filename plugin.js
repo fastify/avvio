@@ -85,11 +85,13 @@ Plugin.prototype.exec = function (server, cb) {
 
     if (err) {
       debug('exec errored', name)
+
+      // In case of errors, we need to kickstart
+      // the asyncQ as it won't get started otherwise
+      this.asyncQ.resume()
     } else {
       debug('exec completed', name)
     }
-
-    this.asyncQ.resume()
 
     completed = true
 
@@ -116,6 +118,7 @@ Plugin.prototype.exec = function (server, cb) {
   var promise = func(this.server, this.opts, done)
 
   if (promise && typeof promise.then === 'function') {
+    debug('resolving promise', name)
     queueMicrotask(() => {
       if (this.asyncQ.length() > 0) {
         this.server.after(() => {
@@ -124,7 +127,7 @@ Plugin.prototype.exec = function (server, cb) {
       }
       this.q.resume()
     })
-    debug('resolving promise', name)
+
     promise.then(
       () => process.nextTick(done),
       (e) => process.nextTick(done, e))
@@ -159,7 +162,16 @@ Plugin.prototype.finish = function (err, cb) {
   const check = () => {
     debug('check', this.name, this.q.length(), this.q.running())
     if (this.q.length() === 0 && this.q.running() === 0) {
-      done()
+      if (this.asyncQ.length() > 0) {
+        this.asyncQ.drain = () => {
+          this.asyncQ.drain = noop
+          this.asyncQ.pause()
+          check()
+        }
+        this.asyncQ.resume()
+      } else {
+        done()
+      }
     } else {
       debug('delayed', this.name)
       // finish when the queue of nested plugins to load is empty

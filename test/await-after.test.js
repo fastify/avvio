@@ -2,23 +2,26 @@
 
 const { test } = require('tap')
 const boot = require('..')
+const { promisify } = require('util')
+const sleep = promisify(setTimeout)
 
 test('await after - nested plugins with same tick callbacks', async (t) => {
   const app = {}
   boot(app)
 
-  t.plan(4)
+  let secondLoaded = false
 
-  app.use((f, opts, cb) => {
+  app.use(async (app) => {
     t.pass('plugin init')
-    app.use((f, opts, cb) => {
+    app.use(async () => {
       t.pass('plugin2 init')
-      cb()
+      await sleep(1)
+      secondLoaded = true
     })
-    cb()
   })
   await app.after()
   t.pass('reachable')
+  t.is(secondLoaded, true)
 
   await app.ready()
   t.pass('reachable')
@@ -248,4 +251,32 @@ test('await after complex scenario', async (t) => {
   async function fourth () {
     fourthLoaded = true
   }
+})
+
+test('without autostart', async (t) => {
+  const app = {}
+  boot(app, { autostart: false })
+  let firstLoaded = false
+  let secondLoaded = false
+  let thirdLoaded = false
+
+  app.use(async function first (app) {
+    firstLoaded = true
+    app.use(async () => {
+      await sleep(1)
+      secondLoaded = true
+    })
+  })
+
+  await app.after()
+  t.is(firstLoaded, true)
+  t.is(secondLoaded, true)
+
+  await app.use(async () => {
+    thirdLoaded = true
+  })
+
+  t.is(thirdLoaded, true)
+
+  await app.ready()
 })
