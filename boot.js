@@ -6,6 +6,7 @@ const inherits = require('util').inherits
 const TimeTree = require('./time-tree')
 const Plugin = require('./plugin')
 const debug = require('debug')('avvio')
+const kAvvio = Symbol('kAvvio')
 
 function wrap (server, opts, instance) {
   const expose = opts.expose || {}
@@ -33,6 +34,7 @@ function wrap (server, opts, instance) {
   }
 
   Object.defineProperty(server, 'then', { get: thenify.bind(instance) })
+  server[kAvvio] = true
 
   server[afterKey] = function (func) {
     if (typeof func !== 'function') {
@@ -187,6 +189,8 @@ function assertPlugin (plugin) {
     throw new Error('plugin must be a function or a promise')
   }
 }
+
+Boot.prototype[kAvvio] = true
 
 // load a plugin
 Boot.prototype.use = function (plugin, opts) {
@@ -344,7 +348,11 @@ function thenify () {
   // await server.ready() as ready() resolves
   // with the server, end we will end up here
   // because of automatic promise chaining.
-  if (this.booted) return
+  if (this.booted) {
+    debug('thenify returning null because we are already booted')
+    return
+  }
+  debug('thenify')
   const p = this._loadRegistered()
   return p.then.bind(p)
 }
@@ -359,14 +367,14 @@ function callWithCbOrNextTick (func, cb, context) {
   if (func.length === 0) {
     this._error = err
     res = func()
-    if (res && typeof res.then === 'function') {
+    if (res && !res[kAvvio] && typeof res.then === 'function') {
       res.then(() => process.nextTick(cb), (e) => process.nextTick(cb, e))
     } else {
       process.nextTick(cb)
     }
   } else if (func.length === 1) {
     res = func(err)
-    if (res && typeof res.then === 'function') {
+    if (res && !res[kAvvio] && typeof res.then === 'function') {
       res.then(() => process.nextTick(cb), (e) => process.nextTick(cb, e))
     } else {
       process.nextTick(cb)
