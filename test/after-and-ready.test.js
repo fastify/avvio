@@ -753,3 +753,37 @@ test('preReady event (errored)', (t) => {
     t.is(order.shift(), 3)
   })
 })
+
+test('after return self', (t) => {
+  t.plan(6)
+
+  const app = boot()
+  let pluginLoaded = false
+  let afterCalled = false
+  let second = false
+
+  app.use(function (s, opts, done) {
+    t.notOk(afterCalled, 'after not called')
+    pluginLoaded = true
+    done()
+  })
+
+  app.after(function () {
+    t.ok(pluginLoaded, 'afterred!')
+    afterCalled = true
+    // happens with after(() => app.use(..))
+    return app
+  })
+
+  app.use(function (s, opts, done) {
+    t.ok(afterCalled, 'after called')
+    second = true
+    done()
+  })
+
+  app.on('start', () => {
+    t.ok(afterCalled, 'after called')
+    t.ok(pluginLoaded, 'plugin loaded')
+    t.ok(second, 'second plugin loaded')
+  })
+})
