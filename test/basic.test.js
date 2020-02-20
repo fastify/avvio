@@ -318,3 +318,41 @@ test('throws correctly if registering after ready', (t) => {
     }, 'root plugin has already booted')
   })
 })
+
+test('preReady errors must be managed', (t) => {
+  t.plan(2)
+
+  const app = boot()
+
+  app.use((f, opts, cb) => {
+    cb()
+  })
+
+  app.on('preReady', () => {
+    throw new Error('boom')
+  })
+
+  app.ready(err => {
+    t.pass('ready function is called')
+    t.equal(err.message, 'boom')
+  })
+})
+
+test('preReady errors do not override plugin\'s errors', (t) => {
+  t.plan(2)
+
+  const app = boot()
+
+  app.use((f, opts, cb) => {
+    cb(new Error('baam'))
+  })
+
+  app.on('preReady', () => {
+    throw new Error('boom')
+  })
+
+  app.ready(err => {
+    t.pass('ready function is called')
+    t.equal(err.message, 'baam')
+  })
+})
