@@ -28,9 +28,9 @@ function getName (func) {
 }
 
 function Plugin (parent, func, optsOrFunc, isAfter, timeout) {
+  this.started = false
   this.func = func
   this.opts = optsOrFunc
-  this.deferred = false
   this.onFinish = null
   this.parent = parent
   this.timeout = timeout === undefined ? parent._timeout : timeout
@@ -38,8 +38,9 @@ function Plugin (parent, func, optsOrFunc, isAfter, timeout) {
   this.isAfter = isAfter
   this.q = fastq(parent, loadPlugin, 1)
   this.q.pause()
-  this.asyncQ = fastq(parent, (resolve, cb) => {
-    resolve(this.server)
+  this._error = null
+  this.asyncQ = fastq(parent, (done, cb) => {
+    done(this._error || this.parent._error)
     cb()
   }, 1)
   this.asyncQ.pause()
@@ -83,12 +84,10 @@ Plugin.prototype.exec = function (server, cb) {
       return
     }
 
+    this._error = err
+
     if (err) {
       debug('exec errored', name)
-
-      // In case of errors, we need to kickstart
-      // the asyncQ as it won't get started otherwise
-      this.asyncQ.resume()
     } else {
       debug('exec completed', name)
     }
@@ -114,19 +113,12 @@ Plugin.prototype.exec = function (server, cb) {
     }, this.timeout)
   }
 
+  this.started = true
   this.emit('start', this.server ? this.server.name : null, this.name, Date.now())
   var promise = func(this.server, this.opts, done)
 
   if (promise && typeof promise.then === 'function') {
     debug('resolving promise', name)
-    queueMicrotask(() => {
-      if (this.asyncQ.length() > 0) {
-        this.server.after(() => {
-          this.asyncQ.resume()
-        })
-      }
-      this.q.resume()
-    })
 
     promise.then(
       () => process.nextTick(done),
@@ -140,8 +132,31 @@ Plugin.prototype.enqueue = function (obj, cb) {
   this.q.push(obj, cb)
 }
 
+Plugin.prototype.pushToAsyncQ = function (fn) {
+  if (!this.server) {
+    this.on('start', () => this._pushToAsyncQ(fn))
+    return
+  }
+
+  this._pushToAsyncQ(fn)
+}
+
+Plugin.prototype._pushToAsyncQ = function (fn) {
+  debug('_pushToAsyncQ', this.name)
+  if (this.asyncQ.length() === 0) {
+    this.server.after((err, cb) => {
+      this.q.pause()
+      debug('resuming asyncQ', this.name)
+      this.asyncQ.resume()
+      process.nextTick(cb, err)
+    })
+  }
+  this.asyncQ.push(fn)
+  this.q.resume()
+}
+
 Plugin.prototype.finish = function (err, cb) {
-  debug('finish', this.name)
+  debug('finish', this.name, err)
   const done = () => {
     if (this.loaded) {
       return
@@ -155,18 +170,19 @@ Plugin.prototype.finish = function (err, cb) {
   }
 
   if (err) {
+    this.asyncQ.resume()
     done()
     return
   }
 
   const check = () => {
-    debug('check', this.name, this.q.length(), this.q.running())
+    debug('check', this.name, this.q.length(), this.q.running(), this.asyncQ.length())
     if (this.q.length() === 0 && this.q.running() === 0) {
       if (this.asyncQ.length() > 0) {
         this.asyncQ.drain = () => {
           this.asyncQ.drain = noop
           this.asyncQ.pause()
-          check()
+          queueMicrotask(check)
         }
         this.asyncQ.resume()
       } else {
@@ -181,12 +197,12 @@ Plugin.prototype.finish = function (err, cb) {
 
         // we defer the check, as a safety net for things
         // that might be scheduled in the loading callback
-        process.nextTick(check)
+        queueMicrotask(check)
       }
     }
   }
 
-  process.nextTick(check)
+  queueMicrotask(check)
 
   // we start loading the dependents plugins only once
   // the current level is finished

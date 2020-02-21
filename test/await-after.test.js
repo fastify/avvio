@@ -27,6 +27,27 @@ test('await after - nested plugins with same tick callbacks', async (t) => {
   t.pass('reachable')
 })
 
+test('await after without server', async (t) => {
+  const app = boot()
+
+  let secondLoaded = false
+
+  app.use(async (app) => {
+    t.pass('plugin init')
+    app.use(async () => {
+      t.pass('plugin2 init')
+      await sleep(1)
+      secondLoaded = true
+    })
+  })
+  await app.after()
+  t.pass('reachable')
+  t.is(secondLoaded, true)
+
+  await app.ready()
+  t.pass('reachable')
+})
+
 test('await after - nested plugins with future tick callbacks', async (t) => {
   const app = {}
   boot(app)
@@ -308,4 +329,17 @@ test('without autostart and with override', async (t) => {
   })
 
   await app.ready()
+})
+
+test('stop processing after errors', async (t) => {
+  const app = boot()
+
+  try {
+    await app.use(async function first (app) {
+      t.pass('first should be loaded')
+      throw new Error('kaboom')
+    })
+  } catch (e) {
+    t.is(e.message, 'kaboom')
+  }
 })

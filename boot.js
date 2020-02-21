@@ -198,11 +198,17 @@ Boot.prototype.use = function (plugin, opts) {
   return this
 }
 
-Boot.prototype._loadRegistered = function (plugin) {
-  plugin = plugin || this._lastUsed
-  return new Promise((resolve) => {
+Boot.prototype._loadRegistered = function () {
+  const plugin = this._current[0]
+  return new Promise((resolve, reject) => {
+    var weNeedToStart = !this.started && !this.booted
     if (plugin && !plugin.loaded) {
-      plugin.asyncQ.push(() => {
+      debug('_loadRegistered deferring promise', plugin.name)
+      plugin.pushToAsyncQ((err) => {
+        if (err) {
+          reject(err)
+          return
+        }
         resolve()
       })
     } else {
@@ -211,7 +217,7 @@ Boot.prototype._loadRegistered = function (plugin) {
 
     // if the root plugin is not loaded, let's resume that
     // so one can use after() befor calling ready
-    if (!this.started && !this.booted) {
+    if (weNeedToStart) {
       this._root.q.resume()
     }
   })
@@ -253,6 +259,10 @@ Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
 }
 
 Boot.prototype.after = function (func) {
+  if (!func) {
+    return this._loadRegistered()
+  }
+
   this._addPlugin(_after.bind(this), {}, true)
 
   function _after (s, opts, done) {
