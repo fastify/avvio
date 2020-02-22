@@ -339,7 +339,7 @@ test('preReady errors must be managed', (t) => {
 })
 
 test('preReady errors do not override plugin\'s errors', (t) => {
-  t.plan(2)
+  t.plan(3)
 
   const app = boot()
 
@@ -348,6 +348,7 @@ test('preReady errors do not override plugin\'s errors', (t) => {
   })
 
   app.on('preReady', () => {
+    t.pass('preReady is executed')
     throw new Error('boom')
   })
 

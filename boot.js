@@ -155,11 +155,10 @@ function Boot (server, opts, done) {
       if (this._readyQ.length() === 0) {
         throw err
       }
-      this._readyQ.resume()
     } else {
       this.booted = true
-      this._readyQ.resume()
     }
+    this._readyQ.resume()
   })
 }
 
