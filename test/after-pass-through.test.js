@@ -8,15 +8,17 @@ boot(app)
 
 t.plan(5)
 
+const e = new Error('kaboom')
+
 app.use(function (f, opts) {
-  return Promise.reject(new Error('kaboom'))
+  return Promise.reject(e)
 }).after(function (err, cb) {
-  t.pass('this is just called')
+  t.is(err, e)
   cb(err)
 }).after(function () {
   t.pass('this is just called')
 }).after(function (err, cb) {
-  t.pass('this is just called')
+  t.is(err, e)
   cb(err)
 })
 

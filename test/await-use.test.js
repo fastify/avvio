@@ -104,30 +104,34 @@ test('await use - await and use chaining', async (t) => {
   t.pass('reachable')
 })
 
+function thenableRejects (t, thenable, err) {
+  return t.rejects(async () => { await thenable }, err)
+}
+
 test('await use - error handling, async throw', async (t) => {
   const app = {}
   boot(app)
 
-  t.plan(1)
+  t.plan(2)
 
-  await app.use(async (f, opts) => {
+  await thenableRejects(t, app.use(async (f, opts) => {
     throw Error('kaboom')
-  })
+  }), Error('kaboom'))
 
-  t.rejects(() => app.ready(), Error('kaboom'))
+  await t.rejects(app.ready(), Error('kaboom'))
 })
 
 test('await use - error handling, async throw, nested', async (t) => {
   const app = {}
   boot(app)
 
-  t.plan(1)
+  t.plan(3)
 
-  await app.use(async (f, opts) => {
-    await app.use(async (f, opts) => {
+  await thenableRejects(t, app.use(async (f, opts) => {
+    await thenableRejects(t, app.use(async (f, opts) => {
       throw Error('kaboom')
-    })
-  })
+    }), Error('kaboom'))
+  }, Error('kaboom')))
 
   t.rejects(() => app.ready(), Error('kaboom'))
 })
@@ -136,11 +140,11 @@ test('await use - error handling, same tick cb err', async (t) => {
   const app = {}
   boot(app)
 
-  t.plan(1)
+  t.plan(2)
 
-  await app.use((f, opts, cb) => {
+  await thenableRejects(t, app.use((f, opts, cb) => {
     cb(Error('kaboom'))
-  })
+  }), Error('kaboom'))
 
   t.rejects(() => app.ready(), Error('kaboom'))
 })
@@ -149,14 +153,14 @@ test('await use - error handling, same tick cb err, nested', async (t) => {
   const app = {}
   boot(app)
 
-  t.plan(1)
+  t.plan(2)
 
-  await app.use((f, opts, cb) => {
+  await thenableRejects(t, app.use((f, opts, cb) => {
     app.use((f, opts, cb) => {
       cb(Error('kaboom'))
     })
     cb()
-  })
+  }), Error('kaboom'))
 
   t.rejects(() => app.ready(), Error('kaboom'))
 })
@@ -165,11 +169,11 @@ test('await use - error handling, future tick cb err', async (t) => {
   const app = {}
   boot(app)
 
-  t.plan(1)
+  t.plan(2)
 
-  await app.use((f, opts, cb) => {
+  await thenableRejects(t, app.use((f, opts, cb) => {
     setImmediate(() => { cb(Error('kaboom')) })
-  })
+  }), Error('kaboom'))
 
   t.rejects(() => app.ready(), Error('kaboom'))
 })
@@ -178,14 +182,14 @@ test('await use - error handling, future tick cb err, nested', async (t) => {
   const app = {}
   boot(app)
 
-  t.plan(1)
+  t.plan(2)
 
-  await app.use((f, opts, cb) => {
+  await thenableRejects(t, app.use((f, opts, cb) => {
     app.use((f, opts, cb) => {
       setImmediate(() => { cb(Error('kaboom')) })
     })
     cb()
-  })
+  }), Error('kaboom'))
 
   t.rejects(() => app.ready(), Error('kaboom'))
 })
