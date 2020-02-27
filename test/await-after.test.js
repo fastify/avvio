@@ -134,7 +134,7 @@ test('await after - promise returning function plugins + promise chaining', asyn
   t.pass('reachable')
 })
 
-test('await after - error handling, async throw', { only: true }, async (t) => {
+test('await after - error handling, async throw', async (t) => {
   const app = {}
   boot(app)
 
