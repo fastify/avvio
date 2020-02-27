@@ -138,51 +138,55 @@ test('await after - error handling, async throw', async (t) => {
   const app = {}
   boot(app)
 
-  t.plan(1)
+  t.plan(2)
+
+  const e = new Error('kaboom')
 
   app.use(async (f, opts) => {
     throw Error('kaboom')
   })
 
-  await app.after()
+  await t.rejects(app.after(), e)
 
-  t.rejects(() => app.ready(), Error('kaboom'))
+  await t.rejects(() => app.ready(), Error('kaboom'))
 })
 
 test('await after - error handling, async throw, nested', async (t) => {
   const app = {}
   boot(app)
 
-  t.plan(1)
+  t.plan(2)
+
+  const e = new Error('kaboom')
 
   app.use(async (f, opts) => {
     app.use(async (f, opts) => {
-      throw Error('kaboom')
+      throw e
     })
   })
-  await app.after()
 
-  t.rejects(() => app.ready(), Error('kaboom'))
+  await t.rejects(app.after())
+  await t.rejects(() => app.ready(), e)
 })
 
 test('await after - error handling, same tick cb err', async (t) => {
   const app = {}
   boot(app)
 
-  t.plan(1)
+  t.plan(2)
 
   app.use((f, opts, cb) => {
     cb(Error('kaboom'))
   })
-  await app.after()
-  t.rejects(() => app.ready(), Error('kaboom'))
+  await t.rejects(app.after())
+  await t.rejects(app.ready(), Error('kaboom'))
 })
 
 test('await after - error handling, same tick cb err, nested', async (t) => {
   const app = {}
   boot(app)
 
-  t.plan(1)
+  t.plan(2)
 
   app.use((f, opts, cb) => {
     app.use((f, opts, cb) => {
@@ -190,28 +194,30 @@ test('await after - error handling, same tick cb err, nested', async (t) => {
     })
     cb()
   })
-  await app.after()
-  t.rejects(() => app.ready(), Error('kaboom'))
+
+  await t.rejects(app.after())
+  await t.rejects(app.ready(), Error('kaboom'))
 })
 
 test('await after - error handling, future tick cb err', async (t) => {
   const app = {}
   boot(app)
 
-  t.plan(1)
+  t.plan(2)
 
   app.use((f, opts, cb) => {
     setImmediate(() => { cb(Error('kaboom')) })
   })
-  await app.after()
-  t.rejects(() => app.ready(), Error('kaboom'))
+
+  await t.rejects(app.after())
+  await t.rejects(app.ready(), Error('kaboom'))
 })
 
 test('await after - error handling, future tick cb err, nested', async (t) => {
   const app = {}
   boot(app)
 
-  t.plan(1)
+  t.plan(2)
 
   app.use((f, opts, cb) => {
     app.use((f, opts, cb) => {
@@ -219,8 +225,8 @@ test('await after - error handling, future tick cb err, nested', async (t) => {
     })
     cb()
   })
-  await app.after()
-  t.rejects(() => app.ready(), Error('kaboom'))
+  await t.rejects(app.after(), Error('kaboom'))
+  await t.rejects(app.ready(), Error('kaboom'))
 })
 
 test('await after complex scenario', async (t) => {
@@ -332,6 +338,8 @@ test('without autostart and with override', async (t) => {
 })
 
 test('stop processing after errors', async (t) => {
+  t.plan(2)
+
   const app = boot()
 
   try {

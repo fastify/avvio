@@ -145,6 +145,7 @@ Plugin.prototype._pushToAsyncQ = function (fn) {
   debug('_pushToAsyncQ', this.name)
   if (this.asyncQ.length() === 0) {
     this.server.after((err, cb) => {
+      this._error = err
       this.q.pause()
       debug('resuming asyncQ', this.name)
       this.asyncQ.resume()
