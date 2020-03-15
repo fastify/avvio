@@ -307,6 +307,21 @@ test('booted should be set before ready', (t) => {
   })
 })
 
+test('start should be emitted after ready resolves', (t) => {
+  t.plan(1)
+
+  const app = boot()
+  let ready = false
+
+  app.ready().then(function () {
+    ready = true
+  })
+
+  app.on('start', function () {
+    t.is(ready, true)
+  })
+})
+
 test('throws correctly if registering after ready', (t) => {
   t.plan(1)
 
