@@ -169,7 +169,7 @@ test('await after - error handling, async throw, nested', async (t) => {
   await t.rejects(() => app.ready(), e)
 })
 
-test('await after - error handling, same tick cb err', { only: true }, async (t) => {
+test('await after - error handling, same tick cb err', async (t) => {
   const app = {}
   boot(app)
 
