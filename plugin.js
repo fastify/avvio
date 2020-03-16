@@ -1,4 +1,5 @@
 'use strict'
+
 const queueMicrotask = require('queue-microtask')
 const fastq = require('fastq')
 const EE = require('events').EventEmitter
@@ -27,6 +28,17 @@ function getName (func) {
   return func.toString().split('\n').slice(0, 2).map(s => s.trim()).join(' -- ')
 }
 
+function promise () {
+  const obj = {}
+
+  obj.promise = new Promise((resolve, reject) => {
+    obj.resolve = resolve
+    obj.reject = reject
+  })
+
+  return obj
+}
+
 function Plugin (parent, func, optsOrFunc, isAfter, timeout) {
   this.started = false
   this.func = func
@@ -39,12 +51,8 @@ function Plugin (parent, func, optsOrFunc, isAfter, timeout) {
   this.q = fastq(parent, loadPlugin, 1)
   this.q.pause()
   this._error = null
-  this.asyncQ = fastq(parent, (done, cb) => {
-    done(this._error || this.parent._error)
-    cb()
-  }, 1)
-  this.asyncQ.pause()
   this.loaded = false
+  this._promise = null
 
   // always start the queue in the next tick
   // because we try to attach subsequent call to use()
@@ -126,34 +134,49 @@ Plugin.prototype.exec = function (server, cb) {
   }
 }
 
+Plugin.prototype.loadedSoFar = function () {
+  if (this.loaded) {
+    return Promise.resolve()
+  }
+
+  const setup = () => {
+    this.server.after((err, cb) => {
+      this._error = err
+      this.q.pause()
+      debug('resolving promise', this.name)
+
+      if (err) {
+        this._promise.reject(err)
+      } else {
+        this._promise.resolve()
+      }
+      this._promise = null
+
+      process.nextTick(cb, err)
+    })
+    this.q.resume()
+  }
+
+  let res
+
+  if (!this._promise) {
+    this._promise = promise()
+    res = this._promise.promise
+
+    if (!this.server) {
+      this.on('start', setup)
+    } else {
+      setup()
+    }
+  }
+
+  return res
+}
+
 Plugin.prototype.enqueue = function (obj, cb) {
   debug('enqueue', this.name, obj.name)
   this.emit('enqueue', this.server ? this.server.name : null, this.name, Date.now())
   this.q.push(obj, cb)
-}
-
-Plugin.prototype.pushToAsyncQ = function (fn) {
-  if (!this.server) {
-    this.on('start', () => this._pushToAsyncQ(fn))
-    return
-  }
-
-  this._pushToAsyncQ(fn)
-}
-
-Plugin.prototype._pushToAsyncQ = function (fn) {
-  debug('_pushToAsyncQ', this.name)
-  if (this.asyncQ.length() === 0) {
-    this.server.after((err, cb) => {
-      this._error = err
-      this.q.pause()
-      debug('resuming asyncQ', this.name)
-      this.asyncQ.resume()
-      process.nextTick(cb, err)
-    })
-  }
-  this.asyncQ.push(fn)
-  this.q.resume()
 }
 
 Plugin.prototype.finish = function (err, cb) {
@@ -171,21 +194,25 @@ Plugin.prototype.finish = function (err, cb) {
   }
 
   if (err) {
-    this.asyncQ.resume()
+    if (this._promise) {
+      this._promise.reject(err)
+      this._promise = null
+    }
     done()
     return
   }
 
   const check = () => {
-    debug('check', this.name, this.q.length(), this.q.running(), this.asyncQ.length())
+    debug('check', this.name, this.q.length(), this.q.running(), this._promise)
     if (this.q.length() === 0 && this.q.running() === 0) {
-      if (this.asyncQ.length() > 0) {
-        this.asyncQ.drain = () => {
-          this.asyncQ.drain = noop
-          this.asyncQ.pause()
+      if (this._promise) {
+        const wrap = () => {
+          debug('wrap')
           queueMicrotask(check)
         }
-        this.asyncQ.resume()
+        this._promise.resolve()
+        this._promise.promise.then(wrap, wrap)
+        this._promise = null
       } else {
         done()
       }

@@ -205,27 +205,19 @@ Boot.prototype.use = function (plugin, opts) {
 
 Boot.prototype._loadRegistered = function () {
   const plugin = this._current[0]
-  return new Promise((resolve, reject) => {
-    var weNeedToStart = !this.started && !this.booted
-    if (plugin && !plugin.loaded) {
-      debug('_loadRegistered deferring promise', plugin.name)
-      plugin.pushToAsyncQ((err) => {
-        if (err) {
-          reject(err)
-          return
-        }
-        resolve()
-      })
-    } else {
-      resolve()
-    }
+  const weNeedToStart = !this.started && !this.booted
 
-    // if the root plugin is not loaded, let's resume that
-    // so one can use after() befor calling ready
-    if (weNeedToStart) {
-      this._root.q.resume()
-    }
-  })
+  // if the root plugin is not loaded, let's resume that
+  // so one can use after() befor calling ready
+  if (weNeedToStart) {
+    process.nextTick(() => this._root.q.resume())
+  }
+
+  if (!plugin) {
+    return Promise.resolve()
+  }
+
+  return plugin.loadedSoFar()
 }
 
 Object.defineProperty(Boot.prototype, 'then', { get: thenify })
