@@ -308,7 +308,7 @@ test('after trigger override', t => {
 
   app
     .use(function first (s, opts, cb) {
-      t.equals(s.count, 1, 'asd')
+      t.equals(s.count, 1, 'should trigger override')
       cb()
     })
     .after(function () {

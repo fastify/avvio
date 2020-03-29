@@ -260,7 +260,7 @@ Boot.prototype.after = function (func) {
     return this._loadRegistered()
   }
 
-  const afterFunctionCountArgs = (func.length + (func.constructor.name === 'AsyncFunction' ? 1 : 0)) || 3
+  const afterFunctionCountArgs = (func.length + (func.constructor.name === 'AsyncFunction' ? 1 : 0)) || true
   this._addPlugin(_after.bind(this), {}, afterFunctionCountArgs)
 
   function _after (s, opts, done) {

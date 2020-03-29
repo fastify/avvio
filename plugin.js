@@ -142,10 +142,7 @@ Plugin.prototype.loadedSoFar = function () {
   }
 
   const setup = () => {
-    console.log('.............', this.server)
     this.server.after((err, cb) => {
-      console.log('.............')
-
       this._error = err
       this.q.pause()
       debug('resolving promise', this.name)
