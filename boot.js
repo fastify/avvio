@@ -260,7 +260,8 @@ Boot.prototype.after = function (func) {
     return this._loadRegistered()
   }
 
-  this._addPlugin(_after.bind(this), {}, true)
+  const afterFunctionCountArgs = (func.length + (func.constructor.name === 'AsyncFunction' ? 1 : 0)) || 3
+  this._addPlugin(_after.bind(this), {}, afterFunctionCountArgs)
 
   function _after (s, opts, done) {
     callWithCbOrNextTick.call(this, func, done)

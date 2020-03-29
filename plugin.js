@@ -74,7 +74,9 @@ Plugin.prototype.exec = function (server, cb) {
   }
 
   try {
-    this.server = this.parent.override(server, func, this.opts)
+    if (!this.isAfter || this.isAfter === 3) {
+      this.server = this.parent.override(server, func, this.opts)
+    }
   } catch (err) {
     debug('override errored', name)
     return cb(err)
@@ -140,7 +142,10 @@ Plugin.prototype.loadedSoFar = function () {
   }
 
   const setup = () => {
+    console.log('.............', this.server)
     this.server.after((err, cb) => {
+      console.log('.............')
+
       this._error = err
       this.q.pause()
       debug('resolving promise', this.name)
