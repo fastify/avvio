@@ -167,6 +167,10 @@ Plugin.prototype.loadedSoFar = function () {
 
     if (!this.server) {
       this.on('start', setup)
+      this.parent.on('error', (err) => {
+        this._promise.reject(err)
+        this._promise = null
+      })
     } else {
       setup()
     }
@@ -199,6 +203,7 @@ Plugin.prototype.finish = function (err, cb) {
     if (this._promise) {
       this._promise.reject(err)
       this._promise = null
+      this.emit('error', err)
     }
     done()
     return
@@ -212,7 +217,13 @@ Plugin.prototype.finish = function (err, cb) {
           debug('wrap')
           queueMicrotask(check)
         }
-        this._promise.resolve()
+
+        if (this._error || (this.parent && this.parent._error)) {
+          this._promise.reject(this._error || (this.parent && this.parent._error))
+        } else {
+          this._promise.resolve()
+        }
+
         this._promise.promise.then(wrap, wrap)
         this._promise = null
       } else {
