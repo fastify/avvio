@@ -166,9 +166,15 @@ Plugin.prototype.loadedSoFar = function () {
     res = this._promise.promise
 
     if (!this.server) {
-      this.on('start', setup)
-      this.parent.on('error', (err) => {
-        this._promise.reject(err)
+      this.parent.once('finish', (err) => {
+        this._error = err
+        this.q.pause()
+        debug('resolving promise', this.name)
+        if (err) {
+          this._promise.reject(err)
+        } else {
+          this._promise.resolve()
+        }
         this._promise = null
       })
     } else {
@@ -183,6 +189,16 @@ Plugin.prototype.enqueue = function (obj, cb) {
   debug('enqueue', this.name, obj.name)
   this.emit('enqueue', this.server ? this.server.name : null, this.name, Date.now())
   this.q.push(obj, cb)
+}
+
+Plugin.prototype.bubbleError = function () {
+  if (this._error) {
+    return this._error
+  }
+  if (this.parent) {
+    return this.parent._error
+  }
+  return undefined
 }
 
 Plugin.prototype.finish = function (err, cb) {
@@ -218,8 +234,9 @@ Plugin.prototype.finish = function (err, cb) {
           queueMicrotask(check)
         }
 
-        if (this._error || (this.parent && this.parent._error)) {
-          this._promise.reject(this._error || (this.parent && this.parent._error))
+        const berror = this.bubbleError()
+        if (berror) {
+          this._promise.reject(berror)
         } else {
           this._promise.resolve()
         }
@@ -271,6 +288,7 @@ function loadPlugin (toLoad, cb) {
   toLoad.exec((last && last.server) || this._server, (err) => {
     toLoad.finish(err, (err) => {
       this._current.shift()
+      this.emit('finish', err)
       cb(err)
     })
   })
