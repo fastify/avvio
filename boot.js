@@ -138,7 +138,7 @@ function Boot (server, opts, done) {
   }
 
   this._doStart = null
-  this._root = new Plugin(this, root.bind(this), opts, noop, 0)
+  this._root = new Plugin(this, root.bind(this), opts, false, 0)
   this._root.once('start', (serverName, funcName, time) => {
     const nodeId = this.pluginTree.start(null, funcName, time)
     this._root.once('loaded', (serverName, funcName, time) => {

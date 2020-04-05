@@ -291,3 +291,52 @@ test('override can receive options function', (t) => {
     cb()
   }, p => ({ hello: p.bar }))
 })
+
+test('after trigger override', t => {
+  t.plan(8)
+
+  const server = { count: 0 }
+  const app = boot(server)
+
+  let overrideCalls = 0
+  app.override = function (s, fn, opts) {
+    overrideCalls++
+    const res = Object.create(s)
+    res.count = res.count + 1
+    return res
+  }
+
+  app
+    .use(function first (s, opts, cb) {
+      t.equals(s.count, 1, 'should trigger override')
+      cb()
+    })
+    .after(function () {
+      t.equals(overrideCalls, 1, 'after with 0 parameter should not trigger override')
+    })
+    .after(function (err) {
+      if (err) throw err
+      t.equals(overrideCalls, 1, 'after with 1 parameter should not trigger override')
+    })
+    .after(function (err, done) {
+      if (err) throw err
+      t.equals(overrideCalls, 1, 'after with 2 parameters should not trigger override')
+      done()
+    })
+    .after(function (err, context, done) {
+      if (err) throw err
+      t.equals(overrideCalls, 1, 'after with 3 parameters should not trigger override')
+      done()
+    })
+    .after(async function () {
+      t.equals(overrideCalls, 1, 'async after with 0 parameter should not trigger override')
+    })
+    .after(async function (err) {
+      if (err) throw err
+      t.equals(overrideCalls, 1, 'async after with 1 parameter should not trigger override')
+    })
+    .after(async function (err, context) {
+      if (err) throw err
+      t.equals(overrideCalls, 1, 'async after with 2 parameters should not trigger override')
+    })
+})

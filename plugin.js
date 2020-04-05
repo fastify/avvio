@@ -73,11 +73,14 @@ Plugin.prototype.exec = function (server, cb) {
     return
   }
 
-  try {
-    this.server = this.parent.override(server, func, this.opts)
-  } catch (err) {
-    debug('override errored', name)
-    return cb(err)
+  if (!this.isAfter) {
+    // Skip override for after
+    try {
+      this.server = this.parent.override(server, func, this.opts)
+    } catch (err) {
+      debug('override errored', name)
+      return cb(err)
+    }
   }
 
   this.opts = typeof this.opts === 'function' ? this.opts(this.server) : this.opts

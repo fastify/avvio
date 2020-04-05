@@ -331,7 +331,7 @@ test('without autostart and with override', async (t) => {
   await app.after()
 
   await app.use(async (app) => {
-    t.is(app.count, 5) // 5 because there are 2 after()
+    t.is(app.count, 3)
   })
 
   await app.ready()
