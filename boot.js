@@ -138,7 +138,7 @@ function Boot (server, opts, done) {
   }
 
   this._doStart = null
-  this._root = new Plugin(this, root.bind(this), opts, noop, 0)
+  this._root = new Plugin(this, root.bind(this), opts, false, 0)
   this._root.once('start', (serverName, funcName, time) => {
     const nodeId = this.pluginTree.start(null, funcName, time)
     this._root.once('loaded', (serverName, funcName, time) => {
@@ -260,8 +260,7 @@ Boot.prototype.after = function (func) {
     return this._loadRegistered()
   }
 
-  const afterFunctionCountArgs = (func.length + (func.constructor.name === 'AsyncFunction' ? 1 : 0)) || true
-  this._addPlugin(_after.bind(this), {}, afterFunctionCountArgs)
+  this._addPlugin(_after.bind(this), {}, true)
 
   function _after (s, opts, done) {
     callWithCbOrNextTick.call(this, func, done)

@@ -325,18 +325,18 @@ test('after trigger override', t => {
     })
     .after(function (err, context, done) {
       if (err) throw err
-      t.equals(overrideCalls, 2, 'after with 3 parameters should trigger override')
+      t.equals(overrideCalls, 1, 'after with 3 parameters should not trigger override')
       done()
     })
     .after(async function () {
-      t.equals(overrideCalls, 2, 'async after with 0 parameter should not trigger override')
+      t.equals(overrideCalls, 1, 'async after with 0 parameter should not trigger override')
     })
     .after(async function (err) {
       if (err) throw err
-      t.equals(overrideCalls, 2, 'async after with 1 parameter should not trigger override')
+      t.equals(overrideCalls, 1, 'async after with 1 parameter should not trigger override')
     })
     .after(async function (err, context) {
       if (err) throw err
-      t.equals(overrideCalls, 3, 'async after with 2 parameters should trigger override')
+      t.equals(overrideCalls, 1, 'async after with 2 parameters should not trigger override')
     })
 })

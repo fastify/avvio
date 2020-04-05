@@ -73,13 +73,14 @@ Plugin.prototype.exec = function (server, cb) {
     return
   }
 
-  try {
-    if (!this.isAfter || this.isAfter === 3) {
+  if (!this.isAfter) {
+    // Skip override for after
+    try {
       this.server = this.parent.override(server, func, this.opts)
+    } catch (err) {
+      debug('override errored', name)
+      return cb(err)
     }
-  } catch (err) {
-    debug('override errored', name)
-    return cb(err)
   }
 
   this.opts = typeof this.opts === 'function' ? this.opts(this.server) : this.opts
@@ -166,17 +167,7 @@ Plugin.prototype.loadedSoFar = function () {
     res = this._promise.promise
 
     if (!this.server) {
-      this.parent.once('finish', (err) => {
-        this._error = err
-        this.q.pause()
-        debug('resolving promise', this.name)
-        if (err) {
-          this._promise.reject(err)
-        } else {
-          this._promise.resolve()
-        }
-        this._promise = null
-      })
+      this.on('start', setup)
     } else {
       setup()
     }
@@ -189,16 +180,6 @@ Plugin.prototype.enqueue = function (obj, cb) {
   debug('enqueue', this.name, obj.name)
   this.emit('enqueue', this.server ? this.server.name : null, this.name, Date.now())
   this.q.push(obj, cb)
-}
-
-Plugin.prototype.bubbleError = function () {
-  if (this._error) {
-    return this._error
-  }
-  if (this.parent) {
-    return this.parent._error
-  }
-  return undefined
 }
 
 Plugin.prototype.finish = function (err, cb) {
@@ -219,7 +200,6 @@ Plugin.prototype.finish = function (err, cb) {
     if (this._promise) {
       this._promise.reject(err)
       this._promise = null
-      this.emit('error', err)
     }
     done()
     return
@@ -233,14 +213,7 @@ Plugin.prototype.finish = function (err, cb) {
           debug('wrap')
           queueMicrotask(check)
         }
-
-        const berror = this.bubbleError()
-        if (berror) {
-          this._promise.reject(berror)
-        } else {
-          this._promise.resolve()
-        }
-
+        this._promise.resolve()
         this._promise.promise.then(wrap, wrap)
         this._promise = null
       } else {
@@ -288,7 +261,6 @@ function loadPlugin (toLoad, cb) {
   toLoad.exec((last && last.server) || this._server, (err) => {
     toLoad.finish(err, (err) => {
       this._current.shift()
-      this.emit('finish', err)
       cb(err)
     })
   })
