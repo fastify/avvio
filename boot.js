@@ -340,10 +340,47 @@ function callWithCbOrNextTick (func, cb, context) {
     } else {
       process.nextTick(cb)
     }
-  } else if (func.length === 2) {
-    func(err, cb)
   } else {
-    func(err, context, cb)
+    if (this._timeout === 0) {
+      if (func.length === 2) {
+        func(err, cb)
+      } else {
+        func(err, context, cb)
+      }
+    } else {
+      timeoutCall.call(this, func, err, context, cb)
+    }
+  }
+}
+
+function timeoutCall (func, rootErr, context, cb) {
+  const name = func.name
+  debug('setting up ready timeout', name, this._timeout)
+  let timer = setTimeout(() => {
+    debug('timed out', name)
+    timer = null
+    const toutErr = new Error(`ERR_AVVIO_READY_TIMEOUT: plugin did not start in time: ${name}`)
+    toutErr.code = 'ERR_AVVIO_READY_TIMEOUT'
+    toutErr.fn = func
+    this._error = toutErr
+    cb(toutErr)
+  }, this._timeout)
+
+  if (func.length === 2) {
+    func(rootErr, timeoutCb.bind(this))
+  } else {
+    func(rootErr, context, timeoutCb.bind(this))
+  }
+
+  function timeoutCb (err) {
+    if (timer) {
+      clearTimeout(timer)
+      this._error = rootErr || err
+      cb(this._error)
+    } else {
+      // timeout has been triggered
+      // can not call cb twice
+    }
   }
 }
 

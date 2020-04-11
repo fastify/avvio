@@ -107,3 +107,90 @@ test('throw in override without autostart', (t) => {
     })
   }, 20)
 })
+
+test('timeout without calling next in ready and ignoring the error', (t) => {
+  t.plan(11)
+  const app = boot({}, {
+    timeout: 10, // 10 ms
+    autostart: false
+  })
+
+  let preReady = false
+
+  app.use(function one (app, opts, next) {
+    t.pass('loaded')
+    app.ready(function readyOk (err, done) {
+      t.notOk(err)
+      t.pass('first ready called')
+      done()
+    })
+    next()
+  })
+
+  app.on('preReady', () => {
+    t.pass('preReady should be called')
+    preReady = true
+  })
+
+  app.on('start', () => {
+    t.pass('start should be called')
+  })
+
+  app.ready(function onReadyWithoutDone (err, done) {
+    t.pass('wrong ready called')
+    t.ok(preReady, 'preReady already called')
+    t.notOk(err)
+    // done() // Don't call done
+  })
+
+  app.ready(function onReadyTwo (err) {
+    t.ok(err)
+    t.strictEqual(err.message, 'ERR_AVVIO_READY_TIMEOUT: plugin did not start in time: onReadyWithoutDone')
+    t.strictEqual(err.code, 'ERR_AVVIO_READY_TIMEOUT')
+    // don't rethrow the error
+  })
+
+  app.start()
+})
+
+test('timeout without calling next in ready and rethrowing the error', (t) => {
+  t.plan(11)
+  const app = boot({}, {
+    timeout: 10, // 10 ms
+    autostart: true
+  })
+
+  app.use(function one (app, opts, next) {
+    t.pass('loaded')
+    app.ready(function readyOk (err, done) {
+      t.ok(err)
+      t.strictEqual(err.message, 'ERR_AVVIO_READY_TIMEOUT: plugin did not start in time: onReadyWithoutDone')
+      t.strictEqual(err.code, 'ERR_AVVIO_READY_TIMEOUT')
+      done(err)
+    })
+    next()
+  })
+
+  app.on('preReady', () => {
+    t.pass('preReady should be called')
+  })
+
+  app.on('start', () => {
+    t.pass('start should be called in any case')
+  })
+
+  app.ready(function onReadyWithoutDone (err, done) {
+    t.pass('wrong ready called')
+    t.notOk(err)
+    // done() // Don't call done
+  })
+
+  app.ready(function onReadyTwo (err, done) {
+    t.ok(err)
+    t.strictEqual(err.message, 'ERR_AVVIO_READY_TIMEOUT: plugin did not start in time: onReadyWithoutDone')
+    t.strictEqual(err.code, 'ERR_AVVIO_READY_TIMEOUT')
+    done(err)
+  })
+
+  app.start()
+})
