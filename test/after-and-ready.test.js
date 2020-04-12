@@ -754,7 +754,7 @@ test('preReady event (errored)', (t) => {
   })
 })
 
-test('after 1 param swallows errors with server and timeout', { only: true }, (t) => {
+test('after 1 param swallows errors with server and timeout', (t) => {
   t.plan(3)
 
   const server = {}
