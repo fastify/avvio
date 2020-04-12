@@ -421,7 +421,7 @@ function timeoutCall (func, rootErr, context, cb) {
   function timeoutCb (err) {
     if (timer) {
       clearTimeout(timer)
-      this._error = rootErr || err
+      this._error = err
       cb(this._error)
     } else {
       // timeout has been triggered

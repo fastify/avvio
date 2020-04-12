@@ -787,3 +787,27 @@ test('after return self', (t) => {
     t.ok(second, 'second plugin loaded')
   })
 })
+
+test('after 1 param swallows errors with server and timeout', (t) => {
+  t.plan(3)
+
+  const server = {}
+  boot(server, { autostart: false, timeout: 1000 })
+
+  server.use(function first (server, opts, done) {
+    t.pass('first called')
+    done(new Error('kaboom'))
+  })
+
+  server.use(function second (server, opts, done) {
+    t.fail('We should not be here')
+  })
+
+  server.after(function (err) {
+    t.ok(err)
+  })
+
+  server.ready(function (err) {
+    t.error(err)
+  })
+})
