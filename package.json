@@ -5,7 +5,7 @@
   "main": "boot.js",
   "scripts": {
     "typescript": "tsc --project ./test/types/tsconfig.json",
-    "test": "standard && tap --no-esm --no-ts --no-jsx -J test/*test.js && npm run typescript"
+    "test": "standard && tap -J test/*test.js && npm run typescript"
   },
   "precommit": "test",
   "repository": {
