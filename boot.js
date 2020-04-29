@@ -30,7 +30,7 @@ function wrap (server, opts, instance) {
 
   server[useKey] = function (fn, opts) {
     instance.use(fn, opts)
-    return instance
+    return this
   }
 
   Object.defineProperty(server, 'then', { get: thenify.bind(instance) })
