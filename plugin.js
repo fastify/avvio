@@ -171,6 +171,8 @@ Plugin.prototype.loadedSoFar = function () {
     } else {
       setup()
     }
+  } else {
+    res = Promise.resolve()
   }
 
   return res
