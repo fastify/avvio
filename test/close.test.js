@@ -357,9 +357,8 @@ test('onClose with 1 parameter', (t) => {
   const app = boot(server)
 
   app.use(function (instance, opts, next) {
-    instance.onClose(function (done) {
+    instance.onClose(function (context) {
       t.is(arguments.length, 1)
-      done()
     })
     next()
   })
@@ -447,23 +446,35 @@ test('close without a cb returns a promise when attaching to a server', (t) => {
   })
 })
 
-test('close with async onClose handlers', (t) => {
-  t.plan(5)
+test('close with async onClose handlers', t => {
+  t.plan(7)
 
   const app = boot()
-  var order = [1, 2, 3, 4]
+  var order = [1, 2, 3, 4, 5, 6]
 
   app.onClose(() => {
+    return new Promise(resolve => setTimeout(resolve, 500)).then(() => {
+      t.is(order.shift(), 5)
+    })
+  })
+
+  app.onClose(() => {
+    t.is(order.shift(), 4)
+  })
+
+  app.onClose(instance => {
     return new Promise(resolve => setTimeout(resolve, 500)).then(() => {
       t.is(order.shift(), 3)
     })
   })
 
-  app.onClose(() => {
-    t.is(order.shift(), 2)
+  app.onClose(async instance => {
+    return new Promise(resolve => setTimeout(resolve, 500)).then(() => {
+      t.is(order.shift(), 2)
+    })
   })
 
-  app.onClose((instance) => {
+  app.onClose(async () => {
     return new Promise(resolve => setTimeout(resolve, 500)).then(() => {
       t.is(order.shift(), 1)
     })
@@ -471,7 +482,7 @@ test('close with async onClose handlers', (t) => {
 
   app.on('start', () => {
     app.close(() => {
-      t.is(order.shift(), 4)
+      t.is(order.shift(), 6)
       t.pass('Closed in the correct order')
     })
   })

@@ -466,11 +466,20 @@ function closeWithCbOrNextTick (func, cb, context) {
 function encapsulateTwoParam (func, that) {
   return _encapsulateTwoParam.bind(that)
   function _encapsulateTwoParam (context, cb) {
+    var res
     if (func.length === 0) {
       func()
       process.nextTick(cb)
     } else if (func.length === 1) {
-      func(cb)
+      res = func(this)
+
+      if (res && res.then) {
+        res.then(function () {
+          process.nextTick(cb)
+        }, cb)
+      } else {
+        process.nextTick(cb)
+      }
     } else {
       func(this, cb)
     }
