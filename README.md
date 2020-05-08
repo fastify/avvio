@@ -1,7 +1,6 @@
 # avvio
 
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](http://standardjs.com/)
- [![Build Status](https://travis-ci.org/mcollina/avvio.svg)](https://travis-ci.org/mcollina/avvio)
 
 Asynchronous bootstrapping is hard, different things can go wrong, *error handling* and *load order* just to name a few. The aim of this module is to make it simple.
 
