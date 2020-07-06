@@ -104,8 +104,8 @@ test('await use - await and use chaining', async (t) => {
   t.pass('reachable')
 })
 
-function thenableRejects (t, thenable, err) {
-  return t.rejects(async () => { await thenable }, err)
+function thenableRejects (t, thenable, err, msg) {
+  return t.rejects(async () => { await thenable }, err, msg)
 }
 
 test('await use - error handling, async throw', async (t) => {
@@ -125,13 +125,13 @@ test('await use - error handling, async throw, nested', async (t) => {
   const app = {}
   boot(app)
 
-  t.plan(3)
+  t.plan(2)
 
-  await thenableRejects(t, app.use(async (f, opts) => {
-    await thenableRejects(t, app.use(async (f, opts) => {
+  await thenableRejects(t, app.use(async function a (f, opts) {
+    await app.use(async function b (f, opts) {
       throw Error('kaboom')
-    }), Error('kaboom'))
-  }, Error('kaboom')))
+    })
+  }, Error('kaboom')), 'b')
 
   t.rejects(() => app.ready(), Error('kaboom'))
 })

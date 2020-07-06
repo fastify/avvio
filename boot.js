@@ -359,9 +359,18 @@ function thenify () {
     debug('thenify returning null because we are already booted')
     return
   }
+  if (this._doNotWrap) {
+    this._doNotWrap = false
+    return
+  }
   debug('thenify')
-  const p = this._loadRegistered()
-  return p.then.bind(p)
+  return (resolve, reject) => {
+    const p = this._loadRegistered()
+    return p.then(() => {
+      this._doNotWrap = true
+      return resolve(this._server)
+    }, reject)
+  }
 }
 
 function callWithCbOrNextTick (func, cb, context) {

@@ -113,14 +113,15 @@ test('await after - promise returning function plugins + promise chaining', asyn
   const app = {}
   boot(app)
 
-  t.plan(6)
+  t.plan(7)
 
   app.use((f, opts) => {
     t.pass('plugin init')
     return app.use((f, opts) => {
       t.pass('plugin2 init')
       return Promise.resolve()
-    }).then(() => {
+    }).then((f2) => {
+      t.is(f2, f)
       t.pass('reachable')
       return 'test'
     }).then((val) => {
