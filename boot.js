@@ -7,6 +7,7 @@ const TimeTree = require('./time-tree')
 const Plugin = require('./plugin')
 const debug = require('debug')('avvio')
 const kAvvio = Symbol('kAvvio')
+const kThenifyDoNotWrap = Symbol('kThenifyDoNotWrap')
 
 function wrap (server, opts, instance) {
   const expose = opts.expose || {}
@@ -359,9 +360,24 @@ function thenify () {
     debug('thenify returning null because we are already booted')
     return
   }
+
+  // Calling resolve(this._server) would fetch the then
+  // property on the server, which will lead it here.
+  // If we do not break the recursion, we will loop
+  // forever.
+  if (this[kThenifyDoNotWrap]) {
+    this[kThenifyDoNotWrap] = false
+    return
+  }
+
   debug('thenify')
-  const p = this._loadRegistered()
-  return p.then.bind(p)
+  return (resolve, reject) => {
+    const p = this._loadRegistered()
+    return p.then(() => {
+      this[kThenifyDoNotWrap] = true
+      return resolve(this._server)
+    }, reject)
+  }
 }
 
 function callWithCbOrNextTick (func, cb, context) {

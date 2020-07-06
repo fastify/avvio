@@ -129,7 +129,7 @@ Plugin.prototype.exec = function (server, cb) {
   var promise = func(this.server, this.opts, done)
 
   if (promise && typeof promise.then === 'function') {
-    debug('resolving promise', name)
+    debug('exec: resolving promise', name)
 
     promise.then(
       () => process.nextTick(done),
@@ -146,11 +146,12 @@ Plugin.prototype.loadedSoFar = function () {
     this.server.after((err, cb) => {
       this._error = err
       this.q.pause()
-      debug('resolving promise', this.name)
 
       if (err) {
+        debug('rejecting promise', this.name, err)
         this._promise.reject(err)
       } else {
+        debug('resolving promise', this.name)
         this._promise.resolve()
       }
       this._promise = null
