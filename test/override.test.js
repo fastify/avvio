@@ -340,3 +340,35 @@ test('after trigger override', t => {
       t.equals(overrideCalls, 1, 'async after with 2 parameters should not trigger override')
     })
 })
+
+test('custom inheritance override in after', (t) => {
+  t.plan(6)
+
+  const server = { count: 0 }
+  const app = boot(server)
+
+  app.override = function (s) {
+    const res = Object.create(s)
+    res.count = res.count + 1
+
+    return res
+  }
+
+  app.use(function first (s1, opts, cb) {
+    t.notEqual(s1, server)
+    t.ok(server.isPrototypeOf(s1))
+    t.equal(s1.count, 1)
+    s1.after(() => {
+      s1.use(second)
+    })
+
+    cb()
+
+    function second (s2, opts, cb) {
+      t.notEqual(s2, s1)
+      t.ok(s1.isPrototypeOf(s2))
+      t.equal(s2.count, 2)
+      cb()
+    }
+  })
+})
