@@ -329,11 +329,20 @@ Boot.prototype.ready = function (func) {
     this._readyQ.push(readyPromiseCB)
     this.start()
 
+    /**
+     * The `encapsulateThreeParam` let callback function
+     * bind to the right server instance.
+     * In promises we need to track the last server
+     * instance loaded, the first one in the _current queue.
+     */
+    const relativeContext = this._current[0].server
+
     function readyPromiseCB (err, context, done) {
+      // the context is always binded to the root server
       if (err) {
         reject(err)
       } else {
-        resolve(context)
+        resolve(relativeContext)
       }
       process.nextTick(done)
     }
