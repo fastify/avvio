@@ -196,6 +196,57 @@ test('if the after/ready callback has two parameters, the first one must be the 
   })
 })
 
+test('if the after/ready async, the returns must be the context generated', (t) => {
+  t.plan(3)
+
+  const server = { my: 'server', index: 0 }
+  const app = boot(server)
+  app.override = function (old) {
+    return { ...old, index: old.index + 1 }
+  }
+
+  app.use(function (s, opts, done) {
+    s.use(function (s, opts, done) {
+      s.ready().then(itself => t.deepEqual(itself, s, 'deep deep'))
+      done()
+    })
+    s.ready().then(itself => t.deepEqual(itself, s, 'deep'))
+    done()
+  })
+
+  app.ready().then(itself => t.deepEqual(itself, server, 'outer'))
+})
+
+test('if the after/ready callback, the returns must be the context generated', (t) => {
+  t.plan(3)
+
+  const server = { my: 'server', index: 0 }
+  const app = boot(server)
+  app.override = function (old) {
+    return { ...old, index: old.index + 1 }
+  }
+
+  app.use(function (s, opts, done) {
+    s.use(function (s, opts, done) {
+      s.ready((_, itself, done) => {
+        t.deepEqual(itself, s, 'deep deep')
+        done()
+      })
+      done()
+    })
+    s.ready((_, itself, done) => {
+      t.deepEqual(itself, s, 'deep')
+      done()
+    })
+    done()
+  })
+
+  app.ready((_, itself, done) => {
+    t.deepEqual(itself, server, 'outer')
+    done()
+  })
+})
+
 test('error should come in the first after - one parameter', (t) => {
   t.plan(3)
 
