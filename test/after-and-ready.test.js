@@ -202,7 +202,9 @@ test('if the after/ready async, the returns must be the context generated', (t) 
   const server = { my: 'server', index: 0 }
   const app = boot(server)
   app.override = function (old) {
-    return { ...old, index: old.index + 1 }
+    const newserver = Object.create(old)
+    newserver.index = old.index + 1
+    return newserver
   }
 
   app.use(function (s, opts, done) {
@@ -223,7 +225,9 @@ test('if the after/ready callback, the returns must be the context generated', (
   const server = { my: 'server', index: 0 }
   const app = boot(server)
   app.override = function (old) {
-    return { ...old, index: old.index + 1 }
+    const newserver = Object.create(old)
+    newserver.index = old.index + 1
+    return newserver
   }
 
   app.use(function (s, opts, done) {
