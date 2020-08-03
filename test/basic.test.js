@@ -372,3 +372,27 @@ test('preReady errors do not override plugin\'s errors', (t) => {
     t.equal(err.message, 'baam')
   })
 })
+
+test('support faux modules', (t) => {
+  t.plan(4)
+
+  const app = boot()
+  var after = false
+
+  // Faux modules are modules built with TypeScript
+  // or Babel that they export a .default property.
+  app.use({
+    default: function (server, opts, done) {
+      t.equal(server, app, 'the first argument is the server')
+      t.deepEqual(opts, {}, 'no options')
+      t.ok(after, 'delayed execution')
+      done()
+    }
+  })
+
+  after = true
+
+  app.on('start', () => {
+    t.pass('booted')
+  })
+})

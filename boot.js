@@ -191,9 +191,15 @@ Boot.prototype.override = function (server, func, opts) {
 }
 
 function assertPlugin (plugin) {
+  // Faux modules are modules built with TypeScript
+  // or Babel that they export a .default property.
+  if (plugin && typeof plugin === 'object' && typeof plugin.default === 'function') {
+    plugin = plugin.default
+  }
   if (!(plugin && (typeof plugin === 'function' || typeof plugin.then === 'function'))) {
     throw new Error('plugin must be a function or a promise')
   }
+  return plugin
 }
 
 Boot.prototype[kAvvio] = true
@@ -224,7 +230,7 @@ Boot.prototype._loadRegistered = function () {
 Object.defineProperty(Boot.prototype, 'then', { get: thenify })
 
 Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
-  assertPlugin(plugin)
+  plugin = assertPlugin(plugin)
   opts = opts || {}
 
   if (this.booted) {
