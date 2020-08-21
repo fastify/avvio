@@ -38,7 +38,7 @@
     "standard": "^14.3.3",
     "tap": "^14.0.0",
     "then-sleep": "^1.0.1",
-    "typescript": "^3.8.3"
+    "typescript": "^4.0.2"
   },
   "dependencies": {
     "archy": "^1.0.0",
