@@ -7,17 +7,26 @@ const inherits = require('util').inherits
 const debug = require('debug')('avvio')
 const CODE_PLUGIN_TIMEOUT = 'ERR_AVVIO_PLUGIN_TIMEOUT'
 
-function getName (func) {
-  // let's see if this is a file, and in that case use that
-  // this is common for plugins
-  const cache = require.cache
-  const keys = Object.keys(cache)
-
-  // eslint-disable-next-line no-var
-  for (var i = 0; i < keys.length; i++) {
-    if (cache[keys[i]].exports === func) {
-      return keys[i]
+/* eslint-disable node/no-deprecated-api */
+const modules = new WeakMap()
+const superLoaders = { ...require.extensions }
+for (const extension of Object.keys(require.extensions)) {
+  require.extensions[extension] = function (module, filename) {
+    const result = superLoaders[extension](module, filename)
+    if (module.exports && typeof module.exports === 'function') {
+      modules.set(module.exports, filename)
     }
+    return result
+  }
+}
+/* eslint-enable node/no-deprecated-api */
+
+function getName (func) {
+  // let's see if this is function is the exports of a file, and in that case use that file's name
+  // this is common for plugins
+  const modulePath = modules.get(func)
+  if (modulePath) {
+    return modulePath
   }
 
   // if not maybe it's a named function, so use that
