@@ -436,7 +436,7 @@ function timeoutCall (func, rootErr, context, cb) {
   let timer = setTimeout(() => {
     debug('timed out', name)
     timer = null
-    const toutErr = new Error(`ERR_AVVIO_READY_TIMEOUT: plugin did not start in time: ${name}`)
+    const toutErr = new Error(`ERR_AVVIO_READY_TIMEOUT: plugin did not start in time: ${name}. You may have forgotten to call 'done' function`)
     toutErr.code = 'ERR_AVVIO_READY_TIMEOUT'
     toutErr.fn = func
     this._error = toutErr

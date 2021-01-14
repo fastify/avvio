@@ -119,7 +119,7 @@ Plugin.prototype.exec = function (server, cb) {
     timer = setTimeout(function () {
       debug('timed out', name)
       timer = null
-      const err = new Error(`${CODE_PLUGIN_TIMEOUT}: plugin did not start in time: ${name}`)
+      const err = new Error(`${CODE_PLUGIN_TIMEOUT}: plugin did not start in time: ${name}. You may have forgotten to call 'done' function`)
       err.code = CODE_PLUGIN_TIMEOUT
       err.fn = func
       done(err)
