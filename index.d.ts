@@ -25,7 +25,7 @@ declare namespace avvio {
   }
 
   interface Plugin<O, I> {
-    (server: context<I>, options: O, done: (err?: Error) => void): void;
+    (server: context<I>, options: O, done: (err?: Error) => void): unknown;
   }
 
   interface Server<I> {
