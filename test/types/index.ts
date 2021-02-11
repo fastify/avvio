@@ -369,3 +369,10 @@ import * as avvio from "../../";
   // avvio with server, options and done callback
   const app = avvio(server, options, () => undefined);
 }
+
+{
+  const app = avvio();
+  const plugin: avvio.Plugin<any, any> = async (): Promise<void> => {};
+  const promise = plugin(app, {}, undefined as any);
+  (promise instanceof Promise);
+}
