@@ -612,7 +612,7 @@ avvio.on('preReady', () => {
 })
 ```
 
-The ouput is like this:
+The output is like this:
 ```json
 {
   "label": "bound root",
