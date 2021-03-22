@@ -292,14 +292,13 @@ all their dependencies. The `'start'` event is not emitted yet.
 
 Note: `await after` can be used as an awaitable alternative to `after(func)`, or `await use` can be also as a shorthand for `use(plugin); await after()`.
 
-The callback changes basing on the parameters your are giving:
+The callback changes based on the parameters you give:
 1. If no parameter is given to the callback and there is an error, that error will be passed to the next error handler.
 2. If one parameter is given to the callback, that parameter will be the `error` object.
 3. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.
 4. If three parameters are given to the callback, the first will be the `error` object, the second will be the top level `context` and the third the `done` callback.
 
-In the "no parameter" and "one parameter" variants, the callback can also
-return a `Promise`.
+In the "no parameter" and "one parameter" variants, the callback can return a `Promise`.
 
 ```js
 const server = {}
@@ -347,7 +346,7 @@ If called with a function, it returns the instance on which `after` is called, 
 
 ### await app.after() | app.after() => Promise
 
-Calling after with no function argument loads any plugins previously registered via `use` and returns a promise which resolves when all plugins registered so far have loaded.
+Calling after with no function argument loads any plugins previously registered via `use` and returns a promise, which resolves when all plugins registered so far have loaded.
 
 ```js
 async function main () {
@@ -381,7 +380,7 @@ Unlike `after` and `use`, `await after` is *not* chainable.
 
 Calls a function after all the plugins and `after` call are completed, but before `'start'` is emitted. `ready` callbacks are executed one at a time.
 
-The callback changes basing on the parameters your are giving:
+The callback changes basing on the parameters you give:
 1. If no parameter is given to the callback and there is an error, that error will be passed to the next error handler.
 2. If one parameter is given to the callback, that parameter will be the `error` object.
 3. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.
@@ -469,7 +468,7 @@ avvio(app, {
 
 ### app.override(server, plugin, options)
 
-Allows to override the instance of the server for each loading plugin.
+Allows overriding the instance of the server for each loading plugin.
 It allows the creation of an inheritance chain for the server instances.
 The first parameter is the server instance and the second is the plugin function while the third is the options object that you give to use.
 
@@ -511,7 +510,7 @@ app.use(function first (s1, opts, cb) {
 
 Registers a new callback that will be fired once then `close` api is called.
 
-The callback changes basing on the parameters your are giving:
+The callback changes basing on the parameters you give:
 1. If one parameter is given to the callback, that parameter will be the `context`.
 2. If zero or one parameter is given, the callback may return a promise
 3. If two parameters are given to the callback, the first will be the top level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, the second will be the `done` callback.
@@ -546,7 +545,7 @@ app.onClose(function (context, done) {
 })
 ```
 
-If the callback returns a promise, the next onClose callback and the close callback won't run until the promise is either resolved or rejected.
+If the callback returns a promise, the next onClose callback and the close callback will not run until the promise is either resolved or rejected.
 
 `done` must be called only once.
 Returns the instance on which `onClose` is called, to support a chainable API.
@@ -558,7 +557,7 @@ Returns the instance on which `onClose` is called, to support a chainable API.
 
 Starts the shutdown procedure, the callback is called once all the registered callbacks with `onClose` has been executed.
 
-The callback changes based on the parameters your are giving:
+The callback changes based on the parameters you give:
 1. If one parameter is given to the callback, that parameter will be the `error` object.
 2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.
 3. If three parameters are given to the callback, the first will be the `error` object, the second will be the top level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, and the third the `done` callback.
@@ -605,7 +604,7 @@ app.close()
 
 ### avvio.toJSON()
 
-Return a JSON tree rappresenting the state of the plugins and the loading time.
+Return a JSON tree representing the state of the plugins and the loading time.
 Call it on `preReady` to get the complete tree.
 
 ```js
