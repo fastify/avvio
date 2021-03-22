@@ -12,6 +12,7 @@ test('boot a plugin and then execute a call after that', (t) => {
   })
 
   const app = boot()
+  // eslint-disable-next-line no-var
   for (var i = 0; i < 12; i++) {
     app.on('preReady', noop)
   }

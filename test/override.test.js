@@ -76,7 +76,7 @@ test('custom inheritance multiple levels twice', (t) => {
     t.equal(s1.count, 1)
     s1.use(second)
     s1.use(third)
-    var prev
+    let prev
 
     cb()
 

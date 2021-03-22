@@ -26,7 +26,7 @@ test('boot an app with a plugin', (t) => {
   t.plan(4)
 
   const app = boot()
-  var after = false
+  let after = false
 
   app.use(function (server, opts, done) {
     t.equal(server, app, 'the first argument is the server')
@@ -46,7 +46,7 @@ test('boot an app with a promisified plugin', (t) => {
   t.plan(4)
 
   const app = boot()
-  var after = false
+  let after = false
 
   app.use(function (server, opts) {
     t.equal(server, app, 'the first argument is the server')
@@ -211,7 +211,7 @@ test('always loads nested plugins after the current one', (t) => {
   const server = {}
   const app = boot(server)
 
-  var second = false
+  let second = false
 
   app.use(function (s, opts, done) {
     app.use(function (s, opts, done) {
@@ -275,7 +275,7 @@ test('start with ready', (t) => {
 test('load a plugin after start()', (t) => {
   t.plan(1)
 
-  var startCalled = false
+  let startCalled = false
   const app = boot(null, {
     autostart: false
   })
@@ -377,7 +377,7 @@ test('support faux modules', (t) => {
   t.plan(4)
 
   const app = boot()
-  var after = false
+  let after = false
 
   // Faux modules are modules built with TypeScript
   // or Babel that they export a .default property.

@@ -13,6 +13,7 @@ function getName (func) {
   const cache = require.cache
   const keys = Object.keys(cache)
 
+  // eslint-disable-next-line no-var
   for (var i = 0; i < keys.length; i++) {
     if (cache[keys[i]].exports === func) {
       return keys[i]
@@ -64,8 +65,8 @@ inherits(Plugin, EE)
 
 Plugin.prototype.exec = function (server, cb) {
   const func = this.func
-  var completed = false
-  var name = this.name
+  let completed = false
+  const name = this.name
 
   if (this.parent._error && !this.isAfter) {
     debug('skipping loading of plugin as parent errored and it is not an after', name)
@@ -89,7 +90,7 @@ Plugin.prototype.exec = function (server, cb) {
 
   debug('exec', name)
 
-  var timer
+  let timer
 
   const done = (err) => {
     if (completed) {
@@ -128,7 +129,7 @@ Plugin.prototype.exec = function (server, cb) {
 
   this.started = true
   this.emit('start', this.server ? this.server.name : null, this.name, Date.now())
-  var promise = func(this.server, this.opts, done)
+  const promise = func(this.server, this.opts, done)
 
   if (promise && typeof promise.then === 'function') {
     debug('exec: resolving promise', name)
