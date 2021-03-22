@@ -7,7 +7,7 @@ test('boot an app with a plugin', (t) => {
   t.plan(4)
 
   const app = boot()
-  var last = false
+  let last = false
 
   app.use(function (server, opts, done) {
     app.onClose(() => {
@@ -267,7 +267,7 @@ test('close event', (t) => {
   t.plan(3)
 
   const app = boot()
-  var last = false
+  let last = false
 
   app.on('start', () => {
     app.close(() => {
@@ -286,7 +286,7 @@ test('close order', (t) => {
   t.plan(5)
 
   const app = boot()
-  var order = [1, 2, 3, 4]
+  const order = [1, 2, 3, 4]
 
   app.use(function (server, opts, done) {
     app.onClose(() => {
@@ -450,7 +450,7 @@ test('close with async onClose handlers', t => {
   t.plan(7)
 
   const app = boot()
-  var order = [1, 2, 3, 4, 5, 6]
+  const order = [1, 2, 3, 4, 5, 6]
 
   app.onClose(() => {
     return new Promise(resolve => setTimeout(resolve, 500)).then(() => {

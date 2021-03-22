@@ -295,7 +295,7 @@ Boot.prototype.onClose = function (func) {
 }
 
 Boot.prototype.close = function (func) {
-  var promise
+  let promise
 
   if (func) {
     if (typeof func !== 'function') {
@@ -397,8 +397,8 @@ function thenify () {
 
 function callWithCbOrNextTick (func, cb, context) {
   context = this._server
-  var err = this._error
-  var res
+  const err = this._error
+  let res
 
   // with this the error will appear just in the next after/ready callback
   this._error = null
@@ -463,9 +463,9 @@ function timeoutCall (func, rootErr, context, cb) {
 
 function closeWithCbOrNextTick (func, cb, context) {
   context = this._server
-  var isOnCloseHandler = func[this._isOnCloseHandlerKey]
+  const isOnCloseHandler = func[this._isOnCloseHandlerKey]
   if (func.length === 0 || func.length === 1) {
-    var promise
+    let promise
     if (isOnCloseHandler) {
       promise = func(context)
     } else {
@@ -497,7 +497,7 @@ function closeWithCbOrNextTick (func, cb, context) {
 function encapsulateTwoParam (func, that) {
   return _encapsulateTwoParam.bind(that)
   function _encapsulateTwoParam (context, cb) {
-    var res
+    let res
     if (func.length === 0) {
       func()
       process.nextTick(cb)
@@ -520,7 +520,7 @@ function encapsulateTwoParam (func, that) {
 function encapsulateThreeParam (func, that) {
   return _encapsulateThreeParam.bind(that)
   function _encapsulateThreeParam (err, cb) {
-    var res
+    let res
     if (!func) {
       process.nextTick(cb)
     } else if (func.length === 0) {
