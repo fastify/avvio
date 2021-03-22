@@ -12,20 +12,25 @@ on:
 
 jobs:
   test:
-    name: ${{ matrix.node-version }} ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+
     strategy:
-      fail-fast: false
       matrix:
-        os: [macOS-latest, windows-latest, ubuntu-latest]
-        node-version: [10, 12, 14]
+        node-version: [10.x, 12.x, 14.x]
+        os: [macos-latest, ubuntu-latest, windows-latest]
+
     steps:
       - uses: actions/checkout@v2
-      - name: Use Node.js ${{ matrix.node-version }}
+
+      - name: Use Node.js
         uses: actions/setup-node@v2.1.5
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Install
-        run: npm i
-      - name: Tests
-        run: npm test
+
+      - name: Install Dependencies
+        run: |
+          npm install --ignore-scripts
+
+      - name: Run Tests
+        run: |
+          npm run test
