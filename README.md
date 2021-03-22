@@ -680,7 +680,7 @@ avvio 56 ms
 
 ## Acknowledgements
 
-This project was kindly sponsored by [nearForm](http://nearform.com).
+This project was kindly sponsored by [nearForm](https://nearform.com).
 
 ## License
 
