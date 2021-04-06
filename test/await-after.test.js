@@ -21,7 +21,7 @@ test('await after - nested plugins with same tick callbacks', async (t) => {
   })
   await app.after()
   t.pass('reachable')
-  t.is(secondLoaded, true)
+  t.equal(secondLoaded, true)
 
   await app.ready()
   t.pass('reachable')
@@ -42,7 +42,7 @@ test('await after without server', async (t) => {
   })
   await app.after()
   t.pass('reachable')
-  t.is(secondLoaded, true)
+  t.equal(secondLoaded, true)
 
   await app.ready()
   t.pass('reachable')
@@ -101,7 +101,7 @@ test('await after - promise resolves to undefined', async (t) => {
       cb()
     })
     const instance = await app.after()
-    t.is(instance, undefined)
+    t.equal(instance, undefined)
   })
   t.pass('reachable')
 
@@ -121,10 +121,10 @@ test('await after - promise returning function plugins + promise chaining', asyn
       t.pass('plugin2 init')
       return Promise.resolve()
     }).then((f2) => {
-      t.is(f2, f)
+      t.equal(f2, f)
       return 'test'
     }).then((val) => {
-      t.is(val, 'test')
+      t.equal(val, 'test')
     })
   })
   await app.after()
@@ -296,14 +296,14 @@ test('without autostart', async (t) => {
   })
 
   await app.after()
-  t.is(firstLoaded, true)
-  t.is(secondLoaded, true)
+  t.equal(firstLoaded, true)
+  t.equal(secondLoaded, true)
 
   await app.use(async () => {
     thirdLoaded = true
   })
 
-  t.is(thirdLoaded, true)
+  t.equal(thirdLoaded, true)
 
   await app.ready()
 })
@@ -321,9 +321,9 @@ test('without autostart and with override', async (t) => {
   }
 
   app.use(async function first (app) {
-    t.is(app.count, 1)
+    t.equal(app.count, 1)
     app.use(async (app) => {
-      t.is(app.count, 2)
+      t.equal(app.count, 2)
       await app.after()
     })
   })
@@ -331,7 +331,7 @@ test('without autostart and with override', async (t) => {
   await app.after()
 
   await app.use(async (app) => {
-    t.is(app.count, 3)
+    t.equal(app.count, 3)
   })
 
   await app.ready()
@@ -348,6 +348,6 @@ test('stop processing after errors', async (t) => {
       throw new Error('kaboom')
     })
   } catch (e) {
-    t.is(e.message, 'kaboom')
+    t.equal(e.message, 'kaboom')
   }
 })

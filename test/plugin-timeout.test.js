@@ -17,9 +17,9 @@ test('timeout without calling next - callbacks', (t) => {
   }
   app.ready((err) => {
     t.ok(err)
-    t.strictEqual(err.fn, one)
-    t.strictEqual(err.message, message('ERR_AVVIO_PLUGIN_TIMEOUT', 'one'))
-    t.strictEqual(err.code, 'ERR_AVVIO_PLUGIN_TIMEOUT')
+    t.equal(err.fn, one)
+    t.equal(err.message, message('ERR_AVVIO_PLUGIN_TIMEOUT', 'one'))
+    t.equal(err.code, 'ERR_AVVIO_PLUGIN_TIMEOUT')
   })
 })
 
@@ -36,9 +36,9 @@ test('timeout without calling next - promises', (t) => {
   }
   app.ready((err) => {
     t.ok(err)
-    t.strictEqual(err.fn, two)
-    t.strictEqual(err.message, message('ERR_AVVIO_PLUGIN_TIMEOUT', 'two'))
-    t.strictEqual(err.code, 'ERR_AVVIO_PLUGIN_TIMEOUT')
+    t.equal(err.fn, two)
+    t.equal(err.message, message('ERR_AVVIO_PLUGIN_TIMEOUT', 'two'))
+    t.equal(err.code, 'ERR_AVVIO_PLUGIN_TIMEOUT')
   })
 })
 
@@ -50,8 +50,8 @@ test('timeout without calling next - use file as name', (t) => {
   app.use(require('./fixtures/plugin-no-next'))
   app.ready((err) => {
     t.ok(err)
-    t.strictEqual(err.message, message('ERR_AVVIO_PLUGIN_TIMEOUT', require.resolve('./fixtures/plugin-no-next')))
-    t.strictEqual(err.code, 'ERR_AVVIO_PLUGIN_TIMEOUT')
+    t.equal(err.message, message('ERR_AVVIO_PLUGIN_TIMEOUT', require.resolve('./fixtures/plugin-no-next')))
+    t.equal(err.code, 'ERR_AVVIO_PLUGIN_TIMEOUT')
   })
 })
 
@@ -66,8 +66,8 @@ test('timeout without calling next - use code as name', (t) => {
 
   app.ready((err) => {
     t.ok(err)
-    t.strictEqual(err.message, message('ERR_AVVIO_PLUGIN_TIMEOUT', 'function (app, opts, next) { -- // do not call next on purpose - code as name'))
-    t.strictEqual(err.code, 'ERR_AVVIO_PLUGIN_TIMEOUT')
+    t.equal(err.message, message('ERR_AVVIO_PLUGIN_TIMEOUT', 'function (app, opts, next) { -- // do not call next on purpose - code as name'))
+    t.equal(err.code, 'ERR_AVVIO_PLUGIN_TIMEOUT')
   })
 })
 
@@ -81,7 +81,7 @@ test('does not keep going', (t) => {
   })
   app.ready((err) => {
     t.ok(err)
-    t.strictEqual(err.message, 'kaboom')
+    t.equal(err.message, 'kaboom')
   })
 })
 
@@ -105,7 +105,7 @@ test('throw in override without autostart', (t) => {
   setTimeout(function () {
     app.ready((err) => {
       t.ok(err)
-      t.strictEqual(err.message, 'kaboom')
+      t.equal(err.message, 'kaboom')
     })
   }, 20)
 })
@@ -147,8 +147,8 @@ test('timeout without calling next in ready and ignoring the error', (t) => {
 
   app.ready(function onReadyTwo (err) {
     t.ok(err)
-    t.strictEqual(err.message, message('ERR_AVVIO_READY_TIMEOUT', 'onReadyWithoutDone'))
-    t.strictEqual(err.code, 'ERR_AVVIO_READY_TIMEOUT')
+    t.equal(err.message, message('ERR_AVVIO_READY_TIMEOUT', 'onReadyWithoutDone'))
+    t.equal(err.code, 'ERR_AVVIO_READY_TIMEOUT')
     // don't rethrow the error
   })
 
@@ -166,8 +166,8 @@ test('timeout without calling next in ready and rethrowing the error', (t) => {
     t.pass('loaded')
     app.ready(function readyOk (err, done) {
       t.ok(err)
-      t.strictEqual(err.message, message('ERR_AVVIO_READY_TIMEOUT', 'onReadyWithoutDone'))
-      t.strictEqual(err.code, 'ERR_AVVIO_READY_TIMEOUT')
+      t.equal(err.message, message('ERR_AVVIO_READY_TIMEOUT', 'onReadyWithoutDone'))
+      t.equal(err.code, 'ERR_AVVIO_READY_TIMEOUT')
       done(err)
     })
     next()
@@ -189,8 +189,8 @@ test('timeout without calling next in ready and rethrowing the error', (t) => {
 
   app.ready(function onReadyTwo (err, done) {
     t.ok(err)
-    t.strictEqual(err.message, message('ERR_AVVIO_READY_TIMEOUT', 'onReadyWithoutDone'))
-    t.strictEqual(err.code, 'ERR_AVVIO_READY_TIMEOUT')
+    t.equal(err.message, message('ERR_AVVIO_READY_TIMEOUT', 'onReadyWithoutDone'))
+    t.equal(err.code, 'ERR_AVVIO_READY_TIMEOUT')
     done(err)
   })
 

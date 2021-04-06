@@ -7,16 +7,16 @@ test('await self', async (t) => {
   const app = {}
   boot(app)
 
-  t.is(await app, app)
+  t.equal(await app, app)
 })
 
 test('await self three times', async (t) => {
   const app = {}
   boot(app)
 
-  t.is(await app, app)
-  t.is(await app, app)
-  t.is(await app, app)
+  t.equal(await app, app)
+  t.equal(await app, app)
+  t.equal(await app, app)
 })
 
 test('await self within plugin', async (t) => {
@@ -24,8 +24,8 @@ test('await self within plugin', async (t) => {
   boot(app)
 
   app.use(async (f) => {
-    t.is(await f, f)
+    t.equal(await f, f)
   })
 
-  t.is(await app, app)
+  t.equal(await app, app)
 })

@@ -21,7 +21,7 @@ test('custom inheritance', (t) => {
   }
 
   app.use(function first (s, opts, cb) {
-    t.notEqual(s, server)
+    t.not(s, server)
     t.ok(server.isPrototypeOf(s))
     cb()
   })
@@ -41,7 +41,7 @@ test('custom inheritance multiple levels', (t) => {
   }
 
   app.use(function first (s1, opts, cb) {
-    t.notEqual(s1, server)
+    t.not(s1, server)
     t.ok(server.isPrototypeOf(s1))
     t.equal(s1.count, 1)
     s1.use(second)
@@ -49,7 +49,7 @@ test('custom inheritance multiple levels', (t) => {
     cb()
 
     function second (s2, opts, cb) {
-      t.notEqual(s2, s1)
+      t.not(s2, s1)
       t.ok(s1.isPrototypeOf(s2))
       t.equal(s2.count, 2)
       cb()
@@ -71,7 +71,7 @@ test('custom inheritance multiple levels twice', (t) => {
   }
 
   app.use(function first (s1, opts, cb) {
-    t.notEqual(s1, server)
+    t.not(s1, server)
     t.ok(server.isPrototypeOf(s1))
     t.equal(s1.count, 1)
     s1.use(second)
@@ -82,14 +82,14 @@ test('custom inheritance multiple levels twice', (t) => {
 
     function second (s2, opts, cb) {
       prev = s2
-      t.notEqual(s2, s1)
+      t.not(s2, s1)
       t.ok(s1.isPrototypeOf(s2))
       t.equal(s2.count, 2)
       cb()
     }
 
     function third (s3, opts, cb) {
-      t.notEqual(s3, s1)
+      t.not(s3, s1)
       t.ok(s1.isPrototypeOf(s3))
       t.notOk(prev.isPrototypeOf(s3))
       t.equal(s3.count, 2)
@@ -112,7 +112,7 @@ test('custom inheritance multiple levels with multiple heads', (t) => {
   }
 
   app.use(function first (s1, opts, cb) {
-    t.notEqual(s1, server)
+    t.not(s1, server)
     t.ok(server.isPrototypeOf(s1))
     t.equal(s1.count, 1)
     s1.use(second)
@@ -120,7 +120,7 @@ test('custom inheritance multiple levels with multiple heads', (t) => {
     cb()
 
     function second (s2, opts, cb) {
-      t.notEqual(s2, s1)
+      t.not(s2, s1)
       t.ok(s1.isPrototypeOf(s2))
       t.equal(s2.count, 2)
       cb()
@@ -128,7 +128,7 @@ test('custom inheritance multiple levels with multiple heads', (t) => {
   })
 
   app.use(function third (s1, opts, cb) {
-    t.notEqual(s1, server)
+    t.not(s1, server)
     t.ok(server.isPrototypeOf(s1))
     t.equal(s1.count, 1)
     s1.use(fourth)
@@ -136,7 +136,7 @@ test('custom inheritance multiple levels with multiple heads', (t) => {
     cb()
 
     function fourth (s2, opts, cb) {
-      t.notEqual(s2, s1)
+      t.not(s2, s1)
       t.ok(s1.isPrototypeOf(s2))
       t.equal(s2.count, 2)
       cb()
@@ -175,7 +175,7 @@ test('fastify test case', (t) => {
   t.ok(instance.use)
 
   instance.use((i, opts, cb) => {
-    t.notEqual(i, instance)
+    t.not(i, instance)
     t.ok(instance.isPrototypeOf(i))
 
     i.add('test', noop, (err) => {
@@ -242,7 +242,7 @@ test('override can receive options object', (t) => {
 
   app.override = function (s, fn, opts) {
     t.equal(s, server)
-    t.deepEqual(opts, options)
+    t.same(opts, options)
 
     const res = Object.create(s)
     res.b = 42
@@ -251,7 +251,7 @@ test('override can receive options object', (t) => {
   }
 
   app.use(function first (s, opts, cb) {
-    t.notEqual(s, server)
+    t.not(s, server)
     t.ok(server.isPrototypeOf(s))
     cb()
   }, options)
@@ -267,7 +267,7 @@ test('override can receive options function', (t) => {
   app.override = function (s, fn, opts) {
     t.equal(s, server)
     if (typeof opts !== 'function') {
-      t.deepEqual(opts, options)
+      t.same(opts, options)
     }
 
     const res = Object.create(s)
@@ -278,7 +278,7 @@ test('override can receive options function', (t) => {
   }
 
   app.use(function first (s, opts, cb) {
-    t.notEqual(s, server)
+    t.not(s, server)
     t.ok(server.isPrototypeOf(s))
     s.foo = 'bar'
     cb()
@@ -286,7 +286,7 @@ test('override can receive options function', (t) => {
 
   app.use(function second (s, opts, cb) {
     t.notOk(s.foo)
-    t.deepEqual(opts, { hello: 'world' })
+    t.same(opts, { hello: 'world' })
     t.ok(server.isPrototypeOf(s))
     cb()
   }, p => ({ hello: p.bar }))
@@ -308,36 +308,36 @@ test('after trigger override', t => {
 
   app
     .use(function first (s, opts, cb) {
-      t.equals(s.count, 1, 'should trigger override')
+      t.equal(s.count, 1, 'should trigger override')
       cb()
     })
     .after(function () {
-      t.equals(overrideCalls, 1, 'after with 0 parameter should not trigger override')
+      t.equal(overrideCalls, 1, 'after with 0 parameter should not trigger override')
     })
     .after(function (err) {
       if (err) throw err
-      t.equals(overrideCalls, 1, 'after with 1 parameter should not trigger override')
+      t.equal(overrideCalls, 1, 'after with 1 parameter should not trigger override')
     })
     .after(function (err, done) {
       if (err) throw err
-      t.equals(overrideCalls, 1, 'after with 2 parameters should not trigger override')
+      t.equal(overrideCalls, 1, 'after with 2 parameters should not trigger override')
       done()
     })
     .after(function (err, context, done) {
       if (err) throw err
-      t.equals(overrideCalls, 1, 'after with 3 parameters should not trigger override')
+      t.equal(overrideCalls, 1, 'after with 3 parameters should not trigger override')
       done()
     })
     .after(async function () {
-      t.equals(overrideCalls, 1, 'async after with 0 parameter should not trigger override')
+      t.equal(overrideCalls, 1, 'async after with 0 parameter should not trigger override')
     })
     .after(async function (err) {
       if (err) throw err
-      t.equals(overrideCalls, 1, 'async after with 1 parameter should not trigger override')
+      t.equal(overrideCalls, 1, 'async after with 1 parameter should not trigger override')
     })
     .after(async function (err, context) {
       if (err) throw err
-      t.equals(overrideCalls, 1, 'async after with 2 parameters should not trigger override')
+      t.equal(overrideCalls, 1, 'async after with 2 parameters should not trigger override')
     })
 })
 
@@ -355,7 +355,7 @@ test('custom inheritance override in after', (t) => {
   }
 
   app.use(function first (s1, opts, cb) {
-    t.notEqual(s1, server)
+    t.not(s1, server)
     t.ok(server.isPrototypeOf(s1))
     t.equal(s1.count, 1)
     s1.after(() => {
@@ -365,7 +365,7 @@ test('custom inheritance override in after', (t) => {
     cb()
 
     function second (s2, opts, cb) {
-      t.notEqual(s2, s1)
+      t.not(s2, s1)
       t.ok(s1.isPrototypeOf(s2))
       t.equal(s2.count, 2)
       cb()

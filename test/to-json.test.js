@@ -23,7 +23,7 @@ test('to json', (t) => {
     const json = app.toJSON()
     outJson.stop = /\d*/
     outJson.diff = /\d*/
-    t.like(json, outJson)
+    t.match(json, outJson)
   })
 
   function one (s, opts, done) {
@@ -34,7 +34,7 @@ test('to json', (t) => {
       label: 'one',
       start: /\d+/
     })
-    t.like(json, outJson)
+    t.match(json, outJson)
     done()
   }
   function two (s, opts, done) {
@@ -45,7 +45,7 @@ test('to json', (t) => {
       label: 'two',
       start: /\d+/
     })
-    t.like(json, outJson)
+    t.match(json, outJson)
     done()
   }
   function three (s, opts, done) {
@@ -56,7 +56,7 @@ test('to json', (t) => {
       label: 'three',
       start: /\d+/
     })
-    t.like(json, outJson)
+    t.match(json, outJson)
     done()
   }
 })
@@ -117,7 +117,7 @@ test('to json multi-level hierarchy', (t) => {
 
   app.on('preReady', function show () {
     const json = app.toJSON()
-    t.like(json, outJson)
+    t.match(json, outJson)
   })
 
   app.override = function (s) {

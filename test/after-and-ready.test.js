@@ -207,14 +207,14 @@ test('if the after/ready async, the returns must be the context generated', (t) 
 
   app.use(function (s, opts, done) {
     s.use(function (s, opts, done) {
-      s.ready().then(itself => t.deepEqual(itself, s, 'deep deep'))
+      s.ready().then(itself => t.same(itself, s, 'deep deep'))
       done()
     })
-    s.ready().then(itself => t.deepEqual(itself, s, 'deep'))
+    s.ready().then(itself => t.same(itself, s, 'deep'))
     done()
   })
 
-  app.ready().then(itself => t.deepEqual(itself, server, 'outer'))
+  app.ready().then(itself => t.same(itself, server, 'outer'))
 })
 
 test('if the after/ready callback, the returns must be the context generated', (t) => {
@@ -229,20 +229,20 @@ test('if the after/ready callback, the returns must be the context generated', (
   app.use(function (s, opts, done) {
     s.use(function (s, opts, done) {
       s.ready((_, itself, done) => {
-        t.deepEqual(itself, s, 'deep deep')
+        t.same(itself, s, 'deep deep')
         done()
       })
       done()
     })
     s.ready((_, itself, done) => {
-      t.deepEqual(itself, s, 'deep')
+      t.same(itself, s, 'deep')
       done()
     })
     done()
   })
 
   app.ready((_, itself, done) => {
-    t.deepEqual(itself, server, 'outer')
+    t.same(itself, server, 'outer')
     done()
   })
 })
@@ -259,7 +259,7 @@ test('error should come in the first after - one parameter', (t) => {
 
   app.after(function (err) {
     t.ok(err instanceof Error)
-    t.is(err.message, 'err')
+    t.equal(err.message, 'err')
   })
 
   app.ready(function (err) {
@@ -279,7 +279,7 @@ test('error should come in the first after - two parameters', (t) => {
 
   app.after(function (err, cb) {
     t.ok(err instanceof Error)
-    t.is(err.message, 'err')
+    t.equal(err.message, 'err')
     cb()
   })
 
@@ -300,7 +300,7 @@ test('error should come in the first after - three parameter', (t) => {
 
   app.after(function (err, context, cb) {
     t.ok(err instanceof Error)
-    t.is(err.message, 'err')
+    t.equal(err.message, 'err')
     t.equal(context, server)
     cb()
   })
@@ -322,7 +322,7 @@ test('error should come in the first ready - one parameter', (t) => {
 
   app.ready(function (err) {
     t.ok(err instanceof Error)
-    t.is(err.message, 'err')
+    t.equal(err.message, 'err')
   })
 })
 
@@ -338,7 +338,7 @@ test('error should come in the first ready - two parameters', (t) => {
 
   app.ready(function (err, cb) {
     t.ok(err instanceof Error)
-    t.is(err.message, 'err')
+    t.equal(err.message, 'err')
     cb()
   })
 })
@@ -355,7 +355,7 @@ test('error should come in the first ready - three parameters', (t) => {
 
   app.ready(function (err, context, cb) {
     t.ok(err instanceof Error)
-    t.is(err.message, 'err')
+    t.equal(err.message, 'err')
     t.equal(context, server)
     cb()
   })
@@ -399,7 +399,7 @@ test('should pass the errors from after to ready', (t) => {
 
   server.use(function (s, opts, done) {
     t.equal(s, server, 'the first argument is the server')
-    t.deepEqual(opts, {}, 'no options')
+    t.same(opts, {}, 'no options')
     done()
   }).after((err, done) => {
     t.error(err)
@@ -411,7 +411,7 @@ test('should pass the errors from after to ready', (t) => {
   })
 
   server.ready(err => {
-    t.is(err.message, 'some error')
+    t.equal(err.message, 'some error')
   })
 
   app.on('start', () => {
@@ -701,11 +701,11 @@ test('preReady event', (t) => {
   })
 
   app.on('preReady', () => {
-    t.is(order.shift(), 1)
+    t.equal(order.shift(), 1)
   })
 
   app.ready(() => {
-    t.is(order.shift(), 2)
+    t.equal(order.shift(), 2)
   })
 })
 
@@ -726,19 +726,19 @@ test('preReady event (multiple)', (t) => {
   })
 
   app.on('preReady', () => {
-    t.is(order.shift(), 1)
+    t.equal(order.shift(), 1)
   })
 
   app.on('preReady', () => {
-    t.is(order.shift(), 2)
+    t.equal(order.shift(), 2)
   })
 
   app.on('preReady', () => {
-    t.is(order.shift(), 3)
+    t.equal(order.shift(), 3)
   })
 
   app.ready(() => {
-    t.is(order.shift(), 4)
+    t.equal(order.shift(), 4)
   })
 })
 
@@ -757,22 +757,22 @@ test('preReady event (nested)', (t) => {
     t.pass('second called')
 
     server.on('preReady', () => {
-      t.is(order.shift(), 3)
+      t.equal(order.shift(), 3)
     })
 
     done()
   })
 
   app.on('preReady', () => {
-    t.is(order.shift(), 1)
+    t.equal(order.shift(), 1)
   })
 
   app.on('preReady', () => {
-    t.is(order.shift(), 2)
+    t.equal(order.shift(), 2)
   })
 
   app.ready(() => {
-    t.is(order.shift(), 4)
+    t.equal(order.shift(), 4)
   })
 })
 
@@ -792,16 +792,16 @@ test('preReady event (errored)', (t) => {
   })
 
   app.on('preReady', () => {
-    t.is(order.shift(), 1)
+    t.equal(order.shift(), 1)
   })
 
   app.on('preReady', () => {
-    t.is(order.shift(), 2)
+    t.equal(order.shift(), 2)
   })
 
   app.ready((err) => {
     t.ok(err)
-    t.is(order.shift(), 3)
+    t.equal(order.shift(), 3)
   })
 })
 

@@ -10,5 +10,5 @@ test('support import', async (t) => {
 
   await app.ready()
 
-  t.is(app.loaded, true)
+  t.equal(app.loaded, true)
 })

@@ -77,7 +77,7 @@ test('await use - promise returning function plugins + promise chaining', async 
       t.pass('reachable')
       return 'test'
     }).then((val) => {
-      t.is(val, 'test')
+      t.equal(val, 'test')
     })
   })
   t.pass('reachable')
