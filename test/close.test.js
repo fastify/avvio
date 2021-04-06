@@ -182,7 +182,7 @@ test('onClose should handle errors', (t) => {
 
   app.on('start', () => {
     app.close(err => {
-      t.is(err.message, 'some error')
+      t.equal(err.message, 'some error')
       t.pass('Closed in the correct order')
     })
   })
@@ -199,16 +199,16 @@ test('#54 close handlers should receive same parameters when queue is not empty'
   })
   app.on('start', () => {
     app.close((err, done) => {
-      t.is(err, null)
+      t.equal(err, null)
       t.pass('Closed in the correct order')
       setImmediate(done)
     })
     app.close(err => {
-      t.is(err, null)
+      t.equal(err, null)
       t.pass('Closed in the correct order')
     })
     app.close(err => {
-      t.is(err, null)
+      t.equal(err, null)
       t.pass('Closed in the correct order')
     })
   })
@@ -234,7 +234,7 @@ test('onClose should handle errors / 2', (t) => {
 
   app.on('start', () => {
     app.close(err => {
-      t.is(err.message, 'some error')
+      t.equal(err.message, 'some error')
       t.pass('Closed in the correct order')
     })
   })
@@ -290,12 +290,12 @@ test('close order', (t) => {
 
   app.use(function (server, opts, done) {
     app.onClose(() => {
-      t.is(order.shift(), 3)
+      t.equal(order.shift(), 3)
     })
 
     app.use(function (server, opts, done) {
       app.onClose(() => {
-        t.is(order.shift(), 2)
+        t.equal(order.shift(), 2)
       })
       done()
     })
@@ -304,14 +304,14 @@ test('close order', (t) => {
 
   app.use(function (server, opts, done) {
     app.onClose(() => {
-      t.is(order.shift(), 1)
+      t.equal(order.shift(), 1)
     })
     done()
   })
 
   app.on('start', () => {
     app.close(() => {
-      t.is(order.shift(), 4)
+      t.equal(order.shift(), 4)
       t.pass('Closed in the correct order')
     })
   })
@@ -339,7 +339,7 @@ test('onClose with 0 parameters', (t) => {
   app.use(function (instance, opts, next) {
     instance.onClose(function () {
       t.ok('called')
-      t.is(arguments.length, 0)
+      t.equal(arguments.length, 0)
     })
     next()
   })
@@ -358,7 +358,7 @@ test('onClose with 1 parameter', (t) => {
 
   app.use(function (instance, opts, next) {
     instance.onClose(function (context) {
-      t.is(arguments.length, 1)
+      t.equal(arguments.length, 1)
     })
     next()
   })
@@ -454,35 +454,35 @@ test('close with async onClose handlers', t => {
 
   app.onClose(() => {
     return new Promise(resolve => setTimeout(resolve, 500)).then(() => {
-      t.is(order.shift(), 5)
+      t.equal(order.shift(), 5)
     })
   })
 
   app.onClose(() => {
-    t.is(order.shift(), 4)
+    t.equal(order.shift(), 4)
   })
 
   app.onClose(instance => {
     return new Promise(resolve => setTimeout(resolve, 500)).then(() => {
-      t.is(order.shift(), 3)
+      t.equal(order.shift(), 3)
     })
   })
 
   app.onClose(async instance => {
     return new Promise(resolve => setTimeout(resolve, 500)).then(() => {
-      t.is(order.shift(), 2)
+      t.equal(order.shift(), 2)
     })
   })
 
   app.onClose(async () => {
     return new Promise(resolve => setTimeout(resolve, 500)).then(() => {
-      t.is(order.shift(), 1)
+      t.equal(order.shift(), 1)
     })
   })
 
   app.on('start', () => {
     app.close(() => {
-      t.is(order.shift(), 6)
+      t.equal(order.shift(), 6)
       t.pass('Closed in the correct order')
     })
   })

@@ -39,7 +39,7 @@ test('pretty print', t => {
     const print = app.prettyPrint()
     const lines = print.split('\n')
 
-    t.equals(lines.length, linesExpected.length)
+    t.equal(lines.length, linesExpected.length)
     lines.forEach((l, i) => {
       t.match(l, linesExpected[i])
     })

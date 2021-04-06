@@ -1,4 +1,4 @@
-esm: false
 ts: false
 jsx: false
 flow: false
+check-coverage: false

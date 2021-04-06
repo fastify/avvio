@@ -32,7 +32,7 @@ app.load(function (app, opts, done) {
 app.after((cb) => {
   t.ok(loaded, 'plugin loaded')
   const server = app.listen(3000, cb)
-  t.tearDown(server.close.bind(server))
+  t.teardown(server.close.bind(server))
 })
 
 app.ready(() => {

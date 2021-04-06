@@ -134,7 +134,7 @@ test('async ready plugin registration (errored)', async (t) => {
     await app.ready()
     t.fail('we should not be here')
   } catch (err) {
-    t.is(err.message, 'kaboom')
+    t.equal(err.message, 'kaboom')
   }
 })
 

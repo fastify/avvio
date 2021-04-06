@@ -30,7 +30,7 @@ test('boot an app with a plugin', (t) => {
 
   app.use(function (server, opts, done) {
     t.equal(server, app, 'the first argument is the server')
-    t.deepEqual(opts, {}, 'no options')
+    t.same(opts, {}, 'no options')
     t.ok(after, 'delayed execution')
     done()
   })
@@ -50,7 +50,7 @@ test('boot an app with a promisified plugin', (t) => {
 
   app.use(function (server, opts) {
     t.equal(server, app, 'the first argument is the server')
-    t.deepEqual(opts, {}, 'no options')
+    t.same(opts, {}, 'no options')
     t.ok(after, 'delayed execution')
     return Promise.resolve()
   })
@@ -83,7 +83,7 @@ test('boot a plugin with a custom server', (t) => {
 
   app.use(function (s, opts, done) {
     t.equal(s, server, 'the first argument is the server')
-    t.deepEqual(opts, {}, 'no options')
+    t.same(opts, {}, 'no options')
     done()
   })
 
@@ -106,7 +106,7 @@ test('custom instance should inherits avvio methods', (t) => {
 
   server.use(function (s, opts, done) {
     t.equal(s, server, 'the first argument is the server')
-    t.deepEqual(opts, {}, 'no options')
+    t.same(opts, {}, 'no options')
     done()
   }).after(() => {
     t.ok('after called')
@@ -138,7 +138,7 @@ test('boot a plugin with options', (t) => {
 
   app.use(function (s, opts, done) {
     t.equal(s, server, 'the first argument is the server')
-    t.deepEqual(opts, myOpts, 'passed options')
+    t.same(opts, myOpts, 'passed options')
     done()
   }, myOpts)
 
@@ -156,7 +156,7 @@ test('boot a plugin with a function that returns the options', (t) => {
     hello: 'world'
   }
   const myOptsAsFunc = parent => {
-    t.strictEqual(parent, server)
+    t.equal(parent, server)
     return parent.myOpts
   }
 
@@ -167,7 +167,7 @@ test('boot a plugin with a function that returns the options', (t) => {
 
   app.use(function (s, opts, done) {
     t.equal(s, server, 'the first argument is the server')
-    t.deepEqual(opts, myOpts, 'passed options via function accessing parent injected variable')
+    t.same(opts, myOpts, 'passed options via function accessing parent injected variable')
     done()
   }, myOptsAsFunc)
 
@@ -318,7 +318,7 @@ test('start should be emitted after ready resolves', (t) => {
   })
 
   app.on('start', function () {
-    t.is(ready, true)
+    t.equal(ready, true)
   })
 })
 
@@ -384,7 +384,7 @@ test('support faux modules', (t) => {
   app.use({
     default: function (server, opts, done) {
       t.equal(server, app, 'the first argument is the server')
-      t.deepEqual(opts, {}, 'no options')
+      t.same(opts, {}, 'no options')
       t.ok(after, 'delayed execution')
       done()
     }
