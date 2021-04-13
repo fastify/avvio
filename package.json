@@ -10,7 +10,7 @@
   "precommit": "test",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mcollina/avvio.git"
+    "url": "git+https://github.com/fastify/avvio.git"
   },
   "keywords": [
     "async",
@@ -27,9 +27,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/mcollina/avvio/issues"
+    "url": "https://github.com/fastify/avvio/issues"
   },
-  "homepage": "https://github.com/mcollina/avvio#readme",
+  "homepage": "https://github.com/fastify/avvio#readme",
   "devDependencies": {
     "@types/node": "^14.0.1",
     "express": "^4.17.1",
