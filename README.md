@@ -94,7 +94,7 @@ async function third (instance, opts) {
 ### avvio([instance], [options], [started])
 
 Starts the avvio sequence.
-As the name suggest, `instance` is the object representing your application.
+As the name suggests, `instance` is the object representing your application.
 Avvio will add the functions `use`, `after` and `ready` to the instance.
 
 ```js
@@ -119,7 +119,7 @@ Options:
 * `expose`: a key/value property to change how `use`, `after` and `ready` are exposed.
 * `autostart`: do not start loading plugins automatically, but wait for
   a call to [`.start()`](#start)  or [`.ready()`](#ready).
-* `timeout`: the number of millis to wait a plugin to load after which
+* `timeout`: the number of millis to wait for a plugin to load after which
   it will error with code `ERR_AVVIO_PLUGIN_TIMEOUT`. Default
   `0` (disabled).
 
@@ -380,7 +380,7 @@ Unlike `after` and `use`, `await after` is *not* chainable.
 
 Calls a function after all the plugins and `after` call are completed, but before `'start'` is emitted. `ready` callbacks are executed one at a time.
 
-The callback changes basing on the parameters you give:
+The callback changes based on the parameters you give:
 1. If no parameter is given to the callback and there is an error, that error will be passed to the next error handler.
 2. If one parameter is given to the callback, that parameter will be the `error` object.
 3. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.
