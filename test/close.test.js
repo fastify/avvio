@@ -498,3 +498,46 @@ test('onClose callback must be a function', (t) => {
     done()
   })
 })
+
+test('close custom server with async onClose handlers', t => {
+  t.plan(7)
+
+  const server = {}
+  const app = boot(server)
+  const order = [1, 2, 3, 4, 5, 6]
+
+  server.onClose(() => {
+    return new Promise(resolve => setTimeout(resolve, 500)).then(() => {
+      t.equal(order.shift(), 5)
+    })
+  })
+
+  server.onClose(() => {
+    t.equal(order.shift(), 4)
+  })
+
+  server.onClose(instance => {
+    return new Promise(resolve => setTimeout(resolve, 500)).then(() => {
+      t.equal(order.shift(), 3)
+    })
+  })
+
+  server.onClose(async instance => {
+    return new Promise(resolve => setTimeout(resolve, 500)).then(() => {
+      t.equal(order.shift(), 2)
+    })
+  })
+
+  server.onClose(async () => {
+    return new Promise(resolve => setTimeout(resolve, 500)).then(() => {
+      t.equal(order.shift(), 1)
+    })
+  })
+
+  app.on('start', () => {
+    app.close(() => {
+      t.equal(order.shift(), 6)
+      t.pass('Closed in the correct order')
+    })
+  })
+})

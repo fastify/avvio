@@ -499,8 +499,14 @@ function encapsulateTwoParam (func, that) {
   function _encapsulateTwoParam (context, cb) {
     let res
     if (func.length === 0) {
-      func()
-      process.nextTick(cb)
+      res = func()
+      if (res && res.then) {
+        res.then(function () {
+          process.nextTick(cb)
+        }, cb)
+      } else {
+        process.nextTick(cb)
+      }
     } else if (func.length === 1) {
       res = func(this)
 
