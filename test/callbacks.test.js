@@ -54,7 +54,7 @@ test('reentrant with callbacks deferred', (t) => {
       try {
         s.use(third)
       } catch (err) {
-        t.equal(err.message, 'root plugin has already booted')
+        t.equal(err.message, 'Root plugin has already booted')
       }
     }, 500)
     done()

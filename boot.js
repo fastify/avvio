@@ -3,6 +3,13 @@
 const fastq = require('fastq')
 const EE = require('events').EventEmitter
 const inherits = require('util').inherits
+const {
+  AVV_ERR_EXPOSE_ALREADY_DEFINED,
+  AVV_ERR_CALLBACK_NOT_FN,
+  AVV_ERR_PLUGIN_NOT_VALID,
+  AVV_ERR_ROOT_PLG_BOOTED,
+  AVV_ERR_READY_TIMEOUT
+} = require('./lib/errors')
 const TimeTree = require('./time-tree')
 const Plugin = require('./plugin')
 const debug = require('debug')('avvio')
@@ -18,15 +25,15 @@ function wrap (server, opts, instance) {
   const closeKey = expose.close || 'close'
 
   if (server[useKey]) {
-    throw new Error(useKey + '() is already defined, specify an expose option')
+    throw new AVV_ERR_EXPOSE_ALREADY_DEFINED(useKey)
   }
 
   if (server[afterKey]) {
-    throw new Error(afterKey + '() is already defined, specify an expose option')
+    throw new AVV_ERR_EXPOSE_ALREADY_DEFINED(afterKey)
   }
 
   if (server[readyKey]) {
-    throw new Error(readyKey + '() is already defined, specify an expose option')
+    throw new AVV_ERR_EXPOSE_ALREADY_DEFINED(readyKey)
   }
 
   server[useKey] = function (fn, opts) {
@@ -47,14 +54,14 @@ function wrap (server, opts, instance) {
 
   server[readyKey] = function (func) {
     if (func && typeof func !== 'function') {
-      throw new Error('not a function')
+      throw new AVV_ERR_CALLBACK_NOT_FN(readyKey, typeof func)
     }
     return instance.ready(func ? encapsulateThreeParam(func, this) : undefined)
   }
 
   server[onCloseKey] = function (func) {
     if (typeof func !== 'function') {
-      throw new Error('not a function')
+      throw new AVV_ERR_CALLBACK_NOT_FN(onCloseKey, typeof func)
     }
     instance.onClose(encapsulateTwoParam(func, this))
     return this
@@ -62,7 +69,7 @@ function wrap (server, opts, instance) {
 
   server[closeKey] = function (func) {
     if (func && typeof func !== 'function') {
-      throw new Error('not a function')
+      throw new AVV_ERR_CALLBACK_NOT_FN(closeKey, typeof func)
     }
 
     if (func) {
@@ -197,7 +204,7 @@ function assertPlugin (plugin) {
     plugin = plugin.default
   }
   if (!(plugin && (typeof plugin === 'function' || typeof plugin.then === 'function'))) {
-    throw new Error('plugin must be a function or a promise')
+    throw new AVV_ERR_PLUGIN_NOT_VALID(typeof plugin)
   }
   return plugin
 }
@@ -234,7 +241,7 @@ Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
   opts = opts || {}
 
   if (this.booted) {
-    throw new Error('root plugin has already booted')
+    throw new AVV_ERR_ROOT_PLG_BOOTED()
   }
 
   // we always add plugins to load at the current element
@@ -249,7 +256,7 @@ Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
   })
 
   if (current.loaded) {
-    throw new Error(`Impossible to load "${obj.name}" plugin because the parent "${current.name}" was already loaded`)
+    throw new Error(obj.name, current.name)
   }
 
   // we add the plugin to be loaded at the end of the current queue
@@ -299,7 +306,7 @@ Boot.prototype.close = function (func) {
 
   if (func) {
     if (typeof func !== 'function') {
-      throw new Error('not a function')
+      throw new AVV_ERR_CALLBACK_NOT_FN('close', typeof func)
     }
   } else {
     promise = new Promise(function (resolve, reject) {
@@ -324,7 +331,7 @@ Boot.prototype.close = function (func) {
 Boot.prototype.ready = function (func) {
   if (func) {
     if (typeof func !== 'function') {
-      throw new Error('not a function')
+      throw new AVV_ERR_CALLBACK_NOT_FN('ready', typeof func)
     }
     this._readyQ.push(func)
     this.start()
@@ -436,8 +443,7 @@ function timeoutCall (func, rootErr, context, cb) {
   let timer = setTimeout(() => {
     debug('timed out', name)
     timer = null
-    const toutErr = new Error(`ERR_AVVIO_READY_TIMEOUT: plugin did not start in time: ${name}. You may have forgotten to call 'done' function or to resolve a Promise`)
-    toutErr.code = 'ERR_AVVIO_READY_TIMEOUT'
+    const toutErr = new AVV_ERR_READY_TIMEOUT(name)
     toutErr.fn = func
     this._error = toutErr
     cb(toutErr)

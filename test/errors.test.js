@@ -1,5 +1,5 @@
 const { test } = require('tap')
-const createError = require('../lib/errors')
+const { createError } = require('../lib/errors')
 
 const expectedErrorName = 'AvvioError'
 
