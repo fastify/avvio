@@ -51,7 +51,7 @@ test('chainable automatically binded', (t) => {
       boot(app)
       t.fail('error must happen')
     } catch (err) {
-      t.equal(err.message, key + '() is already defined, specify an expose option')
+      t.equal(err.message, `'${key}' () is already defined, specify an expose option`)
     }
   })
 

@@ -5,7 +5,7 @@ const fastq = require('fastq')
 const EE = require('events').EventEmitter
 const inherits = require('util').inherits
 const debug = require('debug')('avvio')
-const CODE_PLUGIN_TIMEOUT = 'ERR_AVVIO_PLUGIN_TIMEOUT'
+const { AVV_ERR_READY_TIMEOUT } = require('./lib/errors')
 
 function getName (func) {
   // let's see if this is a file, and in that case use that
@@ -120,8 +120,7 @@ Plugin.prototype.exec = function (server, cb) {
     timer = setTimeout(function () {
       debug('timed out', name)
       timer = null
-      const err = new Error(`${CODE_PLUGIN_TIMEOUT}: plugin did not start in time: ${name}. You may have forgotten to call 'done' function or to resolve a Promise`)
-      err.code = CODE_PLUGIN_TIMEOUT
+      const err = new AVV_ERR_READY_TIMEOUT(name)
       err.fn = func
       done(err)
     }, this.timeout)
