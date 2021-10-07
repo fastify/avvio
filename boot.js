@@ -141,7 +141,7 @@ function Boot (server, opts, done) {
   this._closeQ.pause()
   this._closeQ.drain = () => {
     this.emit('close')
-    // nooping this, we want to emit start only once
+    // nooping this, we want to emit close only once
     this._closeQ.drain = noop
   }
 
