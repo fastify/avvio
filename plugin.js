@@ -7,20 +7,20 @@ const inherits = require('util').inherits
 const debug = require('debug')('avvio')
 const { AVV_ERR_READY_TIMEOUT } = require('./lib/errors')
 
-function getName (func) {
-  // let's see if this is a file, and in that case use that
-  // this is common for plugins
-  const cache = require.cache
-  const keys = Object.keys(cache)
+// this symbol is assigned by fastify-plugin
+const kPluginMeta = Symbol.for('plugin-meta')
 
-  // eslint-disable-next-line no-var
-  for (var i = 0; i < keys.length; i++) {
-    if (cache[keys[i]].exports === func) {
-      return keys[i]
-    }
+function getName (func, optsOrFunc) {
+  // use explicit function metadata if set
+  if (func[kPluginMeta] && func[kPluginMeta].name) {
+    return func[kPluginMeta].name
   }
 
-  // if not maybe it's a named function, so use that
+  if (typeof optsOrFunc !== 'undefined' && typeof optsOrFunc !== 'function' && optsOrFunc.name) {
+    return optsOrFunc.name
+  }
+
+  // use the function name if it exists
   if (func.name) {
     return func.name
   }
@@ -47,7 +47,7 @@ function Plugin (parent, func, optsOrFunc, isAfter, timeout) {
   this.onFinish = null
   this.parent = parent
   this.timeout = timeout === undefined ? parent._timeout : timeout
-  this.name = getName(func)
+  this.name = getName(func, optsOrFunc)
   this.isAfter = isAfter
   this.q = fastq(parent, loadPlugin, 1)
   this.q.pause()

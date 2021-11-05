@@ -50,7 +50,7 @@ test('timeout without calling next - use file as name', (t) => {
   app.use(require('./fixtures/plugin-no-next'))
   app.ready((err) => {
     t.ok(err)
-    t.equal(err.message, message(require.resolve('./fixtures/plugin-no-next')))
+    t.equal(err.message, message('noNext'))
     t.equal(err.code, 'AVV_ERR_READY_TIMEOUT')
   })
 })
