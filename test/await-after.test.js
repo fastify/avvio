@@ -4,6 +4,8 @@ const { test } = require('tap')
 const boot = require('..')
 const { promisify } = require('util')
 const sleep = promisify(setTimeout)
+const fs = require('fs/promises')
+const path = require('path')
 
 test('await after - nested plugins with same tick callbacks', async (t) => {
   const app = {}
@@ -283,7 +285,7 @@ test('await after complex scenario', async (t) => {
 test('without autostart and sync/async plugin mix', async (t) => {
   const app = {}
   boot(app, { autostart: false })
-  t.plan(9)
+  t.plan(11)
 
   let firstLoaded = false
   let secondLoaded = false
@@ -295,7 +297,8 @@ test('without autostart and sync/async plugin mix', async (t) => {
   t.notOk(secondLoaded, 'second is not loaded')
   t.notOk(thirdLoaded, 'third is not loaded')
 
-  await sleep(10)
+  const contents = await fs.readFile(path.join(__dirname, 'fixtures', 'dummy.txt'), 'utf-8')
+  t.equal(contents, 'hello, world!')
 
   app.use(second)
   await app.after()
@@ -318,7 +321,8 @@ test('without autostart and sync/async plugin mix', async (t) => {
   }
 
   async function second () {
-    await sleep(10)
+    const contents = await fs.readFile(path.join(__dirname, 'fixtures', 'dummy.txt'), 'utf-8')
+    t.equal(contents, 'hello, world!')
     secondLoaded = true
   }
 
