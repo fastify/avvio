@@ -4,7 +4,7 @@ const { test } = require('tap')
 const boot = require('..')
 const { promisify } = require('util')
 const sleep = promisify(setTimeout)
-const fs = require('fs/promises')
+const fs = require('fs').promises
 const path = require('path')
 
 test('await after - nested plugins with same tick callbacks', async (t) => {
