@@ -4,6 +4,8 @@ const { test } = require('tap')
 const boot = require('..')
 const { promisify } = require('util')
 const sleep = promisify(setTimeout)
+const fs = require('fs').promises
+const path = require('path')
 
 test('await after - nested plugins with same tick callbacks', async (t) => {
   const app = {}
@@ -303,6 +305,77 @@ test('await after complex scenario', async (t) => {
 
   async function fourth () {
     fourthLoaded = true
+  }
+})
+
+test('without autostart and sync/async plugin mix', async (t) => {
+  const app = {}
+  boot(app, { autostart: false })
+  t.plan(22)
+
+  let firstLoaded = false
+  let secondLoaded = false
+  let thirdLoaded = false
+  let fourthLoaded = false
+
+  app.use(first)
+  await app.after()
+  t.ok(firstLoaded, 'first is loaded')
+  t.notOk(secondLoaded, 'second is not loaded')
+  t.notOk(thirdLoaded, 'third is not loaded')
+  t.notOk(fourthLoaded, 'fourth is not loaded')
+
+  const contents = await fs.readFile(path.join(__dirname, 'fixtures', 'dummy.txt'), 'utf-8')
+  t.equal(contents, 'hello, world!')
+
+  app.use(second)
+  await app.after()
+  t.ok(firstLoaded, 'first is loaded')
+  t.ok(secondLoaded, 'second is loaded')
+  t.notOk(thirdLoaded, 'third is not loaded')
+  t.notOk(fourthLoaded, 'fourth is not loaded')
+
+  await sleep(10)
+
+  app.use(third)
+  await app.after()
+  t.ok(firstLoaded, 'first is loaded')
+  t.ok(secondLoaded, 'second is loaded')
+  t.ok(thirdLoaded, 'third is loaded')
+  t.notOk(fourthLoaded, 'fourth is not loaded')
+
+  app.use(fourth)
+  t.ok(firstLoaded, 'first is loaded')
+  t.ok(secondLoaded, 'second is loaded')
+  t.ok(thirdLoaded, 'third is loaded')
+  t.notOk(fourthLoaded, 'fourth is not loaded')
+
+  await app.after()
+  t.ok(firstLoaded, 'first is loaded')
+  t.ok(secondLoaded, 'second is loaded')
+  t.ok(thirdLoaded, 'third is loaded')
+  t.ok(fourthLoaded, 'fourth is loaded')
+
+  await app.ready()
+
+  async function first () {
+    firstLoaded = true
+  }
+
+  async function second () {
+    const contents = await fs.readFile(path.join(__dirname, 'fixtures', 'dummy.txt'), 'utf-8')
+    t.equal(contents, 'hello, world!')
+    secondLoaded = true
+  }
+
+  async function third () {
+    await sleep(10)
+    thirdLoaded = true
+  }
+
+  function fourth (server, opts, done) {
+    fourthLoaded = true
+    done()
   }
 })
 

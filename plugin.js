@@ -40,6 +40,13 @@ function promise () {
   return obj
 }
 
+function loadPluginNextTick (toLoad, cb) {
+  const parent = this
+  process.nextTick(() => {
+    loadPlugin.call(parent, toLoad, cb)
+  })
+}
+
 function Plugin (parent, func, optsOrFunc, isAfter, timeout) {
   this.started = false
   this.func = func
@@ -49,7 +56,7 @@ function Plugin (parent, func, optsOrFunc, isAfter, timeout) {
   this.timeout = timeout === undefined ? parent._timeout : timeout
   this.name = getName(func, optsOrFunc)
   this.isAfter = isAfter
-  this.q = fastq(parent, loadPlugin, 1)
+  this.q = fastq(parent, loadPluginNextTick, 1)
   this.q.pause()
   this._error = null
   this.loaded = false
