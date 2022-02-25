@@ -249,7 +249,11 @@ test('await after complex scenario', async (t) => {
   t.notOk(fourthLoaded, 'fourth is not loaded')
   app.use(second)
   t.ok(firstLoaded, 'first is loaded')
-  t.ok(secondLoaded, 'second is loaded')
+  if (process.versions.node.indexOf('10') === 0) {
+    t.notOk(secondLoaded, 'second is not loaded')
+  } else {
+    t.ok(secondLoaded, 'second is loaded')
+  }
   t.notOk(thirdLoaded, 'third is not loaded')
   t.notOk(fourthLoaded, 'fourth is not loaded')
   app.use(third)
