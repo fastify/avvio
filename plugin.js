@@ -150,16 +150,18 @@ Plugin.prototype.loadedSoFar = function () {
       this._error = err
       this.q.pause()
 
-      if (err) {
-        debug('rejecting promise', this.name, err)
-        this._promise.reject(err)
-      } else {
-        debug('resolving promise', this.name)
-        this._promise.resolve()
-      }
-      this._promise = null
+      process.nextTick(() => {
+        if (err) {
+          debug('rejecting promise', this.name, err)
+          this._promise.reject(err)
+        } else {
+          debug('resolving promise', this.name)
+          this._promise.resolve()
+        }
+        this._promise = null
 
-      process.nextTick(cb, err)
+        process.nextTick(cb, err)
+      })
     })
     this.q.resume()
   }
