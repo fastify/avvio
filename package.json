@@ -1,6 +1,6 @@
 {
   "name": "avvio",
-  "version": "7.2.3",
+  "version": "7.2.4",
   "description": "Asynchronous bootstrapping of Node applications",
   "main": "boot.js",
   "scripts": {
