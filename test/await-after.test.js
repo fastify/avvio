@@ -50,6 +50,32 @@ test('await after without server', async (t) => {
   t.pass('reachable')
 })
 
+test('await after with cb functions', async (t) => {
+  const app = boot()
+  let secondLoaded = false
+  let record = ''
+
+  app.use(async (app) => {
+    t.pass('plugin init')
+    record += 'plugin|'
+    app.use(async () => {
+      t.pass('plugin2 init')
+      record += 'plugin2|'
+      await sleep(1)
+      secondLoaded = true
+    })
+  })
+  await app.after(() => {
+    record += 'after|'
+  })
+  t.pass('reachable')
+  t.equal(secondLoaded, true)
+  record += 'ready'
+  await app.ready()
+  t.pass('reachable')
+  t.equal(record, 'plugin|plugin2|after|ready')
+})
+
 test('await after - nested plugins with future tick callbacks', async (t) => {
   const app = {}
   boot(app)

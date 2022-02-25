@@ -19,6 +19,7 @@ boot.express(app)
 t.plan(2)
 
 let loaded = false
+let server
 
 app.load(function (app, opts, done) {
   loaded = true
@@ -31,12 +32,12 @@ app.load(function (app, opts, done) {
 
 app.after((cb) => {
   t.ok(loaded, 'plugin loaded')
-  const server = app.listen(3000, cb)
+  server = app.listen(0, cb)
   t.teardown(server.close.bind(server))
 })
 
 app.ready(() => {
-  http.get('http://localhost:3000').on('response', function (res) {
+  http.get(`http://localhost:${server.address().port}`).on('response', function (res) {
     let data = ''
     res.on('data', function (chunk) {
       data += chunk
