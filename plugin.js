@@ -40,13 +40,6 @@ function promise () {
   return obj
 }
 
-function loadPluginNextTick (toLoad, cb) {
-  const parent = this
-  process.nextTick(() => {
-    loadPlugin.call(parent, toLoad, cb)
-  })
-}
-
 function Plugin (parent, func, optsOrFunc, isAfter, timeout) {
   this.started = false
   this.func = func
@@ -250,6 +243,15 @@ Plugin.prototype.finish = function (err, cb) {
   // we start loading the dependents plugins only once
   // the current level is finished
   this.q.resume()
+}
+
+// delays plugin loading until the next tick to ensure any bound `_after` callbacks have a chance
+// to run prior to executing the next plugin
+function loadPluginNextTick (toLoad, cb) {
+  const parent = this
+  process.nextTick(() => {
+    loadPlugin.call(parent, toLoad, cb)
+  })
 }
 
 // loads a plugin
