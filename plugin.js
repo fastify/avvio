@@ -249,9 +249,7 @@ Plugin.prototype.finish = function (err, cb) {
 // to run prior to executing the next plugin
 function loadPluginNextTick (toLoad, cb) {
   const parent = this
-  process.nextTick(() => {
-    loadPlugin.call(parent, toLoad, cb)
-  })
+  process.nextTick(loadPlugin.bind(parent), toLoad, cb)
 }
 
 // loads a plugin
