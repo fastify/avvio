@@ -311,7 +311,7 @@ test('await after complex scenario', async (t) => {
 test('without autostart and sync/async plugin mix', async (t) => {
   const app = {}
   boot(app, { autostart: false })
-  t.plan(22)
+  t.plan(21)
 
   let firstLoaded = false
   let secondLoaded = false
@@ -324,9 +324,6 @@ test('without autostart and sync/async plugin mix', async (t) => {
   t.notOk(secondLoaded, 'second is not loaded')
   t.notOk(thirdLoaded, 'third is not loaded')
   t.notOk(fourthLoaded, 'fourth is not loaded')
-
-  const contents = await fs.readFile(path.join(__dirname, 'fixtures', 'dummy.txt'), 'utf-8')
-  t.equal(contents, 'hello, world!')
 
   app.use(second)
   await app.after()
