@@ -49,7 +49,7 @@ function Plugin (parent, func, optsOrFunc, isAfter, timeout) {
   this.timeout = timeout === undefined ? parent._timeout : timeout
   this.name = getName(func, optsOrFunc)
   this.isAfter = isAfter
-  this.q = fastq(parent, loadPlugin, 1)
+  this.q = fastq(parent, loadPluginNextTick, 1)
   this.q.pause()
   this._error = null
   this.loaded = false
@@ -243,6 +243,13 @@ Plugin.prototype.finish = function (err, cb) {
   // we start loading the dependents plugins only once
   // the current level is finished
   this.q.resume()
+}
+
+// delays plugin loading until the next tick to ensure any bound `_after` callbacks have a chance
+// to run prior to executing the next plugin
+function loadPluginNextTick (toLoad, cb) {
+  const parent = this
+  process.nextTick(loadPlugin.bind(parent), toLoad, cb)
 }
 
 // loads a plugin
