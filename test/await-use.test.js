@@ -1,6 +1,8 @@
 'use strict'
 
 const { test } = require('tap')
+const { promisify } = require('util')
+const sleep = promisify(setTimeout)
 const boot = require('..')
 
 test('await use - nested plugins with same tick callbacks', async (t) => {
@@ -241,4 +243,30 @@ test('mixed await use and non-awaited use ', async (t) => {
   async function fourth () {
     fourthLoaded = true
   }
+})
+
+test('await use - mix of same and future tick callbacks', async (t) => {
+  const app = {}
+  boot(app, { autostart: false })
+  let record = ''
+
+  t.plan(4)
+
+  await app.use(async function plugin0 () {
+    t.pass('plugin0 init')
+    record += 'plugin0|'
+  })
+  await app.use(async function plugin1 () {
+    t.pass('plugin1 init')
+    await sleep(500)
+    record += 'plugin1|'
+  })
+  await sleep(1)
+  await app.use(async function plugin2 () {
+    t.pass('plugin2 init')
+    await sleep(500)
+    record += 'plugin2|'
+  })
+  record += 'ready'
+  t.equal(record, 'plugin0|plugin1|plugin2|ready')
 })
