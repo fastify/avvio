@@ -1,6 +1,5 @@
 'use strict'
 
-const queueMicrotask = require('queue-microtask')
 const fastq = require('fastq')
 const EE = require('events').EventEmitter
 const inherits = require('util').inherits
