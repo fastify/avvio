@@ -43,7 +43,6 @@
   "dependencies": {
     "archy": "^1.0.0",
     "debug": "^4.0.0",
-    "fastq": "^1.6.1",
-    "queue-microtask": "^1.1.2"
+    "fastq": "^1.6.1"
   }
 }
