@@ -55,12 +55,12 @@ class TimeTree {
     return this.tableId.get(nodeId)
   }
 
-  [kAddNode] (parent, child, start) {
+  [kAddNode] (parent, childName, start) {
     const isRoot = parent === null
     if (isRoot) {
       this.root = {
         id: 'root',
-        label: child,
+        label: childName,
         start,
         nodes: []
       }
@@ -69,12 +69,12 @@ class TimeTree {
     }
 
     const parentNode = this[kGetParent](parent)
-    const nodeId = `${child}-${Math.random()}`
+    const nodeId = `${childName}-${Math.random()}`
     const childNode = {
       id: nodeId,
       parent,
       start,
-      label: child,
+      label: childName,
       nodes: []
     }
     parentNode.nodes.push(childNode)
@@ -82,8 +82,8 @@ class TimeTree {
     return nodeId
   }
 
-  start (parent, child, start = Date.now()) {
-    return this[kAddNode](parent, child, start)
+  start (parent, childName, start = Date.now()) {
+    return this[kAddNode](parent, childName, start)
   }
 
   stop (nodeId, stop = Date.now()) {
