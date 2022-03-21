@@ -2,11 +2,11 @@
 
 const archy = require('archy')
 
-const kUntrackNode = Symbol('avvio.untrackNode')
-const kTrackNode = Symbol('avvio.trackNode')
-const kGetParent = Symbol('avvio.getParent')
-const kGetNode = Symbol('avvio.getNode')
-const kAddNode = Symbol('avvio.addNode')
+const kUntrackNode = Symbol('avvio.TimeTree.untrackNode')
+const kTrackNode = Symbol('avvio.TimeTree.trackNode')
+const kGetParent = Symbol('avvio.TimeTree.getParent')
+const kGetNode = Symbol('avvio.TimeTree.getNode')
+const kAddNode = Symbol('avvio.TimeTree.addNode')
 
 class TimeTree {
   constructor () {
