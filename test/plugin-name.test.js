@@ -1,7 +1,6 @@
 'use strict'
 
-const t = require('tap')
-const test = t.test
+const { test } = require('tap')
 const boot = require('..')
 
 test('plugins get a name from the plugin metadata if it is set', async (t) => {

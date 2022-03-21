@@ -1,6 +1,6 @@
 'use strict'
 
-const test = require('tap').test
+const { test } = require('tap')
 const boot = require('..')
 
 test('boot a plugin and then execute a call after that', (t) => {

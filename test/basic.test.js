@@ -1,7 +1,6 @@
 'use strict'
 
-const t = require('tap')
-const test = t.test
+const { test } = require('tap')
 const boot = require('..')
 
 test('boot an empty app', (t) => {

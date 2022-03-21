@@ -1,7 +1,5 @@
-import tap from 'tap'
+import { test } from 'tap'
 import boot from '../boot.js'
-
-const { test } = tap
 
 test('support import', async (t) => {
   const app = boot()

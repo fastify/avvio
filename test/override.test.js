@@ -2,7 +2,7 @@
 
 /* eslint no-prototype-builtins: off */
 
-const test = require('tap').test
+const { test } = require('tap')
 const boot = require('..')
 
 test('custom inheritance', (t) => {
