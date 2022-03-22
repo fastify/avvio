@@ -1,7 +1,6 @@
 'use strict'
 
-const t = require('tap')
-const test = t.test
+const { test } = require('tap')
 const boot = require('..')
 
 const message = (name) => `Plugin did not start in time: '${name}'. You may have forgotten to call 'done' function or to resolve a Promise`

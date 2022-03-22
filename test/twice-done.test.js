@@ -1,6 +1,6 @@
 'use strict'
 
-const test = require('tap').test
+const { test } = require('tap')
 const boot = require('..')
 
 test('calling done twice does not throw error', (t) => {
