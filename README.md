@@ -2,7 +2,6 @@
 
 ![CI](https://github.com/fastify/avvio/workflows/CI/badge.svg)
 [![NPM version](https://img.shields.io/npm/v/avvio.svg?style=flat)](https://www.npmjs.com/package/avvio)
-[![Known Vulnerabilities](https://snyk.io/test/github/fastify/avvio/badge.svg)](https://snyk.io/test/github/fastify/avvio)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://standardjs.com/)
 
 Asynchronous bootstrapping is hard, different things can go wrong, *error handling* and *load order* just to name a few. The aim of this module is to make it simple.
