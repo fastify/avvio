@@ -334,7 +334,7 @@ Boot.prototype.ready = function (func) {
       throw new AVV_ERR_CALLBACK_NOT_FN('ready', typeof func)
     }
     this._readyQ.push(func)
-    this.start()
+    queueMicrotask(this.start.bind(this))
     return
   }
 

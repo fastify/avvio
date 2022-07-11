@@ -63,7 +63,7 @@ test('chainable automatically binded', (t) => {
     expose[key] = 'muahah'
 
     boot(app, {
-      expose: expose
+      expose
     })
 
     t.end()
