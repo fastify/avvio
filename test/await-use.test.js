@@ -270,3 +270,25 @@ test('await use - mix of same and future tick callbacks', async (t) => {
   record += 'ready'
   t.equal(record, 'plugin0|plugin1|plugin2|ready')
 })
+
+test('await use - fork the promise chain', { only: true }, (t) => {
+  t.plan(3)
+  const app = {}
+  boot(app, { autostart: false })
+
+  async function setup () {
+    let set = false
+    await app.use(async function plugin0 () {
+      t.pass('plugin0 init')
+      await sleep(500)
+      set = true
+    })
+    t.equal(set, true)
+  }
+  setup()
+
+  app.ready((err, done) => {
+    t.error(err)
+    done()
+  })
+})
