@@ -271,7 +271,7 @@ test('await use - mix of same and future tick callbacks', async (t) => {
   t.equal(record, 'plugin0|plugin1|plugin2|ready')
 })
 
-test('await use - fork the promise chain', { only: true }, (t) => {
+test('await use - fork the promise chain', (t) => {
   t.plan(3)
   const app = {}
   boot(app, { autostart: false })
