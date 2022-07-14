@@ -22,7 +22,7 @@ happen in the right order. At the end of the loading, your application will star
 To install `avvio`, simply use npm:
 
 ```
-npm install avvio --save
+npm i avvio
 ```
 
 <a name="example"></a>
