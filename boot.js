@@ -402,8 +402,8 @@ function thenify () {
   }
 }
 
-function callWithCbOrNextTick (func, cb, context) {
-  context = this._server
+function callWithCbOrNextTick (func, cb) {
+  const context = this._server
   const err = this._error
   let res
 
