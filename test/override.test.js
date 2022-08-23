@@ -22,7 +22,7 @@ test('custom inheritance', (t) => {
 
   app.use(function first (s, opts, cb) {
     t.not(s, server)
-    t.ok(server.isPrototypeOf(s))
+    t.ok(Object.prototype.isPrototypeOf.call(server, s))
     cb()
   })
 })
@@ -42,7 +42,7 @@ test('custom inheritance multiple levels', (t) => {
 
   app.use(function first (s1, opts, cb) {
     t.not(s1, server)
-    t.ok(server.isPrototypeOf(s1))
+    t.ok(Object.prototype.isPrototypeOf.call(server, s1))
     t.equal(s1.count, 1)
     s1.use(second)
 
@@ -50,7 +50,7 @@ test('custom inheritance multiple levels', (t) => {
 
     function second (s2, opts, cb) {
       t.not(s2, s1)
-      t.ok(s1.isPrototypeOf(s2))
+      t.ok(Object.prototype.isPrototypeOf.call(s1, s2))
       t.equal(s2.count, 2)
       cb()
     }
@@ -72,7 +72,7 @@ test('custom inheritance multiple levels twice', (t) => {
 
   app.use(function first (s1, opts, cb) {
     t.not(s1, server)
-    t.ok(server.isPrototypeOf(s1))
+    t.ok(Object.prototype.isPrototypeOf.call(server, s1))
     t.equal(s1.count, 1)
     s1.use(second)
     s1.use(third)
@@ -83,15 +83,15 @@ test('custom inheritance multiple levels twice', (t) => {
     function second (s2, opts, cb) {
       prev = s2
       t.not(s2, s1)
-      t.ok(s1.isPrototypeOf(s2))
+      t.ok(Object.prototype.isPrototypeOf.call(s1, s2))
       t.equal(s2.count, 2)
       cb()
     }
 
     function third (s3, opts, cb) {
       t.not(s3, s1)
-      t.ok(s1.isPrototypeOf(s3))
-      t.notOk(prev.isPrototypeOf(s3))
+      t.ok(Object.prototype.isPrototypeOf.call(s1, s3))
+      t.notOk(Object.prototype.isPrototypeOf.call(prev, s3))
       t.equal(s3.count, 2)
       cb()
     }
@@ -113,7 +113,7 @@ test('custom inheritance multiple levels with multiple heads', (t) => {
 
   app.use(function first (s1, opts, cb) {
     t.not(s1, server)
-    t.ok(server.isPrototypeOf(s1))
+    t.ok(Object.prototype.isPrototypeOf.call(server, s1))
     t.equal(s1.count, 1)
     s1.use(second)
 
@@ -121,7 +121,7 @@ test('custom inheritance multiple levels with multiple heads', (t) => {
 
     function second (s2, opts, cb) {
       t.not(s2, s1)
-      t.ok(s1.isPrototypeOf(s2))
+      t.ok(Object.prototype.isPrototypeOf.call(s1, s2))
       t.equal(s2.count, 2)
       cb()
     }
@@ -129,7 +129,7 @@ test('custom inheritance multiple levels with multiple heads', (t) => {
 
   app.use(function third (s1, opts, cb) {
     t.not(s1, server)
-    t.ok(server.isPrototypeOf(s1))
+    t.ok(Object.prototype.isPrototypeOf.call(server, s1))
     t.equal(s1.count, 1)
     s1.use(fourth)
 
@@ -137,7 +137,7 @@ test('custom inheritance multiple levels with multiple heads', (t) => {
 
     function fourth (s2, opts, cb) {
       t.not(s2, s1)
-      t.ok(s1.isPrototypeOf(s2))
+      t.ok(Object.prototype.isPrototypeOf.call(s1, s2))
       t.equal(s2.count, 2)
       cb()
     }
@@ -176,7 +176,7 @@ test('fastify test case', (t) => {
 
   instance.use((i, opts, cb) => {
     t.not(i, instance)
-    t.ok(instance.isPrototypeOf(i))
+    t.ok(Object.prototype.isPrototypeOf.call(instance, i))
 
     i.add('test', noop, (err) => {
       t.error(err)
@@ -228,7 +228,7 @@ test('skip override - fastify test case', (t) => {
 
   function first (s, opts, cb) {
     t.equal(s, server)
-    t.notOk(server.isPrototypeOf(s))
+    t.notOk(Object.prototype.isPrototypeOf.call(server, s))
     cb()
   }
 })
@@ -252,7 +252,7 @@ test('override can receive options object', (t) => {
 
   app.use(function first (s, opts, cb) {
     t.not(s, server)
-    t.ok(server.isPrototypeOf(s))
+    t.ok(Object.prototype.isPrototypeOf.call(server, s))
     cb()
   }, options)
 })
@@ -279,7 +279,7 @@ test('override can receive options function', (t) => {
 
   app.use(function first (s, opts, cb) {
     t.not(s, server)
-    t.ok(server.isPrototypeOf(s))
+    t.ok(Object.prototype.isPrototypeOf.call(server, s))
     s.foo = 'bar'
     cb()
   }, options)
@@ -287,7 +287,7 @@ test('override can receive options function', (t) => {
   app.use(function second (s, opts, cb) {
     t.notOk(s.foo)
     t.same(opts, { hello: 'world' })
-    t.ok(server.isPrototypeOf(s))
+    t.ok(Object.prototype.isPrototypeOf.call(server, s))
     cb()
   }, p => ({ hello: p.bar }))
 })
@@ -356,7 +356,7 @@ test('custom inheritance override in after', (t) => {
 
   app.use(function first (s1, opts, cb) {
     t.not(s1, server)
-    t.ok(server.isPrototypeOf(s1))
+    t.ok(Object.prototype.isPrototypeOf.call(server, s1))
     t.equal(s1.count, 1)
     s1.after(() => {
       s1.use(second)
@@ -366,7 +366,7 @@ test('custom inheritance override in after', (t) => {
 
     function second (s2, opts, cb) {
       t.not(s2, s1)
-      t.ok(s1.isPrototypeOf(s2))
+      t.ok(Object.prototype.isPrototypeOf.call(s1, s2))
       t.equal(s2.count, 2)
       cb()
     }

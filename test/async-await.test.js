@@ -297,7 +297,7 @@ test('skip override with promise', (t) => {
   async function first () {
     async function fn (s, opts) {
       t.equal(s, server)
-      t.notOk(server.isPrototypeOf(s))
+      t.notOk(Object.prototype.isPrototypeOf.call(server, s))
     }
 
     fn[Symbol.for('skip-override')] = true
