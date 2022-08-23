@@ -489,14 +489,14 @@ app.override = function (s, fn, opts) {
 
 app.use(function first (s1, opts, cb) {
   assert(s1 !== server)
-  assert(server.isPrototypeOf(s1))
+  assert(Object.prototype.isPrototypeOf.call(server, s1))
   assert(s1.count === 1)
   s1.use(second)
   cb()
 
   function second (s2, opts, cb) {
     assert(s2 !== s1)
-    assert(s1.isPrototypeOf(s2))
+    assert(Object.prototype.isPrototypeOf.isPrototypeOf.call(s1, s2))
     assert(s2.count === 2)
     cb()
   }
