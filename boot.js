@@ -402,8 +402,8 @@ function thenify () {
   }
 }
 
-function callWithCbOrNextTick (func, cb, context) {
-  context = this._server
+function callWithCbOrNextTick (func, cb) {
+  const context = this._server
   const err = this._error
   let res
 
@@ -467,8 +467,8 @@ function timeoutCall (func, rootErr, context, cb) {
   }
 }
 
-function closeWithCbOrNextTick (func, cb, context) {
-  context = this._server
+function closeWithCbOrNextTick (func, cb) {
+  const context = this._server
   const isOnCloseHandler = func[this._isOnCloseHandlerKey]
   if (func.length === 0 || func.length === 1) {
     let promise
