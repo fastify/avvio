@@ -1,152 +1,166 @@
 'use strict'
 
-const fastq = require('fastq')
-const EE = require('events').EventEmitter
-const inherits = require('util').inherits
+const { EventEmitter } = require('events')
+const { inherits } = require('util')
 const {
   AVV_ERR_EXPOSE_ALREADY_DEFINED,
   AVV_ERR_CALLBACK_NOT_FN,
-  AVV_ERR_PLUGIN_NOT_VALID,
   AVV_ERR_ROOT_PLG_BOOTED,
   AVV_ERR_READY_TIMEOUT
 } = require('./lib/errors')
 const TimeTree = require('./time-tree')
-const Plugin = require('./plugin')
-const debug = require('debug')('avvio')
-const kAvvio = Symbol('kAvvio')
-const kThenifyDoNotWrap = Symbol('kThenifyDoNotWrap')
+const { Plugin, validatePluginFunction, loadPlugin } = require('./lib/plugin')
+const { debug } = require('./lib/debug')
+const { executeWithThenable, thenify } = require('./lib/thenable')
+const { kAvvio } = require('./lib/symbols')
+const { noop } = require('./lib/noop')
+const { createQueue } = require('./lib/queue')
+const { createPromise } = require('./lib/promise')
 
-function wrap (server, opts, instance) {
-  const expose = opts.expose || {}
+function wrap (instance, options, avvio) {
+  const expose = options.expose || {}
   const useKey = expose.use || 'use'
   const afterKey = expose.after || 'after'
   const readyKey = expose.ready || 'ready'
   const onCloseKey = expose.onClose || 'onClose'
   const closeKey = expose.close || 'close'
 
-  if (server[useKey]) {
+  if (instance[useKey]) {
     throw new AVV_ERR_EXPOSE_ALREADY_DEFINED(useKey)
   }
 
-  if (server[afterKey]) {
+  if (instance[afterKey]) {
     throw new AVV_ERR_EXPOSE_ALREADY_DEFINED(afterKey)
   }
 
-  if (server[readyKey]) {
+  if (instance[readyKey]) {
     throw new AVV_ERR_EXPOSE_ALREADY_DEFINED(readyKey)
   }
 
-  server[useKey] = function (fn, opts) {
-    instance.use(fn, opts)
+  instance[useKey] = function (fn, options) {
+    avvio.use(fn, options)
     return this
   }
 
-  Object.defineProperty(server, 'then', { get: thenify.bind(instance) })
-  server[kAvvio] = true
+  Object.defineProperties(instance, {
+    [kAvvio]: { get () { return true }, configurable: false, enumerable: false },
+    then: { get: thenify.bind(avvio), configurable: false, enumerable: false }
+  })
 
-  server[afterKey] = function (func) {
+  instance[afterKey] = function (func) {
     if (typeof func !== 'function') {
-      return instance._loadRegistered()
+      return avvio._loadRegistered()
     }
-    instance.after(encapsulateThreeParam(func, this))
+    avvio.after(encapsulateThreeParam(func, this))
     return this
   }
 
-  server[readyKey] = function (func) {
+  instance[readyKey] = function (func) {
     if (func && typeof func !== 'function') {
       throw new AVV_ERR_CALLBACK_NOT_FN(readyKey, typeof func)
     }
-    return instance.ready(func ? encapsulateThreeParam(func, this) : undefined)
+    return avvio.ready(func ? encapsulateThreeParam(func, this) : undefined)
   }
 
-  server[onCloseKey] = function (func) {
+  instance[onCloseKey] = function (func) {
     if (typeof func !== 'function') {
       throw new AVV_ERR_CALLBACK_NOT_FN(onCloseKey, typeof func)
     }
-    instance.onClose(encapsulateTwoParam(func, this))
+    avvio.onClose(encapsulateTwoParam(func, this))
     return this
   }
 
-  server[closeKey] = function (func) {
+  instance[closeKey] = function (func) {
     if (func && typeof func !== 'function') {
       throw new AVV_ERR_CALLBACK_NOT_FN(closeKey, typeof func)
     }
 
     if (func) {
-      instance.close(encapsulateThreeParam(func, this))
+      avvio.close(encapsulateThreeParam(func, this))
       return this
     }
 
     // this is a Promise
-    return instance.close()
+    return avvio.close()
   }
 }
 
-function Boot (server, opts, done) {
-  if (typeof server === 'function' && arguments.length === 1) {
-    done = server
-    opts = {}
-    server = null
+/**
+ * avvio instance creation
+ * @param {*} instance
+ * @param {*} options
+ * @param {*} done
+ * @returns
+ */
+function Avvio (instance, options, done) {
+  // Avvio(done)
+  if (typeof instance === 'function' && arguments.length === 1) {
+    done = instance
+    options = {}
+    instance = null
   }
 
-  if (typeof opts === 'function') {
-    done = opts
-    opts = {}
+  // Avvio(instance, done)
+  if (typeof options === 'function') {
+    done = options
+    options = {}
   }
 
-  opts = opts || {}
+  // Avvio()
+  // Avvio(options)
+  options = options || {}
 
-  if (!(this instanceof Boot)) {
-    const instance = new Boot(server, opts, done)
+  // Avvio() or new Avvio()
+  if (!(this instanceof Avvio)) {
+    const avvio = new Avvio(instance, options, done)
 
-    if (server) {
-      wrap(server, opts, instance)
+    if (instance) {
+      wrap(instance, options, avvio)
     }
 
-    return instance
+    return avvio
   }
 
-  if (opts.autostart !== false) {
-    opts.autostart = true
-  }
+  // ---constructor---
 
-  server = server || this
-
-  this._timeout = Number(opts.timeout) || 0
-  this._server = server
-  this._current = []
-  this._error = null
-  this._isOnCloseHandlerKey = Symbol('isOnCloseHandler')
-  this._lastUsed = null
-
+  // remove the limit of listeners
   this.setMaxListeners(0)
+
+  // internals
+  this._timeout = Number(options.timeout ?? 0)
+  this._instance = instance ?? this
+  this._current = [] // plugin stack
+  this._doStart = null
+  this._error = null
+  this._lastUsed = null
+  this._isOnCloseHandlerKey = Symbol('isOnCloseHandler')
+
+  if (options.autostart !== false) {
+    options.autostart = true
+  }
 
   if (done) {
     this.once('start', done)
   }
 
-  this.started = false
-  this.booted = false
+  // state control
+  this.started = false // is "true" after "Avvio#start()" has been called
+  this.booted = false // is "true" after all plugins "loaded" emitted
   this.pluginTree = new TimeTree()
 
-  this._readyQ = fastq(this, callWithCbOrNextTick, 1)
-  this._readyQ.pause()
-  this._readyQ.drain = () => {
+  // prepare queue
+  this._readyQ = createQueue(this, callWithCallbackOrNextTick, () => {
     this.emit('start')
-    // nooping this, we want to emit start only once
+    // start event should be emitted once only
     this._readyQ.drain = noop
-  }
-
-  this._closeQ = fastq(this, closeWithCbOrNextTick, 1)
-  this._closeQ.pause()
-  this._closeQ.drain = () => {
+  })
+  this._closeQ = createQueue(this, closeWithCallbackOrNextTick, () => {
     this.emit('close')
-    // nooping this, we want to emit close only once
-    this._closeQ.drain = noop
-  }
+    // close event should be emitted once only
+    this._readyQ.drain = noop
+  })
 
-  this._doStart = null
-  this._root = new Plugin(this, root.bind(this), opts, false, 0)
+  this._root = new Plugin(this, root.bind(this), options, false, 0)
   this._root.once('start', (serverName, funcName, time) => {
     const nodeId = this.pluginTree.start(null, funcName, time)
     this._root.once('loaded', (serverName, funcName, time) => {
@@ -154,19 +168,19 @@ function Boot (server, opts, done) {
     })
   })
 
-  Plugin.loadPlugin.call(this, this._root, (err) => {
+  loadPlugin.call(this, this._root, (error) => {
     debug('root plugin ready')
     try {
       this.emit('preReady')
       this._root = null
     } catch (prereadyError) {
-      err = err || this._error || prereadyError
+      error = error || this._error || prereadyError
     }
 
-    if (err) {
-      this._error = err
+    if (error) {
+      this._error = error
       if (this._readyQ.length() === 0) {
-        throw err
+        throw error
       }
     } else {
       this.booted = true
@@ -175,16 +189,19 @@ function Boot (server, opts, done) {
   })
 }
 
-function root (s, opts, done) {
-  this._doStart = done
-  if (opts.autostart) {
-    this.start()
-  }
-}
+inherits(Avvio, EventEmitter)
 
-inherits(Boot, EE)
+// we define the getters
+Object.defineProperties(Avvio.prototype, {
+  [kAvvio]: { get () { return true }, configurable: false, enumerable: false },
+  then: { get: thenify, configurable: false, enumerable: false }
+})
 
-Boot.prototype.start = function () {
+/**
+ * Start the plugin registration flow
+ * @returns
+ */
+Avvio.prototype.start = function () {
   this.started = true
 
   // we need to wait any call to use() to happen
@@ -192,100 +209,40 @@ Boot.prototype.start = function () {
   return this
 }
 
-// allows to override the instance of a server, given a plugin
-Boot.prototype.override = function (server, func, opts) {
-  return server
+/**
+ * Override the context of plugin.
+ * @param {*} instance
+ * @param {*} func
+ * @param {*} options
+ * @returns
+ */
+Avvio.prototype.override = function (instance, func, options) {
+  return instance
 }
-
-function assertPlugin (plugin) {
-  // Faux modules are modules built with TypeScript
-  // or Babel that they export a .default property.
-  if (plugin && typeof plugin === 'object' && typeof plugin.default === 'function') {
-    plugin = plugin.default
-  }
-  if (!(plugin && (typeof plugin === 'function' || typeof plugin.then === 'function'))) {
-    throw new AVV_ERR_PLUGIN_NOT_VALID(typeof plugin)
-  }
-  return plugin
-}
-
-Boot.prototype[kAvvio] = true
 
 // load a plugin
-Boot.prototype.use = function (plugin, opts) {
-  this._lastUsed = this._addPlugin(plugin, opts, false)
+Avvio.prototype.use = function (plugin, options) {
+  this._lastUsed = this._addPlugin(plugin, options, false)
   return this
 }
 
-Boot.prototype._loadRegistered = function () {
-  const plugin = this._current[0]
-  const weNeedToStart = !this.started && !this.booted
-
-  // if the root plugin is not loaded, let's resume that
-  // so one can use after() befor calling ready
-  if (weNeedToStart) {
-    process.nextTick(() => this._root.q.resume())
-  }
-
-  if (!plugin) {
-    return Promise.resolve()
-  }
-
-  return plugin.loadedSoFar()
-}
-
-Object.defineProperty(Boot.prototype, 'then', { get: thenify })
-
-Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
-  plugin = assertPlugin(plugin)
-  opts = opts || {}
-
-  if (this.booted) {
-    throw new AVV_ERR_ROOT_PLG_BOOTED()
-  }
-
-  // we always add plugins to load at the current element
-  const current = this._current[0]
-
-  const obj = new Plugin(this, plugin, opts, isAfter)
-  obj.once('start', (serverName, funcName, time) => {
-    const nodeId = this.pluginTree.start(current.name, funcName, time)
-    obj.once('loaded', (serverName, funcName, time) => {
-      this.pluginTree.stop(nodeId, time)
-    })
-  })
-
-  if (current.loaded) {
-    throw new Error(obj.name, current.name)
-  }
-
-  // we add the plugin to be loaded at the end of the current queue
-  current.enqueue(obj, (err) => {
-    if (err) {
-      this._error = err
-    }
-  })
-
-  return obj
-}
-
-Boot.prototype.after = function (func) {
+Avvio.prototype.after = function (func) {
   if (!func) {
     return this._loadRegistered()
   }
 
   this._addPlugin(_after.bind(this), {}, true)
 
-  function _after (s, opts, done) {
-    callWithCbOrNextTick.call(this, func, done)
+  function _after (s, options, done) {
+    callWithCallbackOrNextTick.call(this, func, done)
   }
 
   return this
 }
 
-Boot.prototype.onClose = function (func) {
+Avvio.prototype.onClose = function (func) {
   // this is used to distinguish between onClose and close handlers
-  // because they share the same queue but must be called with different signatures
+  // because they share the same queue but must be called with different signaturesult
 
   if (typeof func !== 'function') {
     throw new Error('not a function')
@@ -294,14 +251,14 @@ Boot.prototype.onClose = function (func) {
   func[this._isOnCloseHandlerKey] = true
   this._closeQ.unshift(func, callback.bind(this))
 
-  function callback (err) {
-    if (err) this._error = err
+  function callback (error) {
+    if (error) this._error = error
   }
 
   return this
 }
 
-Boot.prototype.close = function (func) {
+Avvio.prototype.close = function (func) {
   let promise
 
   if (func) {
@@ -309,14 +266,14 @@ Boot.prototype.close = function (func) {
       throw new AVV_ERR_CALLBACK_NOT_FN('close', typeof func)
     }
   } else {
-    promise = new Promise(function (resolve, reject) {
-      func = function (err) {
-        if (err) {
-          return reject(err)
-        }
-        resolve()
+    promise = createPromise()
+    func = function (error) {
+      if (error) {
+        promise.reject(error)
+      } else {
+        promise.resolve()
       }
-    })
+    }
   }
 
   this.ready(() => {
@@ -325,10 +282,10 @@ Boot.prototype.close = function (func) {
     process.nextTick(this._closeQ.resume.bind(this._closeQ))
   })
 
-  return promise
+  return promise?.promise
 }
 
-Boot.prototype.ready = function (func) {
+Avvio.prototype.ready = function (func) {
   if (func) {
     if (typeof func !== 'function') {
       throw new AVV_ERR_CALLBACK_NOT_FN('ready', typeof func)
@@ -350,10 +307,10 @@ Boot.prototype.ready = function (func) {
      */
     const relativeContext = this._current[0].server
 
-    function readyPromiseCB (err, context, done) {
+    function readyPromiseCB (error, context, done) {
       // the context is always binded to the root server
-      if (err) {
-        reject(err)
+      if (error) {
+        reject(error)
       } else {
         resolve(relativeContext)
       }
@@ -362,113 +319,139 @@ Boot.prototype.ready = function (func) {
   })
 }
 
-Boot.prototype.prettyPrint = function () {
+Avvio.prototype.prettyPrint = function () {
   return this.pluginTree.prittyPrint()
 }
 
-Boot.prototype.toJSON = function () {
+Avvio.prototype.toJSON = function () {
   return this.pluginTree.toJSON()
 }
 
-function noop () { }
+Avvio.prototype._loadRegistered = function () {
+  const plugin = this._current[0]
+  const weNeedToStart = !this.started && !this.booted
 
-function thenify () {
-  // If the instance is ready, then there is
-  // nothing to await. This is true during
-  // await server.ready() as ready() resolves
-  // with the server, end we will end up here
-  // because of automatic promise chaining.
+  // if the root plugin is not loaded, let's resume that
+  // so one can use after() befor calling ready
+  if (weNeedToStart) {
+    process.nextTick(() => this._root.q.resume())
+  }
+
+  if (!plugin) {
+    return Promise.resolve()
+  }
+
+  return plugin.loadedSoFar()
+}
+
+Avvio.prototype._addPlugin = function (func, options, isAfter) {
+  func = validatePluginFunction(func)
+  options = options || {}
+
   if (this.booted) {
-    debug('thenify returning null because we are already booted')
-    return
+    throw new AVV_ERR_ROOT_PLG_BOOTED()
   }
 
-  // Calling resolve(this._server) would fetch the then
-  // property on the server, which will lead it here.
-  // If we do not break the recursion, we will loop
-  // forever.
-  if (this[kThenifyDoNotWrap]) {
-    this[kThenifyDoNotWrap] = false
-    return
+  // we always add plugins to load at the current element
+  const current = this._current[0]
+
+  const plugin = new Plugin(this, func, options, isAfter)
+  plugin.once('start', (serverName, funcName, time) => {
+    const nodeId = this.pluginTree.start(current.name, funcName, time)
+    plugin.once('loaded', (serverName, funcName, time) => {
+      this.pluginTree.stop(nodeId, time)
+    })
+  })
+
+  if (current.loaded) {
+    throw new Error(plugin.name, current.name)
   }
 
-  debug('thenify')
-  return (resolve, reject) => {
-    const p = this._loadRegistered()
-    return p.then(() => {
-      this[kThenifyDoNotWrap] = true
-      return resolve(this._server)
-    }, reject)
+  // we add the plugin to be loaded at the end of the current queue
+  current.enqueue(plugin, (error) => {
+    if (error) {
+      this._error = error
+    }
+  })
+
+  return plugin
+}
+
+module.exports = Avvio
+module.exports.default = Avvio
+module.exports.Avvio = Avvio
+
+// Internal Function(s)
+
+/**
+ * root plugin
+ * @param {*} context
+ * @param {*} options
+ * @param {*} done
+ */
+function root (context, options, done) {
+  this._doStart = done
+  if (options.autostart) {
+    this.start()
   }
 }
 
-function callWithCbOrNextTick (func, cb) {
-  const context = this._server
-  const err = this._error
-  let res
+function callWithCallbackOrNextTick (func, callback) {
+  const context = this._instance
+  const error = this._error
 
   // with this the error will appear just in the next after/ready callback
   this._error = null
   if (func.length === 0) {
-    this._error = err
-    res = func()
-    if (res && !res[kAvvio] && typeof res.then === 'function') {
-      res.then(() => process.nextTick(cb), (e) => process.nextTick(cb, e))
-    } else {
-      process.nextTick(cb)
-    }
+    this._error = error
+    executeWithThenable(func, [], callback)
   } else if (func.length === 1) {
-    res = func(err)
-    if (res && !res[kAvvio] && typeof res.then === 'function') {
-      res.then(() => process.nextTick(cb), (e) => process.nextTick(cb, e))
-    } else {
-      process.nextTick(cb)
-    }
+    executeWithThenable(func, [error], callback)
   } else {
     if (this._timeout === 0) {
       if (func.length === 2) {
-        func(err, cb)
+        func(error, callback)
       } else {
-        func(err, context, cb)
+        func(error, context, callback)
       }
     } else {
-      timeoutCall.call(this, func, err, context, cb)
+      setupTimeout.call(this, func, error, context, callback)
     }
   }
 }
 
-function timeoutCall (func, rootErr, context, cb) {
+function setupTimeout (func, rootError, context, callback) {
   const name = func.name
   debug('setting up ready timeout', name, this._timeout)
   let timer = setTimeout(() => {
     debug('timed out', name)
     timer = null
-    const toutErr = new AVV_ERR_READY_TIMEOUT(name)
-    toutErr.fn = func
-    this._error = toutErr
-    cb(toutErr)
+    const toutError = new AVV_ERR_READY_TIMEOUT(name)
+    toutError.fn = func
+    this._error = toutError
+    callback(toutError)
   }, this._timeout)
 
   if (func.length === 2) {
-    func(rootErr, timeoutCb.bind(this))
+    func(rootError, timeoutCallback.bind(this))
   } else {
-    func(rootErr, context, timeoutCb.bind(this))
+    func(rootError, context, timeoutCallback.bind(this))
   }
 
-  function timeoutCb (err) {
+  function timeoutCallback (error) {
     if (timer) {
       clearTimeout(timer)
-      this._error = err
-      cb(this._error)
+      this._error = error
+      callback(this._error)
     } else {
       // timeout has been triggered
-      // can not call cb twice
+      // can not call callback twice
     }
   }
 }
 
-function closeWithCbOrNextTick (func, cb) {
-  const context = this._server
+function closeWithCallbackOrNextTick (func, callback) {
+  const context = this._instance
   const isOnCloseHandler = func[this._isOnCloseHandlerKey]
   if (func.length === 0 || func.length === 1) {
     let promise
@@ -478,94 +461,85 @@ function closeWithCbOrNextTick (func, cb) {
       promise = func(this._error)
     }
     if (promise && typeof promise.then === 'function') {
-      debug('resolving close/onClose promise')
+      debug('resultolving close/onClose promise')
       promise.then(
-        () => process.nextTick(cb),
-        (e) => process.nextTick(cb, e))
+        () => process.nextTick(callback),
+        (e) => process.nextTick(callback, e))
     } else {
-      process.nextTick(cb)
+      process.nextTick(callback)
     }
   } else if (func.length === 2) {
     if (isOnCloseHandler) {
-      func(context, cb)
+      func(context, callback)
     } else {
-      func(this._error, cb)
+      func(this._error, callback)
     }
   } else {
     if (isOnCloseHandler) {
-      func(context, cb)
+      func(context, callback)
     } else {
-      func(this._error, context, cb)
+      func(this._error, context, callback)
     }
   }
 }
 
 function encapsulateTwoParam (func, that) {
   return _encapsulateTwoParam.bind(that)
-  function _encapsulateTwoParam (context, cb) {
-    let res
+  function _encapsulateTwoParam (context, callback) {
+    let result
     if (func.length === 0) {
-      res = func()
-      if (res && res.then) {
-        res.then(function () {
-          process.nextTick(cb)
-        }, cb)
+      result = func()
+      if (result && result.then) {
+        result.then(function () {
+          process.nextTick(callback)
+        }, callback)
       } else {
-        process.nextTick(cb)
+        process.nextTick(callback)
       }
     } else if (func.length === 1) {
-      res = func(this)
+      result = func(this)
 
-      if (res && res.then) {
-        res.then(function () {
-          process.nextTick(cb)
-        }, cb)
+      if (result && result.then) {
+        result.then(function () {
+          process.nextTick(callback)
+        }, callback)
       } else {
-        process.nextTick(cb)
+        process.nextTick(callback)
       }
     } else {
-      func(this, cb)
+      func(this, callback)
     }
   }
 }
 
 function encapsulateThreeParam (func, that) {
   return _encapsulateThreeParam.bind(that)
-  function _encapsulateThreeParam (err, cb) {
-    let res
+  function _encapsulateThreeParam (error, callback) {
+    let result
     if (!func) {
-      process.nextTick(cb)
+      process.nextTick(callback)
     } else if (func.length === 0) {
-      res = func()
-      if (res && res.then) {
-        res.then(function () {
-          process.nextTick(cb, err)
-        }, cb)
+      result = func()
+      if (result && result.then) {
+        result.then(function () {
+          process.nextTick(callback, error)
+        }, callback)
       } else {
-        process.nextTick(cb, err)
+        process.nextTick(callback, error)
       }
     } else if (func.length === 1) {
-      res = func(err)
-      if (res && res.then) {
-        res.then(function () {
-          process.nextTick(cb)
-        }, cb)
+      result = func(error)
+      if (result && result.then) {
+        result.then(function () {
+          process.nextTick(callback)
+        }, callback)
       } else {
-        process.nextTick(cb)
+        process.nextTick(callback)
       }
     } else if (func.length === 2) {
-      func(err, cb)
+      func(error, callback)
     } else {
-      func(err, this, cb)
+      func(error, this, callback)
     }
   }
-}
-
-module.exports = Boot
-module.exports.express = function (app) {
-  return Boot(app, {
-    expose: {
-      use: 'load'
-    }
-  })
 }
