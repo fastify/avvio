@@ -426,10 +426,15 @@ function callWithCbOrNextTick (func, cb) {
     }
   } else {
     if (this._timeout === 0) {
+      const wrapCb = (err) => {
+        this._error = err
+        cb(this._error)
+      }
+
       if (func.length === 2) {
-        func(err, cb)
+        func(err, wrapCb)
       } else {
-        func(err, context, cb)
+        func(err, context, wrapCb)
       }
     } else {
       timeoutCall.call(this, func, err, context, cb)

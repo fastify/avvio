@@ -305,3 +305,17 @@ test('skip override with promise', (t) => {
     return fn
   }
 })
+
+test('ready queue error', async (t) => {
+  const app = boot()
+  app.use(first)
+
+  async function first (s, opts) {}
+
+  app.ready(function (_, worker, done) {
+    const error = new Error('kaboom')
+    done(error)
+  })
+
+  await t.rejects(app.ready(), { message: 'kaboom' })
+})
