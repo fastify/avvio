@@ -1,7 +1,5 @@
 'use strict'
 
-const archy = require('archy')
-
 const kUntrackNode = Symbol('avvio.TimeTree.untrackNode')
 const kTrackNode = Symbol('avvio.TimeTree.trackNode')
 const kGetParent = Symbol('avvio.TimeTree.getParent')
@@ -100,16 +98,27 @@ class TimeTree {
   }
 
   prettyPrint () {
-    const decorateText = (node) => {
-      node.label = `${node.label} ${node.diff} ms`
-      if (node.nodes.length > 0) {
-        node.nodes = node.nodes.map(_ => decorateText(_))
-      }
-      return node
-    }
-    const out = decorateText(this.toJSON())
-    return archy(out)
+    return prettyPrintTimeTree(this.toJSON())
   }
+}
+
+function prettyPrintTimeTree (obj, prefix = '') {
+  let result = prefix
+
+  const nodesCount = obj.nodes.length
+  const lastIndex = nodesCount - 1
+  result += `${obj.label} ${obj.diff} ms\n`
+
+  for (let i = 0; i < nodesCount; ++i) {
+    const node = obj.nodes[i]
+    const prefix_ = prefix + (i === lastIndex ? '  ' : '│ ')
+
+    result += prefix
+    result += (i === lastIndex ? '└─' : '├─')
+    result += (node.nodes.length === 0 ? '─ ' : '┬ ')
+    result += prettyPrintTimeTree(node, prefix_).slice(prefix.length + 2)
+  }
+  return result
 }
 
 module.exports = TimeTree
