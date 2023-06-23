@@ -3,6 +3,7 @@
 /* eslint no-prototype-builtins: off */
 
 const { test } = require('tap')
+const { noop } = require('../lib/noop')
 const boot = require('..')
 
 test('custom inheritance', (t) => {
@@ -151,8 +152,6 @@ test('custom inheritance multiple levels with multiple heads', (t) => {
 test('fastify test case', (t) => {
   t.plan(7)
 
-  const noop = () => {}
-
   function build () {
     const app = boot(server, {})
     app.override = function (s) {
@@ -167,7 +166,7 @@ test('fastify test case', (t) => {
 
     return server
 
-    function server (req, res) {}
+    function server (req, res) { }
   }
 
   const instance = build()

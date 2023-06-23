@@ -2,7 +2,7 @@
 
 const { test } = require('tap')
 const boot = require('..')
-const noop = () => {}
+const { noop } = require('../lib/noop')
 
 test('boot a plugin and then execute a call after that', (t) => {
   t.plan(1)

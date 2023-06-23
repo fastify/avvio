@@ -13,6 +13,7 @@ const {
 const TimeTree = require('./time-tree')
 const Plugin = require('./plugin')
 const { debug } = require('./lib/debug')
+const { noop } = require('./lib/noop')
 const kAvvio = Symbol('kAvvio')
 const kThenifyDoNotWrap = Symbol('kThenifyDoNotWrap')
 
@@ -369,8 +370,6 @@ Boot.prototype.prettyPrint = function () {
 Boot.prototype.toJSON = function () {
   return this.pluginTree.toJSON()
 }
-
-function noop () { }
 
 function thenify () {
   // If the instance is ready, then there is

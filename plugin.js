@@ -4,6 +4,7 @@ const fastq = require('fastq')
 const EE = require('events').EventEmitter
 const inherits = require('util').inherits
 const { debug } = require('./lib/debug')
+const { noop } = require('./lib/noop')
 const { AVV_ERR_READY_TIMEOUT } = require('./lib/errors')
 
 // this symbol is assigned by fastify-plugin
@@ -276,8 +277,6 @@ function loadPlugin (toLoad, cb) {
     })
   })
 }
-
-function noop () {}
 
 module.exports = Plugin
 module.exports.loadPlugin = loadPlugin
