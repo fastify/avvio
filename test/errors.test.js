@@ -1,7 +1,8 @@
 'use strict'
 
 const { test } = require('tap')
-const { createError } = require('../lib/errors')
+const errors = require('../lib/errors')
+const createError = errors.createError
 
 const expectedErrorName = 'AvvioError'
 
