@@ -5,9 +5,7 @@ const EE = require('events').EventEmitter
 const inherits = require('util').inherits
 const debug = require('debug')('avvio')
 const { AVV_ERR_READY_TIMEOUT } = require('./lib/errors')
-
-// this symbol is assigned by fastify-plugin
-const kPluginMeta = Symbol.for('plugin-meta')
+const { kPluginMeta } = require('./lib/symbols')
 
 function getName (func, optsOrFunc) {
   // use explicit function metadata if set

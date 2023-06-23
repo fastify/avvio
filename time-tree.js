@@ -1,12 +1,13 @@
 'use strict'
 
 const archy = require('archy')
-
-const kUntrackNode = Symbol('avvio.TimeTree.untrackNode')
-const kTrackNode = Symbol('avvio.TimeTree.trackNode')
-const kGetParent = Symbol('avvio.TimeTree.getParent')
-const kGetNode = Symbol('avvio.TimeTree.getNode')
-const kAddNode = Symbol('avvio.TimeTree.addNode')
+const {
+  kUntrackNode,
+  kTrackNode,
+  kGetParent,
+  kGetNode,
+  kAddNode
+} = require('./lib/symbols')
 
 class TimeTree {
   constructor () {

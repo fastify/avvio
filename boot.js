@@ -10,11 +10,13 @@ const {
   AVV_ERR_ROOT_PLG_BOOTED,
   AVV_ERR_READY_TIMEOUT
 } = require('./lib/errors')
+const {
+  kAvvio,
+  kThenifyDoNotWrap
+} = require('./lib/symbols')
 const TimeTree = require('./time-tree')
 const Plugin = require('./plugin')
 const debug = require('debug')('avvio')
-const kAvvio = Symbol('kAvvio')
-const kThenifyDoNotWrap = Symbol('kThenifyDoNotWrap')
 
 function wrap (server, opts, instance) {
   const expose = opts.expose || {}
