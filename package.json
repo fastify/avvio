@@ -4,10 +4,16 @@
   "description": "Asynchronous bootstrapping of Node applications",
   "main": "boot.js",
   "scripts": {
-    "test": "standard && tap -J test/*test.js && npm run typescript",
-    "typescript": "tsc --project ./test/types/tsconfig.json"
+    "lint": "standard",
+    "lint:fix": "standard --fix",
+    "test": "npm run test:unit && npm run test:typescript",
+    "test:unit": "tap",
+    "test:typescript": "tsc --project ./test/types/tsconfig.json"
   },
-  "precommit": "test",
+  "precommit": [
+    "lint",
+    "test"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/fastify/avvio.git"
@@ -41,7 +47,6 @@
     "typescript": "^5.0.2"
   },
   "dependencies": {
-    "debug": "^4.0.0",
     "fastq": "^1.6.1"
   }
 }

@@ -12,7 +12,7 @@ const {
 } = require('./lib/errors')
 const TimeTree = require('./lib/time-tree')
 const Plugin = require('./plugin')
-const debug = require('debug')('avvio')
+const { debug } = require('./lib/debug')
 const kAvvio = Symbol('kAvvio')
 const kThenifyDoNotWrap = Symbol('kThenifyDoNotWrap')
 
