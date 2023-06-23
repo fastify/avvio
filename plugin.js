@@ -3,7 +3,7 @@
 const fastq = require('fastq')
 const EE = require('events').EventEmitter
 const inherits = require('util').inherits
-const debug = require('debug')('avvio')
+const { debug } = require('./lib/debug')
 const { AVV_ERR_READY_TIMEOUT } = require('./lib/errors')
 
 // this symbol is assigned by fastify-plugin

@@ -42,7 +42,6 @@
   },
   "dependencies": {
     "archy": "^1.0.0",
-    "debug": "^4.0.0",
     "fastq": "^1.6.1"
   }
 }
