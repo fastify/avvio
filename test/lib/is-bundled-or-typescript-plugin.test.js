@@ -3,7 +3,7 @@
 const { test } = require('tap')
 const { isBundledOrTypescriptPlugin } = require('../../lib/is-bundled-or-typescript-plugin')
 
-test('i', (t) => {
+test('isBundledOrTypescriptPlugin', (t) => {
   t.plan(9)
 
   t.equal(isBundledOrTypescriptPlugin(1), false)
