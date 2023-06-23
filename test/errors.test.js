@@ -96,3 +96,23 @@ test('Create the error without the new keyword', t => {
   t.equal(err.message, 'Not available')
   t.equal(err.code, 'CODE')
 })
+
+test('Correct codes of AvvioErrors', t => {
+  const testcases = [
+    'AVV_ERR_EXPOSE_ALREADY_DEFINED',
+    'AVV_ERR_CALLBACK_NOT_FN',
+    'AVV_ERR_PLUGIN_NOT_VALID',
+    'AVV_ERR_ROOT_PLG_BOOTED',
+    'AVV_ERR_PARENT_PLG_LOADED',
+    'AVV_ERR_READY_TIMEOUT'
+  ]
+
+  t.plan(testcases.length + 1)
+  // errors.js exposes errors and the createError fn
+  t.equal(testcases.length + 1, Object.keys(errors).length)
+
+  for (const testcase of testcases) {
+    const error = new errors[testcase]()
+    t.equal(error.code, testcase)
+  }
+})
