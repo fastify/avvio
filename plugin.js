@@ -5,28 +5,7 @@ const EE = require('events').EventEmitter
 const inherits = require('util').inherits
 const { debug } = require('./lib/debug')
 const { AVV_ERR_READY_TIMEOUT } = require('./lib/errors')
-
-// this symbol is assigned by fastify-plugin
-const kPluginMeta = Symbol.for('plugin-meta')
-
-function getName (func, optsOrFunc) {
-  // use explicit function metadata if set
-  if (func[kPluginMeta] && func[kPluginMeta].name) {
-    return func[kPluginMeta].name
-  }
-
-  if (typeof optsOrFunc !== 'undefined' && typeof optsOrFunc !== 'function' && optsOrFunc.name) {
-    return optsOrFunc.name
-  }
-
-  // use the function name if it exists
-  if (func.name) {
-    return func.name
-  }
-
-  // takes the first two lines of the function if nothing else works
-  return func.toString().split('\n').slice(0, 2).map(s => s.trim()).join(' -- ')
-}
+const { getPluginName } = require('./lib/get-plugin-name')
 
 function promise () {
   const obj = {}
@@ -39,14 +18,14 @@ function promise () {
   return obj
 }
 
-function Plugin (parent, func, optsOrFunc, isAfter, timeout) {
+function Plugin (parent, func, options, isAfter, timeout) {
   this.started = false
   this.func = func
-  this.opts = optsOrFunc
+  this.opts = options
   this.onFinish = null
   this.parent = parent
   this.timeout = timeout === undefined ? parent._timeout : timeout
-  this.name = getName(func, optsOrFunc)
+  this.name = getPluginName(func, options)
   this.isAfter = isAfter
   this.q = fastq(parent, loadPluginNextTick, 1)
   this.q.pause()
