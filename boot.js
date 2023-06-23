@@ -10,7 +10,7 @@ const {
   AVV_ERR_ROOT_PLG_BOOTED,
   AVV_ERR_READY_TIMEOUT
 } = require('./lib/errors')
-const TimeTree = require('./time-tree')
+const TimeTree = require('./lib/time-tree')
 const Plugin = require('./plugin')
 const debug = require('debug')('avvio')
 const kAvvio = Symbol('kAvvio')
