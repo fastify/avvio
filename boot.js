@@ -363,7 +363,7 @@ Boot.prototype.ready = function (func) {
 }
 
 Boot.prototype.prettyPrint = function () {
-  return this.pluginTree.prittyPrint()
+  return this.pluginTree.prettyPrint()
 }
 
 Boot.prototype.toJSON = function () {

@@ -99,7 +99,7 @@ class TimeTree {
     return Object.assign({}, this.root)
   }
 
-  prittyPrint () {
+  prettyPrint () {
     const decorateText = (node) => {
       node.label = `${node.label} ${node.diff} ms`
       if (node.nodes.length > 0) {
