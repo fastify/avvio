@@ -12,7 +12,7 @@ test('getPluginName of function', (t) => {
 test('getPluginName of async function', (t) => {
   t.plan(1)
 
-  t.equal(getPluginName(function aPlugin () { }), 'aPlugin')
+  t.equal(getPluginName(async function aPlugin () { }), 'aPlugin')
 })
 
 test('getPluginName of arrow function without name', (t) => {
