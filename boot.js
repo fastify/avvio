@@ -10,7 +10,7 @@ const {
   AVV_ERR_ROOT_PLG_BOOTED,
   AVV_ERR_READY_TIMEOUT
 } = require('./lib/errors')
-const TimeTree = require('./time-tree')
+const TimeTree = require('./lib/time-tree')
 const Plugin = require('./plugin')
 const { debug } = require('./lib/debug')
 const kAvvio = Symbol('kAvvio')
@@ -363,7 +363,7 @@ Boot.prototype.ready = function (func) {
 }
 
 Boot.prototype.prettyPrint = function () {
-  return this.pluginTree.prittyPrint()
+  return this.pluginTree.prettyPrint()
 }
 
 Boot.prototype.toJSON = function () {
