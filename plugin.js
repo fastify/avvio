@@ -4,6 +4,7 @@ const fastq = require('fastq')
 const EE = require('events').EventEmitter
 const inherits = require('util').inherits
 const { debug } = require('./lib/debug')
+const { createPromise } = require('./lib/create-promise')
 const { AVV_ERR_READY_TIMEOUT } = require('./lib/errors')
 
 // this symbol is assigned by fastify-plugin
@@ -26,17 +27,6 @@ function getName (func, optsOrFunc) {
 
   // takes the first two lines of the function if nothing else works
   return func.toString().split('\n').slice(0, 2).map(s => s.trim()).join(' -- ')
-}
-
-function promise () {
-  const obj = {}
-
-  obj.promise = new Promise((resolve, reject) => {
-    obj.resolve = resolve
-    obj.reject = reject
-  })
-
-  return obj
 }
 
 function Plugin (parent, func, optsOrFunc, isAfter, timeout) {
@@ -165,7 +155,7 @@ Plugin.prototype.loadedSoFar = function () {
   let res
 
   if (!this._promise) {
-    this._promise = promise()
+    this._promise = createPromise()
     res = this._promise.promise
 
     if (!this.server) {
