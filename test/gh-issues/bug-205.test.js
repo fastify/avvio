@@ -9,8 +9,8 @@ test('should print the time tree', (t) => {
 
   app.use(function first (instance, opts, cb) {
     const out = instance.prettyPrint().split('\n')
-    t.equal(out[0], 'bound root undefined ms')
-    t.equal(out[1], '└── first undefined ms')
+    t.equal(out[0], 'bound root -1 ms')
+    t.equal(out[1], '└── first -1 ms')
     cb()
   })
 })

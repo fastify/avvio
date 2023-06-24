@@ -62,7 +62,7 @@ test('TimeTree#start is adding a node with correct shape, root-node', t => {
   t.ok('stop' in rootNode)
   t.type(rootNode.stop, 'undefined')
   t.ok('diff' in rootNode)
-  t.type(rootNode.diff, 'undefined')
+  t.type(rootNode.diff, 'number')
 })
 
 test('TimeTree#start is adding a node with correct shape, child-node', t => {
@@ -92,7 +92,7 @@ test('TimeTree#start is adding a node with correct shape, child-node', t => {
   t.ok('stop' in childNode)
   t.type(childNode.stop, 'undefined')
   t.ok('diff' in childNode)
-  t.type(childNode.diff, 'undefined')
+  t.type(childNode.diff, 'number')
 })
 
 test('TimeTree#start is adding a root element when parent is null', t => {
@@ -111,7 +111,7 @@ test('TimeTree#start is adding a root element when parent is null', t => {
   t.ok(Array.isArray(rootNode.nodes))
   t.equal(rootNode.nodes.length, 0)
   t.ok(Number.isInteger(rootNode.start))
-  t.type(rootNode.diff, 'undefined')
+  t.type(rootNode.diff, 'number')
 })
 
 test('TimeTree#start parameter start can override automatically generated start time', t => {
@@ -246,10 +246,12 @@ test('TimeTree#stop parameter stop is used as stop value of node', t => {
 })
 
 test('TimeTree#stop calculates the diff', t => {
-  t.plan(2)
+  t.plan(4)
 
   const tree = new TimeTree()
   tree.start(null, 'root', 1)
+  t.type(tree.root.diff, 'number')
+  t.equal(tree.root.diff, -1)
   tree.stop('root', 5)
 
   t.type(tree.root.diff, 'number')
