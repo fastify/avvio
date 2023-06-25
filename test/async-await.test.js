@@ -3,7 +3,11 @@
 /* eslint no-prototype-builtins: off */
 
 const { test } = require('tap')
-const sleep = require('then-sleep')
+const sleep = function (ms) {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, ms)
+  })
+}
 
 const boot = require('..')
 

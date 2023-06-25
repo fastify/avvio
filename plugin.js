@@ -3,48 +3,20 @@
 const fastq = require('fastq')
 const EE = require('events').EventEmitter
 const inherits = require('util').inherits
-const debug = require('debug')('avvio')
+const { debug } = require('./lib/debug')
+const { loadPlugin } = require('./lib/load-plugin')
+const { createPromise } = require('./lib/create-promise')
 const { AVV_ERR_READY_TIMEOUT } = require('./lib/errors')
-const { kPluginMeta } = require('./lib/symbols')
+const { getPluginName } = require('./lib/get-plugin-name')
 
-function getName (func, optsOrFunc) {
-  // use explicit function metadata if set
-  if (func[kPluginMeta] && func[kPluginMeta].name) {
-    return func[kPluginMeta].name
-  }
-
-  if (typeof optsOrFunc !== 'undefined' && typeof optsOrFunc !== 'function' && optsOrFunc.name) {
-    return optsOrFunc.name
-  }
-
-  // use the function name if it exists
-  if (func.name) {
-    return func.name
-  }
-
-  // takes the first two lines of the function if nothing else works
-  return func.toString().split('\n').slice(0, 2).map(s => s.trim()).join(' -- ')
-}
-
-function promise () {
-  const obj = {}
-
-  obj.promise = new Promise((resolve, reject) => {
-    obj.resolve = resolve
-    obj.reject = reject
-  })
-
-  return obj
-}
-
-function Plugin (parent, func, optsOrFunc, isAfter, timeout) {
+function Plugin (parent, func, options, isAfter, timeout) {
   this.started = false
   this.func = func
-  this.opts = optsOrFunc
+  this.opts = options
   this.onFinish = null
   this.parent = parent
   this.timeout = timeout === undefined ? parent._timeout : timeout
-  this.name = getName(func, optsOrFunc)
+  this.name = getPluginName(func, options)
   this.isAfter = isAfter
   this.q = fastq(parent, loadPluginNextTick, 1)
   this.q.pause()
@@ -163,7 +135,7 @@ Plugin.prototype.loadedSoFar = function () {
   let res
 
   if (!this._promise) {
-    this._promise = promise()
+    this._promise = createPromise()
     res = this._promise.promise
 
     if (!this.server) {
@@ -242,40 +214,16 @@ Plugin.prototype.finish = function (err, cb) {
   this.q.resume()
 }
 
-// delays plugin loading until the next tick to ensure any bound `_after` callbacks have a chance
-// to run prior to executing the next plugin
-function loadPluginNextTick (toLoad, cb) {
-  const parent = this
-  process.nextTick(loadPlugin.bind(parent), toLoad, cb)
-}
-
-// loads a plugin
-function loadPlugin (toLoad, cb) {
-  if (typeof toLoad.func.then === 'function') {
-    toLoad.func.then((fn) => {
-      if (typeof fn.default === 'function') {
-        fn = fn.default
-      }
-      toLoad.func = fn
-      loadPlugin.call(this, toLoad, cb)
-    }, cb)
-    return
-  }
-
-  const last = this._current[0]
-
-  // place the plugin at the top of _current
-  this._current.unshift(toLoad)
-
-  toLoad.exec((last && last.server) || this._server, (err) => {
-    toLoad.finish(err, (err) => {
-      this._current.shift()
-      cb(err)
-    })
-  })
+/**
+ * Delays plugin loading until the next tick to ensure any bound `_after` callbacks have a chance
+ * to run prior to executing the next plugin
+ */
+function loadPluginNextTick (plugin, callback) {
+  process.nextTick(loadPlugin, this, plugin, callback)
 }
 
 function noop () {}
 
-module.exports = Plugin
-module.exports.loadPlugin = loadPlugin
+module.exports = {
+  Plugin
+}
