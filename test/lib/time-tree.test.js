@@ -1,7 +1,7 @@
 'use strict'
 
 const { test } = require('tap')
-const TimeTree = require('../../lib/time-tree')
+const { TimeTree } = require('../../lib/time-tree')
 
 test('TimeTree is constructed with a root attribute, set to null', t => {
   t.plan(1)
@@ -60,7 +60,7 @@ test('TimeTree#start is adding a node with correct shape, root-node', t => {
   t.ok('start' in rootNode)
   t.ok(Number.isInteger(rootNode.start))
   t.ok('stop' in rootNode)
-  t.type(rootNode.stop, 'undefined')
+  t.type(rootNode.stop, 'null')
   t.ok('diff' in rootNode)
   t.type(rootNode.diff, 'number')
 })
@@ -90,7 +90,7 @@ test('TimeTree#start is adding a node with correct shape, child-node', t => {
   t.ok('start' in childNode)
   t.ok(Number.isInteger(childNode.start))
   t.ok('stop' in childNode)
-  t.type(childNode.stop, 'undefined')
+  t.type(childNode.stop, 'null')
   t.ok('diff' in childNode)
   t.type(childNode.diff, 'number')
 })
@@ -226,7 +226,7 @@ test('TimeTree#stop sets stop value of node', t => {
 
   const tree = new TimeTree()
   tree.start(null, 'root')
-  t.type(tree.root.stop, 'undefined')
+  t.type(tree.root.stop, 'null')
 
   tree.stop('root')
   t.type(tree.root.stop, 'number')
@@ -238,7 +238,7 @@ test('TimeTree#stop parameter stop is used as stop value of node', t => {
 
   const tree = new TimeTree()
   tree.start(null, 'root')
-  t.type(tree.root.stop, 'undefined')
+  t.type(tree.root.stop, 'null')
 
   tree.stop('root', 1337)
   t.type(tree.root.stop, 'number')
@@ -263,10 +263,10 @@ test('TimeTree#stop does nothing when node is not found', t => {
 
   const tree = new TimeTree()
   tree.start(null, 'root')
-  t.type(tree.root.stop, 'undefined')
+  t.type(tree.root.stop, 'null')
 
   tree.stop('invalid')
-  t.type(tree.root.stop, 'undefined')
+  t.type(tree.root.stop, 'null')
 })
 
 test('TimeTree untracks node ids /1', t => {
