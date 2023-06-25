@@ -11,8 +11,9 @@ const {
   AVV_ERR_READY_TIMEOUT
 } = require('./lib/errors')
 const TimeTree = require('./lib/time-tree')
-const Plugin = require('./plugin')
+const { Plugin } = require('./plugin')
 const { debug } = require('./lib/debug')
+const { loadPlugin } = require('./lib/load-plugin')
 const kAvvio = Symbol('kAvvio')
 const kThenifyDoNotWrap = Symbol('kThenifyDoNotWrap')
 
@@ -154,7 +155,7 @@ function Boot (server, opts, done) {
     })
   })
 
-  Plugin.loadPlugin.call(this, this._root, (err) => {
+  loadPlugin(this, this._root, (err) => {
     debug('root plugin ready')
     try {
       this.emit('preReady')
