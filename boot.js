@@ -6,7 +6,6 @@ const inherits = require('util').inherits
 const {
   AVV_ERR_EXPOSE_ALREADY_DEFINED,
   AVV_ERR_CALLBACK_NOT_FN,
-  AVV_ERR_PLUGIN_NOT_VALID,
   AVV_ERR_ROOT_PLG_BOOTED,
   AVV_ERR_READY_TIMEOUT
 } = require('./lib/errors')
@@ -18,6 +17,8 @@ const {
 const { TimeTree } = require('./lib/time-tree')
 const { Plugin } = require('./plugin')
 const { debug } = require('./lib/debug')
+const { validatePlugin } = require('./lib/validate-plugin')
+const { isBundledOrTypescriptPlugin } = require('./lib/is-bundled-or-typescript-plugin')
 const { loadPlugin } = require('./lib/load-plugin')
 
 function wrap (server, opts, instance) {
@@ -201,18 +202,6 @@ Boot.prototype.override = function (server, func, opts) {
   return server
 }
 
-function assertPlugin (plugin) {
-  // Faux modules are modules built with TypeScript
-  // or Babel that they export a .default property.
-  if (plugin && typeof plugin === 'object' && typeof plugin.default === 'function') {
-    plugin = plugin.default
-  }
-  if (!(plugin && (typeof plugin === 'function' || typeof plugin.then === 'function'))) {
-    throw new AVV_ERR_PLUGIN_NOT_VALID(typeof plugin)
-  }
-  return plugin
-}
-
 Boot.prototype[kAvvio] = true
 
 // load a plugin
@@ -241,7 +230,10 @@ Boot.prototype._loadRegistered = function () {
 Object.defineProperty(Boot.prototype, 'then', { get: thenify })
 
 Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
-  plugin = assertPlugin(plugin)
+  if (isBundledOrTypescriptPlugin(plugin)) {
+    plugin = plugin.default
+  }
+  validatePlugin(plugin)
   opts = opts || {}
 
   if (this.booted) {
