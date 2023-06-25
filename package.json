@@ -45,7 +45,7 @@
     "typescript": "^5.0.2"
   },
   "dependencies": {
-    "archy": "^1.0.0",
+    "@fastify/error": "^3.3.0",
     "fastq": "^1.6.1"
   }
 }
