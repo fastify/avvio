@@ -4,19 +4,9 @@ const fastq = require('fastq')
 const EE = require('events').EventEmitter
 const inherits = require('util').inherits
 const { debug } = require('./lib/debug')
+const { createPromise } = require('./lib/create-promise')
 const { AVV_ERR_READY_TIMEOUT } = require('./lib/errors')
 const { getPluginName } = require('./lib/get-plugin-name')
-
-function promise () {
-  const obj = {}
-
-  obj.promise = new Promise((resolve, reject) => {
-    obj.resolve = resolve
-    obj.reject = reject
-  })
-
-  return obj
-}
 
 function Plugin (parent, func, options, isAfter, timeout) {
   this.started = false
@@ -144,7 +134,7 @@ Plugin.prototype.loadedSoFar = function () {
   let res
 
   if (!this._promise) {
-    this._promise = promise()
+    this._promise = createPromise()
     res = this._promise.promise
 
     if (!this.server) {
