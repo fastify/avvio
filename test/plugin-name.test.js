@@ -2,13 +2,14 @@
 
 const { test } = require('tap')
 const boot = require('..')
+const { kPluginMeta } = require('../lib/symbols')
 
 test('plugins get a name from the plugin metadata if it is set', async (t) => {
   t.plan(1)
   const app = boot()
 
   const func = (app, opts, next) => next()
-  func[Symbol.for('plugin-meta')] = { name: 'a-test-plugin' }
+  func[kPluginMeta] = { name: 'a-test-plugin' }
   app.use(func)
   await app.ready()
 

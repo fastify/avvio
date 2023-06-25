@@ -9,13 +9,17 @@ const {
   AVV_ERR_ROOT_PLG_BOOTED,
   AVV_ERR_READY_TIMEOUT
 } = require('./lib/errors')
-const TimeTree = require('./time-tree')
-const Plugin = require('./plugin')
+const {
+  kAvvio,
+  kIsOnCloseHandler,
+  kThenifyDoNotWrap
+} = require('./lib/symbols')
+const { TimeTree } = require('./lib/time-tree')
+const { Plugin } = require('./plugin')
 const { debug } = require('./lib/debug')
 const { validatePlugin } = require('./lib/validate-plugin')
 const { isBundledOrTypescriptPlugin } = require('./lib/is-bundled-or-typescript-plugin')
-const kAvvio = Symbol('kAvvio')
-const kThenifyDoNotWrap = Symbol('kThenifyDoNotWrap')
+const { loadPlugin } = require('./lib/load-plugin')
 
 function wrap (server, opts, instance) {
   const expose = opts.expose || {}
@@ -117,7 +121,7 @@ function Boot (server, opts, done) {
   this._server = server
   this._current = []
   this._error = null
-  this._isOnCloseHandlerKey = Symbol('isOnCloseHandler')
+  this._isOnCloseHandlerKey = kIsOnCloseHandler
   this._lastUsed = null
 
   this.setMaxListeners(0)
@@ -155,7 +159,7 @@ function Boot (server, opts, done) {
     })
   })
 
-  Plugin.loadPlugin.call(this, this._root, (err) => {
+  loadPlugin(this, this._root, (err) => {
     debug('root plugin ready')
     try {
       this.emit('preReady')
@@ -355,7 +359,7 @@ Boot.prototype.ready = function (func) {
 }
 
 Boot.prototype.prettyPrint = function () {
-  return this.pluginTree.prittyPrint()
+  return this.pluginTree.prettyPrint()
 }
 
 Boot.prototype.toJSON = function () {
