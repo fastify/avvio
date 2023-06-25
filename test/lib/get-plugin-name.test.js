@@ -2,6 +2,7 @@
 
 const { test } = require('tap')
 const { getPluginName } = require('../../lib/get-plugin-name')
+const { kPluginMeta } = require('../../lib/symbols')
 
 test('getPluginName of function', (t) => {
   t.plan(1)
@@ -36,7 +37,7 @@ test("getPluginName based on Symbol 'plugin-meta' /1", (t) => {
 
   }
 
-  plugin[Symbol.for('plugin-meta')] = {}
+  plugin[kPluginMeta] = {}
   t.equal(getPluginName(plugin), 'plugin')
 })
 
@@ -47,7 +48,7 @@ test("getPluginName based on Symbol 'plugin-meta' /2", (t) => {
 
   }
 
-  plugin[Symbol.for('plugin-meta')] = {
+  plugin[kPluginMeta] = {
     name: 'fastify-non-existent'
   }
   t.equal(getPluginName(plugin), 'fastify-non-existent')

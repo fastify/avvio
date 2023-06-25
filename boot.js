@@ -10,12 +10,15 @@ const {
   AVV_ERR_ROOT_PLG_BOOTED,
   AVV_ERR_READY_TIMEOUT
 } = require('./lib/errors')
+const {
+  kAvvio,
+  kIsOnCloseHandler,
+  kThenifyDoNotWrap
+} = require('./lib/symbols')
 const { TimeTree } = require('./lib/time-tree')
 const { Plugin } = require('./plugin')
 const { debug } = require('./lib/debug')
 const { loadPlugin } = require('./lib/load-plugin')
-const kAvvio = Symbol('kAvvio')
-const kThenifyDoNotWrap = Symbol('kThenifyDoNotWrap')
 
 function wrap (server, opts, instance) {
   const expose = opts.expose || {}
@@ -117,7 +120,7 @@ function Boot (server, opts, done) {
   this._server = server
   this._current = []
   this._error = null
-  this._isOnCloseHandlerKey = Symbol('isOnCloseHandler')
+  this._isOnCloseHandlerKey = kIsOnCloseHandler
   this._lastUsed = null
 
   this.setMaxListeners(0)
