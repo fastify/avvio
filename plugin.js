@@ -4,6 +4,7 @@ const fastq = require('fastq')
 const EE = require('events').EventEmitter
 const inherits = require('util').inherits
 const { debug } = require('./lib/debug')
+const { loadPlugin } = require('./lib/load-plugin')
 const { createPromise } = require('./lib/create-promise')
 const { AVV_ERR_READY_TIMEOUT } = require('./lib/errors')
 const { getPluginName } = require('./lib/get-plugin-name')
@@ -213,40 +214,16 @@ Plugin.prototype.finish = function (err, cb) {
   this.q.resume()
 }
 
-// delays plugin loading until the next tick to ensure any bound `_after` callbacks have a chance
-// to run prior to executing the next plugin
-function loadPluginNextTick (toLoad, cb) {
-  const parent = this
-  process.nextTick(loadPlugin.bind(parent), toLoad, cb)
-}
-
-// loads a plugin
-function loadPlugin (toLoad, cb) {
-  if (typeof toLoad.func.then === 'function') {
-    toLoad.func.then((fn) => {
-      if (typeof fn.default === 'function') {
-        fn = fn.default
-      }
-      toLoad.func = fn
-      loadPlugin.call(this, toLoad, cb)
-    }, cb)
-    return
-  }
-
-  const last = this._current[0]
-
-  // place the plugin at the top of _current
-  this._current.unshift(toLoad)
-
-  toLoad.exec((last && last.server) || this._server, (err) => {
-    toLoad.finish(err, (err) => {
-      this._current.shift()
-      cb(err)
-    })
-  })
+/**
+ * Delays plugin loading until the next tick to ensure any bound `_after` callbacks have a chance
+ * to run prior to executing the next plugin
+ */
+function loadPluginNextTick (plugin, callback) {
+  process.nextTick(loadPlugin, this, plugin, callback)
 }
 
 function noop () {}
 
-module.exports = Plugin
-module.exports.loadPlugin = loadPlugin
+module.exports = {
+  Plugin
+}
