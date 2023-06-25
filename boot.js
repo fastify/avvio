@@ -230,10 +230,10 @@ Boot.prototype._loadRegistered = function () {
 Object.defineProperty(Boot.prototype, 'then', { get: thenify })
 
 Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
-  validatePlugin(plugin)
   if (isBundledOrTypescriptPlugin(plugin)) {
     plugin = plugin.default
   }
+  validatePlugin(plugin)
   opts = opts || {}
 
   if (this.booted) {

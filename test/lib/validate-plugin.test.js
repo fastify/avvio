@@ -5,7 +5,7 @@ const { validatePlugin } = require('../../lib/validate-plugin')
 const { AVV_ERR_PLUGIN_NOT_VALID } = require('../../lib/errors')
 
 test('validatePlugin', (t) => {
-  t.plan(9)
+  t.plan(8)
 
   t.throws(() => validatePlugin(1), new AVV_ERR_PLUGIN_NOT_VALID('number'))
   t.throws(() => validatePlugin('function'), new AVV_ERR_PLUGIN_NOT_VALID('string'))
@@ -16,6 +16,4 @@ test('validatePlugin', (t) => {
   t.doesNotThrow(() => validatePlugin(function () {}))
   t.doesNotThrow(() => validatePlugin(new Promise((resolve) => resolve)))
   t.doesNotThrow(() => validatePlugin(Promise.resolve()))
-
-  t.doesNotThrow(() => validatePlugin({ default: () => {} }))
 })
