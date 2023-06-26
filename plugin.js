@@ -8,6 +8,7 @@ const { loadPlugin } = require('./lib/load-plugin')
 const { createPromise } = require('./lib/create-promise')
 const { AVV_ERR_READY_TIMEOUT } = require('./lib/errors')
 const { getPluginName } = require('./lib/get-plugin-name')
+const { isPromiseLike } = require('./lib/is-promise-like')
 
 function Plugin (parent, func, options, isAfter, timeout) {
   this.started = false
@@ -99,7 +100,7 @@ Plugin.prototype.exec = function (server, cb) {
   this.emit('start', this.server ? this.server.name : null, this.name, Date.now())
   const promise = func(this.server, this.opts, done)
 
-  if (promise && typeof promise.then === 'function') {
+  if (isPromiseLike(promise)) {
     debug('exec: resolving promise', name)
 
     promise.then(

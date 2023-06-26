@@ -20,6 +20,7 @@ const { debug } = require('./lib/debug')
 const { validatePlugin } = require('./lib/validate-plugin')
 const { isBundledOrTypescriptPlugin } = require('./lib/is-bundled-or-typescript-plugin')
 const { loadPlugin } = require('./lib/load-plugin')
+const { isPromiseLike } = require('./lib/is-promise-like')
 
 function wrap (server, opts, instance) {
   const expose = opts.expose || {}
@@ -408,14 +409,14 @@ function callWithCbOrNextTick (func, cb) {
   if (func.length === 0) {
     this._error = err
     res = func()
-    if (res && !res[kAvvio] && typeof res.then === 'function') {
+    if (isPromiseLike(res) && !res[kAvvio]) {
       res.then(() => process.nextTick(cb), (e) => process.nextTick(cb, e))
     } else {
       process.nextTick(cb)
     }
   } else if (func.length === 1) {
     res = func(err)
-    if (res && !res[kAvvio] && typeof res.then === 'function') {
+    if (isPromiseLike(res) && !res[kAvvio]) {
       res.then(() => process.nextTick(cb), (e) => process.nextTick(cb, e))
     } else {
       process.nextTick(cb)
