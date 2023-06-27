@@ -1,7 +1,7 @@
 'use strict'
 
 const fastq = require('fastq')
-const EE = require('events').EventEmitter
+const { EventEmitter } = require('events')
 const inherits = require('util').inherits
 const { debug } = require('./lib/debug')
 const { loadPlugin } = require('./lib/load-plugin')
@@ -26,7 +26,7 @@ function Plugin (parent, func, options, isAfter, timeout) {
   this._promise = null
 }
 
-inherits(Plugin, EE)
+inherits(Plugin, EventEmitter)
 
 Plugin.prototype.exec = function (server, cb) {
   const func = this.func
