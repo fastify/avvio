@@ -24,11 +24,6 @@ function Plugin (parent, func, options, isAfter, timeout) {
   this._error = null
   this.loaded = false
   this._promise = null
-
-  // always start the queue in the next tick
-  // because we try to attach subsequent call to use()
-  // to the right plugin. we need to defer them,
-  // or they will end up at the top of _current
 }
 
 inherits(Plugin, EE)
