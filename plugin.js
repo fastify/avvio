@@ -93,12 +93,12 @@ Plugin.prototype.exec = function (server, cb) {
 
   this.started = true
   this.emit('start', this.server ? this.server.name : null, this.name, Date.now())
-  const promise = func(this.server, this.opts, done)
+  const maybePromiseLike = func(this.server, this.opts, done)
 
-  if (isPromiseLike(promise)) {
+  if (isPromiseLike(maybePromiseLike)) {
     debug('exec: resolving promise', name)
 
-    promise.then(
+    maybePromiseLike.then(
       () => process.nextTick(done),
       (e) => process.nextTick(done, e))
   }
