@@ -3,7 +3,7 @@
 const { test } = require('tap')
 const boot = require('../..')
 const { loadPlugin } = require('../../lib/load-plugin')
-const { Plugin } = require('../../plugin')
+const { Plugin } = require('../../lib/plugin')
 
 test('successfully load a plugin with sync function', (t) => {
   t.plan(1)

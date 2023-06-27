@@ -15,7 +15,7 @@ const {
   kThenifyDoNotWrap
 } = require('./lib/symbols')
 const { TimeTree } = require('./lib/time-tree')
-const { Plugin } = require('./plugin')
+const { Plugin } = require('./lib/plugin')
 const { debug } = require('./lib/debug')
 const { validatePlugin } = require('./lib/validate-plugin')
 const { isBundledOrTypescriptPlugin } = require('./lib/is-bundled-or-typescript-plugin')
@@ -120,7 +120,11 @@ function Boot (server, opts, done) {
 
   this._timeout = Number(opts.timeout) || 0
   this._server = server
+  /**
+   * @type {Array<Plugin>}
+   */
   this._current = []
+
   this._error = null
   this._isOnCloseHandlerKey = kIsOnCloseHandler
   this._lastUsed = null
@@ -216,9 +220,9 @@ Boot.prototype._loadRegistered = function () {
   const weNeedToStart = !this.started && !this.booted
 
   // if the root plugin is not loaded, let's resume that
-  // so one can use after() befor calling ready
+  // so one can use after() before calling ready
   if (weNeedToStart) {
-    process.nextTick(() => this._root.q.resume())
+    process.nextTick(() => this._root.queue.resume())
   }
 
   if (!plugin) {
