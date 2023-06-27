@@ -248,7 +248,7 @@ Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
   // we always add plugins to load at the current element
   const current = this._current[0]
 
-  const obj = new Plugin(this, plugin, opts, isAfter)
+  const obj = new Plugin(this, plugin, opts, isAfter, this._timeout)
   obj.once('start', (serverName, funcName, time) => {
     const nodeId = this.pluginTree.start(current.name, funcName, time)
     obj.once('loaded', (serverName, funcName, time) => {
