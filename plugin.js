@@ -14,7 +14,6 @@ function Plugin (parent, func, options, isAfter, timeout) {
   this.started = false
   this.func = func
   this.opts = options
-  this.onFinish = null
   this.parent = parent
   this.timeout = timeout === undefined ? parent._timeout : timeout
   this.name = getPluginName(func, options)
