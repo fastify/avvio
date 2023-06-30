@@ -10,7 +10,8 @@ test('Correct codes of AvvioErrors', t => {
     'AVV_ERR_PLUGIN_NOT_VALID',
     'AVV_ERR_ROOT_PLG_BOOTED',
     'AVV_ERR_PARENT_PLG_LOADED',
-    'AVV_ERR_READY_TIMEOUT'
+    'AVV_ERR_READY_TIMEOUT',
+    'AVV_ERR_PLUGIN_EXEC_TIMEOUT'
   ]
 
   t.plan(testcases.length + 1)
