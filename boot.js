@@ -155,7 +155,7 @@ function Boot (server, opts, done) {
   }
 
   this._doStart = null
-  this._root = new Plugin(fastq(this, this.loadPluginNextTick, 1), root.bind(this), opts, false, 0)
+  this._root = new Plugin(fastq(this, this._loadPluginNextTick, 1), root.bind(this), opts, false, 0)
   this._root.once('start', (serverName, funcName, time) => {
     const nodeId = this.pluginTree.start(null, funcName, time)
     this._root.once('loaded', (serverName, funcName, time) => {
@@ -163,7 +163,7 @@ function Boot (server, opts, done) {
     })
   })
 
-  this.loadPlugin(this._root, (err) => {
+  this._loadPlugin(this._root, (err) => {
     debug('root plugin ready')
     try {
       this.emit('preReady')
@@ -247,7 +247,7 @@ Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
   // we always add plugins to load at the current element
   const current = this._current[0]
 
-  const obj = new Plugin(fastq(this, this.loadPluginNextTick, 1), plugin, opts, isAfter, this._timeout)
+  const obj = new Plugin(fastq(this, this._loadPluginNextTick, 1), plugin, opts, isAfter, this._timeout)
   obj.once('start', (serverName, funcName, time) => {
     const nodeId = this.pluginTree.start(current.name, funcName, time)
     obj.once('loaded', (serverName, funcName, time) => {
@@ -381,7 +381,7 @@ Boot.prototype.toJSON = function () {
  * @param {Plugin} plugin
  * @param {LoadPluginCallback} callback
  */
-Boot.prototype.loadPlugin = function (plugin, callback) {
+Boot.prototype._loadPlugin = function (plugin, callback) {
   const instance = this
   if (isPromiseLike(plugin.func)) {
     plugin.func.then((fn) => {
@@ -389,7 +389,7 @@ Boot.prototype.loadPlugin = function (plugin, callback) {
         fn = fn.default
       }
       plugin.func = fn
-      this.loadPlugin(plugin, callback)
+      this._loadPlugin(plugin, callback)
     }, callback)
     return
   }
@@ -431,8 +431,8 @@ Boot.prototype.loadPlugin = function (plugin, callback) {
 * Delays plugin loading until the next tick to ensure any bound `_after` callbacks have a chance
 * to run prior to executing the next plugin
 */
-Boot.prototype.loadPluginNextTick = function (plugin, callback) {
-  process.nextTick(this.loadPlugin.bind(this), plugin, callback)
+Boot.prototype._loadPluginNextTick = function (plugin, callback) {
+  process.nextTick(this._loadPlugin.bind(this), plugin, callback)
 }
 
 function noop () { }
