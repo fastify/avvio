@@ -19,7 +19,6 @@ const { Plugin } = require('./lib/plugin')
 const { debug } = require('./lib/debug')
 const { validatePlugin } = require('./lib/validate-plugin')
 const { isBundledOrTypescriptPlugin } = require('./lib/is-bundled-or-typescript-plugin')
-const { loadPlugin } = require('./lib/load-plugin')
 const { isPromiseLike } = require('./lib/is-promise-like')
 
 function wrap (server, opts, instance) {
@@ -156,7 +155,7 @@ function Boot (server, opts, done) {
   }
 
   this._doStart = null
-  this._root = new Plugin(this, root.bind(this), opts, false, 0)
+  this._root = new Plugin(fastq(this, this.loadPluginNextTick, 1), root.bind(this), opts, false, 0)
   this._root.once('start', (serverName, funcName, time) => {
     const nodeId = this.pluginTree.start(null, funcName, time)
     this._root.once('loaded', (serverName, funcName, time) => {
@@ -164,7 +163,7 @@ function Boot (server, opts, done) {
     })
   })
 
-  loadPlugin(this, this._root, (err) => {
+  this.loadPlugin(this._root, (err) => {
     debug('root plugin ready')
     try {
       this.emit('preReady')
@@ -248,7 +247,7 @@ Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
   // we always add plugins to load at the current element
   const current = this._current[0]
 
-  const obj = new Plugin(this, plugin, opts, isAfter, this._timeout)
+  const obj = new Plugin(fastq(this, this.loadPluginNextTick, 1), plugin, opts, isAfter, this._timeout)
   obj.once('start', (serverName, funcName, time) => {
     const nodeId = this.pluginTree.start(current.name, funcName, time)
     obj.once('loaded', (serverName, funcName, time) => {
@@ -369,6 +368,71 @@ Boot.prototype.prettyPrint = function () {
 
 Boot.prototype.toJSON = function () {
   return this.pluginTree.toJSON()
+}
+
+/**
+ * @callback LoadPluginCallback
+ * @param {Error} [err]
+ */
+
+/**
+ * Load a plugin
+ *
+ * @param {Plugin} plugin
+ * @param {LoadPluginCallback} callback
+ */
+Boot.prototype.loadPlugin = function (plugin, callback) {
+  const instance = this
+  if (isPromiseLike(plugin.func)) {
+    plugin.func.then((fn) => {
+      if (typeof fn.default === 'function') {
+        fn = fn.default
+      }
+      plugin.func = fn
+      this.loadPlugin(plugin, callback)
+    }, callback)
+    return
+  }
+
+  const last = instance._current[0]
+
+  // place the plugin at the top of _current
+  instance._current.unshift(plugin)
+
+  if (instance._error && !plugin.isAfter) {
+    debug('skipping loading of plugin as instance errored and it is not an after', plugin.name)
+    process.nextTick(execCallback)
+    return
+  }
+
+  let server = (last && last.server) || instance._server
+
+  if (!plugin.isAfter) {
+    // Skip override for after
+    try {
+      server = instance.override(server, plugin.func, plugin.options)
+    } catch (overrideErr) {
+      debug('override errored', plugin.name)
+      return execCallback(overrideErr)
+    }
+  }
+
+  plugin.exec(server, execCallback)
+
+  function execCallback (err) {
+    plugin.finish(err, (err) => {
+      instance._current.shift()
+      callback(err)
+    })
+  }
+}
+
+/**
+* Delays plugin loading until the next tick to ensure any bound `_after` callbacks have a chance
+* to run prior to executing the next plugin
+*/
+Boot.prototype.loadPluginNextTick = function (plugin, callback) {
+  process.nextTick(this.loadPlugin.bind(this), plugin, callback)
 }
 
 function noop () { }
