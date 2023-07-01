@@ -18,7 +18,7 @@ test('timeout without calling next - callbacks', (t) => {
     t.ok(err)
     t.equal(err.fn, one)
     t.equal(err.message, message('one'))
-    t.equal(err.code, 'AVV_ERR_READY_TIMEOUT')
+    t.equal(err.code, 'AVV_ERR_PLUGIN_EXEC_TIMEOUT')
   })
 })
 
@@ -37,7 +37,7 @@ test('timeout without calling next - promises', (t) => {
     t.ok(err)
     t.equal(err.fn, two)
     t.equal(err.message, message('two'))
-    t.equal(err.code, 'AVV_ERR_READY_TIMEOUT')
+    t.equal(err.code, 'AVV_ERR_PLUGIN_EXEC_TIMEOUT')
   })
 })
 
@@ -50,7 +50,7 @@ test('timeout without calling next - use file as name', (t) => {
   app.ready((err) => {
     t.ok(err)
     t.equal(err.message, message('noNext'))
-    t.equal(err.code, 'AVV_ERR_READY_TIMEOUT')
+    t.equal(err.code, 'AVV_ERR_PLUGIN_EXEC_TIMEOUT')
   })
 })
 
@@ -66,7 +66,7 @@ test('timeout without calling next - use code as name', (t) => {
   app.ready((err) => {
     t.ok(err)
     t.equal(err.message, message('function (app, opts, next) { -- // do not call next on purpose - code as name'))
-    t.equal(err.code, 'AVV_ERR_READY_TIMEOUT')
+    t.equal(err.code, 'AVV_ERR_PLUGIN_EXEC_TIMEOUT')
   })
 })
 
