@@ -83,7 +83,6 @@ async function third (instance, opts) {
   * <a href="#override"><code>instance.<b>override()</b></code></a>
   * <a href="#onClose"><code>instance.<b>onClose()</b></code></a>
   * <a href="#close"><code>instance.<b>close()</b></code></a>
-  * <a href="#express"><code>avvio.<b>express()</b></code></a>
   * <a href="#toJSON"><code>avvio.<b>toJSON()</b></code></a>
   * <a href="#prettyPrint"><code>avvio.<b>prettyPrint()</b></code></a>
 
@@ -443,24 +442,6 @@ also start the boot sequence.
 
 Start the boot sequence, if it was not started yet.
 Returns the `app` instance.
-
--------------------------------------------------------
-<a name="express"></a>
-
-### avvio.express(app)
-
-Same as:
-
-```js
-const app = express()
-const avvio = require('avvio')
-
-avvio(app, {
-  expose: {
-    use: 'load'
-  }
-})
-```
 
 -------------------------------------------------------
 <a name="override"></a>
