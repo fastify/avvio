@@ -1,8 +1,7 @@
 'use strict'
 
 const fastq = require('fastq')
-const EE = require('events').EventEmitter
-const inherits = require('util').inherits
+const { EventEmitter } = require('events')
 const {
   AVV_ERR_EXPOSE_ALREADY_DEFINED,
   AVV_ERR_CALLBACK_NOT_FN,
@@ -189,7 +188,14 @@ function root (s, opts, done) {
   }
 }
 
-inherits(Boot, EE)
+Boot.prototype = Object.create(EventEmitter.prototype, {
+  constructor: {
+    value: Boot,
+    enumerable: false,
+    writable: true,
+    configurable: true
+  }
+})
 
 Boot.prototype.start = function () {
   this.started = true
