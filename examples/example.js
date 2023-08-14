@@ -1,6 +1,6 @@
 'use strict'
 
-const avvio = require('.')()
+const avvio = require('..')()
 
 function a (instance, opts, cb) {
   (opts.use || []).forEach(_ => { instance.use(_, { use: opts.subUse || [] }) })
