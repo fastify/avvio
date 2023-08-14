@@ -39,7 +39,6 @@
   "devDependencies": {
     "@fastify/pre-commit": "^2.0.2",
     "@types/node": "^20.1.0",
-    "express": "^4.17.1",
     "standard": "^17.0.0",
     "tap": "^16.0.0",
     "typescript": "^5.0.2"
