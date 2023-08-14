@@ -97,11 +97,40 @@ test('boot a plugin with a custom server', (t) => {
   })
 })
 
-test('custom instance should inherits avvio methods', (t) => {
+test('custom instance should inherits avvio methods /1', (t) => {
   t.plan(6)
 
   const server = {}
   const app = boot(server, {})
+
+  server.use(function (s, opts, done) {
+    t.equal(s, server, 'the first argument is the server')
+    t.same(opts, {}, 'no options')
+    done()
+  }).after(() => {
+    t.ok('after called')
+  })
+
+  server.onClose(() => {
+    t.ok('onClose called')
+  })
+
+  server.ready(() => {
+    t.ok('ready called')
+  })
+
+  app.on('start', () => {
+    server.close(() => {
+      t.pass('booted')
+    })
+  })
+})
+
+test('custom instance should inherits avvio methods /2', (t) => {
+  t.plan(6)
+
+  const server = {}
+  const app = new boot(server, {}) // eslint-disable-line new-cap
 
   server.use(function (s, opts, done) {
     t.equal(s, server, 'the first argument is the server')
