@@ -109,9 +109,7 @@ function Boot (server, opts, done) {
     wrap(server, opts, this)
   }
 
-  if (opts.autostart !== false) {
-    opts.autostart = true
-  }
+  opts.autostart = opts.autostart !== false
 
   server = server || this
 
@@ -153,21 +151,22 @@ function Boot (server, opts, done) {
   }
 
   this._doStart = null
-  this._root = new Plugin(fastq(this, this._loadPluginNextTick, 1), root.bind(this), opts, false, 0)
-  this._root.once('start', (serverName, funcName, time) => {
-    const nodeId = this.pluginTree.start(null, funcName, time)
-    this._root.once('loaded', (serverName, funcName, time) => {
-      this.pluginTree.stop(nodeId, time)
-    })
-  })
+
+  const instance = this
+  this._root = new Plugin(fastq(this, this._loadPluginNextTick, 1), function root (server, opts, done) {
+    instance._doStart = done
+    opts.autostart && instance.start()
+  }, opts, false, 0)
+
+  this._trackPluginLoading(this._root)
 
   this._loadPlugin(this._root, (err) => {
     debug('root plugin ready')
     try {
       this.emit('preReady')
       this._root = null
-    } catch (prereadyError) {
-      err = err || this._error || prereadyError
+    } catch (preReadyError) {
+      err = err || this._error || preReadyError
     }
 
     if (err) {
@@ -180,13 +179,6 @@ function Boot (server, opts, done) {
     }
     this._readyQ.resume()
   })
-}
-
-function root (s, opts, done) {
-  this._doStart = done
-  if (opts.autostart) {
-    this.start()
-  }
 }
 
 inherits(Boot, EE)
@@ -231,11 +223,11 @@ Boot.prototype._loadRegistered = function () {
 
 Object.defineProperty(Boot.prototype, 'then', { get: thenify })
 
-Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
-  if (isBundledOrTypescriptPlugin(plugin)) {
-    plugin = plugin.default
+Boot.prototype._addPlugin = function (pluginFn, opts, isAfter) {
+  if (isBundledOrTypescriptPlugin(pluginFn)) {
+    pluginFn = pluginFn.default
   }
-  validatePlugin(plugin)
+  validatePlugin(pluginFn)
   opts = opts || {}
 
   if (this.booted) {
@@ -245,26 +237,21 @@ Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
   // we always add plugins to load at the current element
   const current = this._current[0]
 
-  const obj = new Plugin(fastq(this, this._loadPluginNextTick, 1), plugin, opts, isAfter, this._timeout)
-  obj.once('start', (serverName, funcName, time) => {
-    const nodeId = this.pluginTree.start(current.name, funcName, time)
-    obj.once('loaded', (serverName, funcName, time) => {
-      this.pluginTree.stop(nodeId, time)
-    })
-  })
+  const plugin = new Plugin(fastq(this, this._loadPluginNextTick, 1), pluginFn, opts, isAfter, this._timeout)
+  this._trackPluginLoading(plugin)
 
   if (current.loaded) {
-    throw new Error(obj.name, current.name)
+    throw new Error(plugin.name, current.name)
   }
 
   // we add the plugin to be loaded at the end of the current queue
-  current.enqueue(obj, (err) => {
+  current.enqueue(plugin, (err) => {
     if (err) {
       this._error = err
     }
   })
 
-  return obj
+  return plugin
 }
 
 Boot.prototype.after = function (func) {
@@ -357,6 +344,16 @@ Boot.prototype.ready = function (func) {
       }
       process.nextTick(done)
     }
+  })
+}
+
+Boot.prototype._trackPluginLoading = function (plugin) {
+  const parentName = this._current[0]?.name || null
+  plugin.once('start', (serverName, funcName, time) => {
+    const nodeId = this.pluginTree.start(parentName || null, funcName, time)
+    plugin.once('loaded', (serverName, funcName, time) => {
+      this.pluginTree.stop(nodeId, time)
+    })
   })
 }
 
