@@ -11,8 +11,7 @@ const {
 } = require('./lib/errors')
 const {
   kAvvio,
-  kIsOnCloseHandler,
-  kThenifyDoNotWrap
+  kIsOnCloseHandler
 } = require('./lib/symbols')
 const { TimeTree } = require('./lib/time-tree')
 const { Plugin } = require('./lib/plugin')
@@ -20,6 +19,8 @@ const { debug } = require('./lib/debug')
 const { validatePlugin } = require('./lib/validate-plugin')
 const { isBundledOrTypescriptPlugin } = require('./lib/is-bundled-or-typescript-plugin')
 const { isPromiseLike } = require('./lib/is-promise-like')
+const { thenify } = require('./lib/thenify')
+const { executeWithThenable } = require('./lib/executeWithThenable')
 
 function wrap (server, opts, instance) {
   const expose = opts.expose || {}
@@ -437,58 +438,17 @@ Boot.prototype._loadPluginNextTick = function (plugin, callback) {
 
 function noop () { }
 
-function thenify () {
-  // If the instance is ready, then there is
-  // nothing to await. This is true during
-  // await server.ready() as ready() resolves
-  // with the server, end we will end up here
-  // because of automatic promise chaining.
-  if (this.booted) {
-    debug('thenify returning null because we are already booted')
-    return
-  }
-
-  // Calling resolve(this._server) would fetch the then
-  // property on the server, which will lead it here.
-  // If we do not break the recursion, we will loop
-  // forever.
-  if (this[kThenifyDoNotWrap]) {
-    this[kThenifyDoNotWrap] = false
-    return
-  }
-
-  debug('thenify')
-  return (resolve, reject) => {
-    const p = this._loadRegistered()
-    return p.then(() => {
-      this[kThenifyDoNotWrap] = true
-      return resolve(this._server)
-    }, reject)
-  }
-}
-
 function callWithCbOrNextTick (func, cb) {
   const context = this._server
   const err = this._error
-  let res
 
   // with this the error will appear just in the next after/ready callback
   this._error = null
   if (func.length === 0) {
     this._error = err
-    res = func()
-    if (isPromiseLike(res) && !res[kAvvio]) {
-      res.then(() => process.nextTick(cb), (e) => process.nextTick(cb, e))
-    } else {
-      process.nextTick(cb)
-    }
+    executeWithThenable(func, [], cb)
   } else if (func.length === 1) {
-    res = func(err)
-    if (isPromiseLike(res) && !res[kAvvio]) {
-      res.then(() => process.nextTick(cb), (e) => process.nextTick(cb, e))
-    } else {
-      process.nextTick(cb)
-    }
+    executeWithThenable(func, [err], cb)
   } else {
     if (this._timeout === 0) {
       const wrapCb = (err) => {
