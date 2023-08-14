@@ -347,6 +347,10 @@ Boot.prototype.ready = function (func) {
   })
 }
 
+/**
+ * @param {Plugin} plugin
+ * @returns {void}
+ */
 Boot.prototype._trackPluginLoading = function (plugin) {
   const parentName = this._current[0]?.name || null
   plugin.once('start', (serverName, funcName, time) => {
