@@ -7,7 +7,8 @@ const {
   AVV_ERR_EXPOSE_ALREADY_DEFINED,
   AVV_ERR_CALLBACK_NOT_FN,
   AVV_ERR_ROOT_PLG_BOOTED,
-  AVV_ERR_READY_TIMEOUT
+  AVV_ERR_READY_TIMEOUT,
+  AVV_ERR_ATTRIBUTE_ALREADY_DEFINED
 } = require('./lib/errors')
 const {
   kAvvio,
@@ -20,72 +21,6 @@ const { debug } = require('./lib/debug')
 const { validatePlugin } = require('./lib/validate-plugin')
 const { isBundledOrTypescriptPlugin } = require('./lib/is-bundled-or-typescript-plugin')
 const { isPromiseLike } = require('./lib/is-promise-like')
-
-function wrap (server, opts, instance) {
-  const expose = opts.expose || {}
-  const useKey = expose.use || 'use'
-  const afterKey = expose.after || 'after'
-  const readyKey = expose.ready || 'ready'
-  const onCloseKey = expose.onClose || 'onClose'
-  const closeKey = expose.close || 'close'
-
-  if (server[useKey]) {
-    throw new AVV_ERR_EXPOSE_ALREADY_DEFINED(useKey)
-  }
-
-  if (server[afterKey]) {
-    throw new AVV_ERR_EXPOSE_ALREADY_DEFINED(afterKey)
-  }
-
-  if (server[readyKey]) {
-    throw new AVV_ERR_EXPOSE_ALREADY_DEFINED(readyKey)
-  }
-
-  server[useKey] = function (fn, opts) {
-    instance.use(fn, opts)
-    return this
-  }
-
-  Object.defineProperty(server, 'then', { get: thenify.bind(instance) })
-  server[kAvvio] = true
-
-  server[afterKey] = function (func) {
-    if (typeof func !== 'function') {
-      return instance._loadRegistered()
-    }
-    instance.after(encapsulateThreeParam(func, this))
-    return this
-  }
-
-  server[readyKey] = function (func) {
-    if (func && typeof func !== 'function') {
-      throw new AVV_ERR_CALLBACK_NOT_FN(readyKey, typeof func)
-    }
-    return instance.ready(func ? encapsulateThreeParam(func, this) : undefined)
-  }
-
-  server[onCloseKey] = function (func) {
-    if (typeof func !== 'function') {
-      throw new AVV_ERR_CALLBACK_NOT_FN(onCloseKey, typeof func)
-    }
-    instance.onClose(encapsulateTwoParam(func, this))
-    return this
-  }
-
-  server[closeKey] = function (func) {
-    if (func && typeof func !== 'function') {
-      throw new AVV_ERR_CALLBACK_NOT_FN(closeKey, typeof func)
-    }
-
-    if (func) {
-      instance.close(encapsulateThreeParam(func, this))
-      return this
-    }
-
-    // this is a Promise
-    return instance.close()
-  }
-}
 
 function Boot (server, opts, done) {
   if (typeof server === 'function' && arguments.length === 1) {
@@ -100,23 +35,21 @@ function Boot (server, opts, done) {
   }
 
   opts = opts || {}
+  opts.autostart = opts.autostart !== false
+  opts.timeout = Number(opts.timeout) || 0
+  opts.expose = opts.expose || {}
 
   if (!new.target) {
     return new Boot(server, opts, done)
   }
 
+  this._server = server || this
+  this._opts = opts
+
   if (server) {
-    wrap(server, opts, this)
+    this._expose()
   }
 
-  if (opts.autostart !== false) {
-    opts.autostart = true
-  }
-
-  server = server || this
-
-  this._timeout = Number(opts.timeout) || 0
-  this._server = server
   /**
    * @type {Array<Plugin>}
    */
@@ -245,7 +178,7 @@ Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
   // we always add plugins to load at the current element
   const current = this._current[0]
 
-  const obj = new Plugin(fastq(this, this._loadPluginNextTick, 1), plugin, opts, isAfter, this._timeout)
+  const obj = new Plugin(fastq(this, this._loadPluginNextTick, 1), plugin, opts, isAfter, this._opts.timeout)
   obj.once('start', (serverName, funcName, time) => {
     const nodeId = this.pluginTree.start(current.name, funcName, time)
     obj.once('loaded', (serverName, funcName, time) => {
@@ -265,6 +198,82 @@ Boot.prototype._addPlugin = function (plugin, opts, isAfter) {
   })
 
   return obj
+}
+
+Boot.prototype._expose = function _expose () {
+  const instance = this
+  const server = instance._server
+  const {
+    use: useKey = 'use',
+    after: afterKey = 'after',
+    ready: readyKey = 'ready',
+    onClose: onCloseKey = 'onClose',
+    close: closeKey = 'close',
+  } = this._opts.expose
+
+  if (server[useKey]) {
+    throw new AVV_ERR_EXPOSE_ALREADY_DEFINED(useKey, 'use')
+  }
+  server[useKey] = function (fn, opts) {
+    instance.use(fn, opts)
+    return this
+  }
+
+  if (server[afterKey]) {
+    throw new AVV_ERR_EXPOSE_ALREADY_DEFINED(afterKey, 'after')
+  }
+  server[afterKey] = function (func) {
+    if (typeof func !== 'function') {
+      return instance._loadRegistered()
+    }
+    instance.after(encapsulateThreeParam(func, this))
+    return this
+  }
+
+  if (server[readyKey]) {
+    throw new AVV_ERR_EXPOSE_ALREADY_DEFINED(readyKey, 'ready')
+  }
+  server[readyKey] = function (func) {
+    if (func && typeof func !== 'function') {
+      throw new AVV_ERR_CALLBACK_NOT_FN(readyKey, typeof func)
+    }
+    return instance.ready(func ? encapsulateThreeParam(func, this) : undefined)
+  }
+
+  if (server[onCloseKey]) {
+    throw new AVV_ERR_EXPOSE_ALREADY_DEFINED(onCloseKey, 'onClose')
+  }
+  server[onCloseKey] = function (func) {
+    if (typeof func !== 'function') {
+      throw new AVV_ERR_CALLBACK_NOT_FN(onCloseKey, typeof func)
+    }
+    instance.onClose(encapsulateTwoParam(func, this))
+    return this
+  }
+
+  if (server[closeKey]) {
+    throw new AVV_ERR_EXPOSE_ALREADY_DEFINED(closeKey, 'close')
+  }
+  server[closeKey] = function (func) {
+    if (func && typeof func !== 'function') {
+      throw new AVV_ERR_CALLBACK_NOT_FN(closeKey, typeof func)
+    }
+
+    if (func) {
+      instance.close(encapsulateThreeParam(func, this))
+      return this
+    }
+
+    // this is a Promise
+    return instance.close()
+  }
+
+  if (server.then) {
+    throw new AVV_ERR_ATTRIBUTE_ALREADY_DEFINED('then')
+  }
+  Object.defineProperty(server, 'then', { get: thenify.bind(instance) })
+
+  server[kAvvio] = true
 }
 
 Boot.prototype.after = function (func) {
@@ -488,7 +497,7 @@ function callWithCbOrNextTick (func, cb) {
       process.nextTick(cb)
     }
   } else {
-    if (this._timeout === 0) {
+    if (this._opts.timeout === 0) {
       const wrapCb = (err) => {
         this._error = err
         cb(this._error)
@@ -507,7 +516,7 @@ function callWithCbOrNextTick (func, cb) {
 
 function timeoutCall (func, rootErr, context, cb) {
   const name = func.name
-  debug('setting up ready timeout', name, this._timeout)
+  debug('setting up ready timeout', name, this._opts.timeout)
   let timer = setTimeout(() => {
     debug('timed out', name)
     timer = null
@@ -515,7 +524,7 @@ function timeoutCall (func, rootErr, context, cb) {
     toutErr.fn = func
     this._error = toutErr
     cb(toutErr)
-  }, this._timeout)
+  }, this._opts.timeout)
 
   if (func.length === 2) {
     func(rootErr, timeoutCb.bind(this))
