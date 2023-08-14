@@ -208,7 +208,7 @@ Boot.prototype._expose = function _expose () {
     after: afterKey = 'after',
     ready: readyKey = 'ready',
     onClose: onCloseKey = 'onClose',
-    close: closeKey = 'close',
+    close: closeKey = 'close'
   } = this._opts.expose
 
   if (server[useKey]) {
