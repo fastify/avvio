@@ -101,14 +101,12 @@ function Boot (server, opts, done) {
 
   opts = opts || {}
 
-  if (!(this instanceof Boot)) {
-    const instance = new Boot(server, opts, done)
+  if (!new.target) {
+    return new Boot(server, opts, done)
+  }
 
-    if (server) {
-      wrap(server, opts, instance)
-    }
-
-    return instance
+  if (server) {
+    wrap(server, opts, this)
   }
 
   if (opts.autostart !== false) {
