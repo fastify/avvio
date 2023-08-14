@@ -123,7 +123,7 @@ function Boot (server, opts, done) {
   this._current = []
 
   this._error = null
-  this._isOnCloseHandlerKey = kIsOnCloseHandler
+
   this._lastUsed = null
 
   this.setMaxListeners(0)
@@ -289,7 +289,7 @@ Boot.prototype.onClose = function (func) {
     throw new Error('not a function')
   }
 
-  func[this._isOnCloseHandlerKey] = true
+  func[kIsOnCloseHandler] = true
   this._closeQ.unshift(func, callback.bind(this))
 
   function callback (err) {
@@ -537,7 +537,7 @@ function timeoutCall (func, rootErr, context, cb) {
 
 function closeWithCbOrNextTick (func, cb) {
   const context = this._server
-  const isOnCloseHandler = func[this._isOnCloseHandlerKey]
+  const isOnCloseHandler = func[kIsOnCloseHandler]
   if (func.length === 0 || func.length === 1) {
     let promise
     if (isOnCloseHandler) {
