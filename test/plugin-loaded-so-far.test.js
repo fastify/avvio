@@ -35,7 +35,7 @@ test('loadedSoFar resolves a Promise, if plugin was loaded by avvio', async (t) 
   await t.resolves(plugin.loadedSoFar())
 })
 
-test('loadedSoFar resolves a Promise when plugin is loaded by avvio', t => {
+test('loadedSoFar resolves a Promise when plugin is loaded by avvio', async t => {
   t.plan(2)
   const app = boot()
 
@@ -46,17 +46,15 @@ test('loadedSoFar resolves a Promise when plugin is loaded by avvio', t => {
   const loadStart = Date.now()
   plugin.loadedSoFar().then(() => {
     const thenTimestamp = Date.now()
-    t.ok((thenTimestamp - loadStart) > 500)
+    t.ok((thenTimestamp - loadStart) > 500, thenTimestamp - loadStart)
   }).catch(err => t.error(err))
 
   app._loadPlugin(plugin, function () {
     const thenTimestamp = Date.now()
-    t.ok((thenTimestamp - loadStart) > 500)
+    t.ok((thenTimestamp - loadStart) > 500, thenTimestamp - loadStart)
   })
 
-  plugin.loadedSoFar().then(() => {
-    t.ok()
-  }).catch(err => t.error(err))
+  await t.resolves(plugin.loadedSoFar())
 })
 
 test('loadedSoFar resolves a Promise, if .after() has no error', async t => {
