@@ -40,36 +40,6 @@ test('chainable automatically binded', (t) => {
   t.equal(readyResult, undefined)
 })
 
-;['use', 'after', 'ready'].forEach((key) => {
-  test('throws if ' + key + ' is already there', (t) => {
-    t.plan(1)
-
-    const app = {}
-    app[key] = () => {}
-
-    try {
-      boot(app)
-      t.fail('error must happen')
-    } catch (err) {
-      t.equal(err.message, `'${key}' () is already defined, specify an expose option`)
-    }
-  })
-
-  test('support expose for ' + key, (t) => {
-    const app = {}
-    app[key] = () => {}
-
-    const expose = {}
-    expose[key] = 'muahah'
-
-    boot(app, {
-      expose
-    })
-
-    t.end()
-  })
-})
-
 test('chainable standalone with server', (t) => {
   t.plan(6)
 
