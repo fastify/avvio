@@ -616,11 +616,11 @@ avvio.on('preReady', () => {
 The output is like this:
 ```json
 {
-  "label": "bound root",
+  "label": "root",
   "start": 1550245184665,
   "nodes": [
     {
-      "parent": "bound root",
+      "parent": "root",
       "start": 1550245184665,
       "label": "first",
       "nodes": [
@@ -637,7 +637,7 @@ The output is like this:
       "diff": 44
     },
     {
-      "parent": "bound root",
+      "parent": "root",
       "start": 1550245184709,
       "label": "third",
       "nodes": [],
