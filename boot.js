@@ -181,7 +181,7 @@ Boot.prototype._addPlugin = function (pluginFn, opts, isAfter) {
   }
 
   // we add the plugin to be loaded at the end of the current queue
-  current.enqueue(obj, (err) => { err && (this._error = err) })
+  current.enqueue(plugin, (err) => { err && (this._error = err) })
 
   return plugin
 }
