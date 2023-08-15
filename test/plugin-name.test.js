@@ -14,7 +14,7 @@ test('plugins get a name from the plugin metadata if it is set', async (t) => {
   await app.ready()
 
   t.match(app.toJSON(), {
-    label: 'bound root',
+    label: 'root',
     nodes: [
       { label: 'a-test-plugin' }
     ]
@@ -30,7 +30,7 @@ test('plugins get a name from the options if theres no metadata', async (t) => {
   await app.ready()
 
   t.match(app.toJSON(), {
-    label: 'bound root',
+    label: 'root',
     nodes: [
       { label: 'test registration options name' }
     ]
@@ -46,7 +46,7 @@ test('plugins get a name from the function name if theres no name in the options
   await app.ready()
 
   t.match(app.toJSON(), {
-    label: 'bound root',
+    label: 'root',
     nodes: [
       { label: 'testPlugin' }
     ]
@@ -61,7 +61,7 @@ test('plugins get a name from the function source if theres no other option', as
   await app.ready()
 
   t.match(app.toJSON(), {
-    label: 'bound root',
+    label: 'root',
     nodes: [
       { label: '(app, opts, next) => next()' }
     ]
