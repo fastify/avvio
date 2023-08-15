@@ -61,10 +61,23 @@ test('boot an app with a promisified plugin', (t) => {
   })
 })
 
-test('boot an app with a plugin and a callback', (t) => {
+test('boot an app with a plugin and a callback /1', (t) => {
   t.plan(2)
 
   const app = boot(() => {
+    t.pass('booted')
+  })
+
+  app.use(function (server, opts, done) {
+    t.pass('plugin loaded')
+    done()
+  })
+})
+
+test('boot an app with a plugin and a callback /2', (t) => {
+  t.plan(2)
+
+  const app = boot({}, () => {
     t.pass('booted')
   })
 
