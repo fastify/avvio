@@ -2,6 +2,7 @@
 
 const { test } = require('tap')
 const boot = require('..')
+const { AVV_ERR_CALLBACK_NOT_FN } = require('../lib/errors')
 
 test('boot an app with a plugin', (t) => {
   t.plan(4)
@@ -494,7 +495,7 @@ test('onClose callback must be a function', (t) => {
   const app = boot()
 
   app.use(function (server, opts, done) {
-    t.throws(() => app.onClose({}), { message: 'not a function' })
+    t.throws(() => app.onClose({}), new AVV_ERR_CALLBACK_NOT_FN('onClose', 'object'))
     done()
   })
 })

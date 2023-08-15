@@ -281,7 +281,7 @@ Boot.prototype.onClose = function (func) {
   // because they share the same queue but must be called with different signatures
 
   if (typeof func !== 'function') {
-    throw new Error('not a function')
+    throw new AVV_ERR_CALLBACK_NOT_FN('onClose', typeof func)
   }
 
   func[kIsOnCloseHandler] = true
