@@ -181,11 +181,7 @@ Boot.prototype._addPlugin = function (pluginFn, opts, isAfter) {
   }
 
   // we add the plugin to be loaded at the end of the current queue
-  current.enqueue(plugin, (err) => {
-    if (err) {
-      this._error = err
-    }
-  })
+  current.enqueue(obj, (err) => { err && (this._error = err) })
 
   return plugin
 }
@@ -289,11 +285,7 @@ Boot.prototype.onClose = function (func) {
   }
 
   func[this._isOnCloseHandlerKey] = true
-  this._closeQ.unshift(func, callback.bind(this))
-
-  function callback (err) {
-    if (err) this._error = err
-  }
+  this._closeQ.unshift(func, (err) => { err && (this._error = err) })
 
   return this
 }
