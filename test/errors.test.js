@@ -6,6 +6,7 @@ const errors = require('../lib/errors')
 test('Correct codes of AvvioErrors', t => {
   const testcases = [
     'AVV_ERR_EXPOSE_ALREADY_DEFINED',
+    'AVV_ERR_ATTRIBUTE_ALREADY_DEFINED',
     'AVV_ERR_CALLBACK_NOT_FN',
     'AVV_ERR_PLUGIN_NOT_VALID',
     'AVV_ERR_ROOT_PLG_BOOTED',

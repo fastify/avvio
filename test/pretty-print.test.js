@@ -15,7 +15,7 @@ test('pretty print', t => {
     .use(third).after(after)
     .use(duplicate, { count: 1 })
 
-  const linesExpected = [/^bound root \d+ ms$/,
+  const linesExpected = [/^root \d+ ms$/,
     /^├── first \d+ ms$/,
     /^├─┬ duplicate \d+ ms$/,
     /^│ └─┬ duplicate \d+ ms$/,
