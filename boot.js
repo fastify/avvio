@@ -173,7 +173,7 @@ Boot.prototype._addPlugin = function (pluginFn, opts, isAfter) {
   // we always add plugins to load at the current element
   const current = this._current[0]
 
-  const plugin = new Plugin(fastq(this, this._loadPluginNextTick, 1), pluginFn, opts, isAfter, this._timeout)
+  const plugin = new Plugin(fastq(this, this._loadPluginNextTick, 1), pluginFn, opts, isAfter, this._opts.timeout)
   this._trackPluginLoading(plugin)
 
   if (current.loaded) {
