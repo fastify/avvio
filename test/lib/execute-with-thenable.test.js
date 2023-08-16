@@ -1,7 +1,7 @@
 'use strict'
 
 const { test } = require('tap')
-const { executeWithThenable } = require('../../lib/executeWithThenable')
+const { executeWithThenable } = require('../../lib/execute-with-thenable')
 const { kAvvio } = require('../../lib/symbols')
 
 test('executeWithThenable', (t) => {
