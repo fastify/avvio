@@ -114,6 +114,25 @@ test('TimeTree#start is adding a root element when parent is null', t => {
   t.type(rootNode.diff, 'number')
 })
 
+test('TimeTree#start is adding a root element when parent does not exist', t => {
+  t.plan(9)
+
+  const tree = new TimeTree()
+  tree.start('invalid', 'root')
+
+  const rootNode = tree.root
+
+  t.type(rootNode, 'object')
+  t.equal(Object.keys(rootNode).length, 7)
+  t.equal(rootNode.parent, null)
+  t.equal(rootNode.id, 'root')
+  t.equal(rootNode.label, 'root')
+  t.ok(Array.isArray(rootNode.nodes))
+  t.equal(rootNode.nodes.length, 0)
+  t.ok(Number.isInteger(rootNode.start))
+  t.type(rootNode.diff, 'number')
+})
+
 test('TimeTree#start parameter start can override automatically generated start time', t => {
   t.plan(1)
 
