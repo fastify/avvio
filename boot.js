@@ -21,7 +21,7 @@ const { validatePlugin } = require('./lib/validate-plugin')
 const { isBundledOrTypescriptPlugin } = require('./lib/is-bundled-or-typescript-plugin')
 const { isPromiseLike } = require('./lib/is-promise-like')
 const { thenify } = require('./lib/thenify')
-const { executeWithThenable } = require('./lib/executeWithThenable')
+const { executeWithThenable } = require('./lib/execute-with-thenable')
 
 function Boot (server, opts, done) {
   if (typeof server === 'function' && arguments.length === 1) {
