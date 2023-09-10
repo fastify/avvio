@@ -2,7 +2,7 @@
 
 const { test } = require('tap')
 const express = require('express')
-const http = require('http')
+const http = require('node:http')
 const boot = require('..')
 
 test('express support', (t) => {

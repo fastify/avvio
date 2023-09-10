@@ -472,7 +472,7 @@ It allows the creation of an inheritance chain for the server instances.
 The first parameter is the server instance and the second is the plugin function while the third is the options object that you give to use.
 
 ```js
-const assert = require('assert')
+const assert = require('node:assert')
 const server = { count: 0 }
 const app = require('avvio')(server)
 

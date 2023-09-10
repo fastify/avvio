@@ -1,8 +1,8 @@
 'use strict'
 
 const fastq = require('fastq')
-const EE = require('events').EventEmitter
-const inherits = require('util').inherits
+const EE = require('node:events').EventEmitter
+const inherits = require('node:util').inherits
 const {
   AVV_ERR_EXPOSE_ALREADY_DEFINED,
   AVV_ERR_CALLBACK_NOT_FN,

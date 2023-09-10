@@ -1,7 +1,7 @@
 'use strict'
 
 const { test } = require('tap')
-const { promisify } = require('util')
+const { promisify } = require('node:util')
 const sleep = promisify(setTimeout)
 const boot = require('..')
 
