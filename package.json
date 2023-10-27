@@ -3,6 +3,7 @@
   "version": "8.2.1",
   "description": "Asynchronous bootstrapping of Node applications",
   "main": "boot.js",
+  "type": "commonjs",
   "scripts": {
     "lint": "standard",
     "lint:fix": "standard --fix",
