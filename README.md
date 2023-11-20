@@ -685,4 +685,4 @@ This project was kindly sponsored by [nearForm](https://nearform.com).
 Copyright Matteo Collina 2016-2020, Licensed under [MIT][].
 
 [MIT]: ./LICENSE
-[example]: ./example.js
+[example]: ./examples/example.js
