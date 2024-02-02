@@ -35,6 +35,18 @@ import * as avvio from "../../";
     server.close;
   });
 
+  app.use(async (server, options) => {},
+    (server) => {
+      server.use;
+      server.after;
+      server.ready;
+      server.on;
+      server.start;
+      server.override;
+      server.onClose;
+      server.close;
+  });
+
   app.after(err => {
     if (err) throw err;
   });
@@ -156,6 +168,18 @@ import * as avvio from "../../";
     server.close;
   });
 
+  app.use(async (server, options) => {},
+    (server) => {
+      server.use;
+      server.after;
+      server.ready;
+      server.on;
+      server.start;
+      server.override;
+      server.onClose;
+      server.close;
+    });
+
   app.after(err => {
     if (err) throw err;
   });
@@ -269,6 +293,14 @@ import * as avvio from "../../";
     server.ready;
     server.typescriptIs;
   });
+
+  app.use(async (server, options) => {},
+   ((server) => {
+      server.use;
+      server.after;
+      server.ready;
+      server.typescriptIs;
+  }));
 
   app.after(err => {
     if (err) throw err;
