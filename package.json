@@ -47,8 +47,6 @@
   },
   "dependencies": {
     "@fastify/error": "^3.3.0",
-    "archy": "^1.0.0",
-    "debug": "^4.0.0",
     "fastq": "^1.17.1"
   }
 }
