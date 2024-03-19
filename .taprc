@@ -1,7 +1,4 @@
-ts: false
-jsx: false
-flow: false
-check-coverage: false
+disable-coverage: true
 
 files:
   - test/**/*test.js
