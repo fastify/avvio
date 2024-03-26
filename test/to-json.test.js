@@ -14,7 +14,7 @@ test('to json', (t) => {
 
   const outJson = {
     id: 'root',
-    label: 'bound root',
+    label: 'root',
     start: /\d+/,
     nodes: []
   }
@@ -69,12 +69,12 @@ test('to json multi-level hierarchy', (t) => {
 
   const outJson = {
     id: 'root',
-    label: 'bound root',
+    label: 'root',
     start: /\d+/,
     nodes: [
       {
         id: /.+/,
-        parent: 'bound root',
+        parent: 'root',
         start: /\d+/,
         label: 'first',
         nodes: [

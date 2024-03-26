@@ -2,10 +2,10 @@
 
 const { test } = require('tap')
 const boot = require('..')
-const { promisify } = require('util')
+const { promisify } = require('node:util')
 const sleep = promisify(setTimeout)
-const fs = require('fs').promises
-const path = require('path')
+const fs = require('node:fs').promises
+const path = require('node:path')
 
 test('await after - nested plugins with same tick callbacks', async (t) => {
   const app = {}

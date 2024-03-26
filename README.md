@@ -453,7 +453,7 @@ It allows the creation of an inheritance chain for the server instances.
 The first parameter is the server instance and the second is the plugin function while the third is the options object that you give to use.
 
 ```js
-const assert = require('assert')
+const assert = require('node:assert')
 const server = { count: 0 }
 const app = require('avvio')(server)
 
@@ -597,11 +597,11 @@ avvio.on('preReady', () => {
 The output is like this:
 ```json
 {
-  "label": "bound root",
+  "label": "root",
   "start": 1550245184665,
   "nodes": [
     {
-      "parent": "bound root",
+      "parent": "root",
       "start": 1550245184665,
       "label": "first",
       "nodes": [
@@ -618,7 +618,7 @@ The output is like this:
       "diff": 44
     },
     {
-      "parent": "bound root",
+      "parent": "root",
       "start": 1550245184709,
       "label": "third",
       "nodes": [],
@@ -666,4 +666,4 @@ This project was kindly sponsored by [nearForm](https://nearform.com).
 Copyright Matteo Collina 2016-2020, Licensed under [MIT][].
 
 [MIT]: ./LICENSE
-[example]: ./example.js
+[example]: ./examples/example.js

@@ -65,7 +65,7 @@ declare namespace avvio {
   }
 
   interface Use<I, C = context<I>> {
-    <O>(fn: avvio.Plugin<O, I>, options?: O): C;
+    <O>(fn: avvio.Plugin<O, I>, options?: O | ((server: C) => O)): C;
   }
 
   interface Ready<I, C = context<I>> {

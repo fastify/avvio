@@ -1,8 +1,9 @@
 {
   "name": "avvio",
-  "version": "8.2.1",
+  "version": "8.3.0",
   "description": "Asynchronous bootstrapping of Node applications",
   "main": "boot.js",
+  "type": "commonjs",
   "scripts": {
     "lint": "standard",
     "lint:fix": "standard --fix",
@@ -45,6 +46,6 @@
   },
   "dependencies": {
     "@fastify/error": "^3.3.0",
-    "fastq": "^1.6.1"
+    "fastq": "^1.17.1"
   }
 }
