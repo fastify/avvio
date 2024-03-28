@@ -83,7 +83,6 @@ async function third (instance, opts) {
   * <a href="#override"><code>instance.<b>override()</b></code></a>
   * <a href="#onClose"><code>instance.<b>onClose()</b></code></a>
   * <a href="#close"><code>instance.<b>close()</b></code></a>
-  * <a href="#express"><code>avvio.<b>express()</b></code></a>
   * <a href="#toJSON"><code>avvio.<b>toJSON()</b></code></a>
   * <a href="#prettyPrint"><code>avvio.<b>prettyPrint()</b></code></a>
 
@@ -445,24 +444,6 @@ Start the boot sequence, if it was not started yet.
 Returns the `app` instance.
 
 -------------------------------------------------------
-<a name="express"></a>
-
-### avvio.express(app)
-
-Same as:
-
-```js
-const app = express()
-const avvio = require('avvio')
-
-avvio(app, {
-  expose: {
-    use: 'load'
-  }
-})
-```
-
--------------------------------------------------------
 <a name="override"></a>
 
 ### app.override(server, plugin, options)
@@ -685,4 +666,4 @@ This project was kindly sponsored by [nearForm](https://nearform.com).
 Copyright Matteo Collina 2016-2020, Licensed under [MIT][].
 
 [MIT]: ./LICENSE
-[example]: ./example.js
+[example]: ./examples/example.js
