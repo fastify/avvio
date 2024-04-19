@@ -196,27 +196,6 @@ test('timeout without calling next in ready and rethrowing the error', (t) => {
   app.start()
 })
 
-test('nested timeout do not crash - callbacks', (t) => {
-  t.plan(4)
-  const app = boot({}, {
-    timeout: 10 // 10 ms
-  })
-  app.use(one)
-  function one (app, opts, next) {
-    app.use(two).after(next)
-  }
-
-  function two (app, opts, next) {
-    // do not call next on purpose
-  }
-  app.ready((err) => {
-    t.ok(err)
-    t.equal(err.fn, one)
-    t.equal(err.message, message('one')) // TODO: should be 'two'
-    t.equal(err.code, 'AVV_ERR_PLUGIN_EXEC_TIMEOUT')
-  })
-})
-
 test('nested timeout do not crash - await', (t) => {
   t.plan(4)
   const app = boot({}, {
@@ -232,8 +211,8 @@ test('nested timeout do not crash - await', (t) => {
   }
   app.ready((err) => {
     t.ok(err)
-    t.equal(err.fn, one)
-    t.equal(err.message, message('one')) // TODO: should be 'two'
+    t.equal(err.fn, two)
+    t.equal(err.message, message('two'))
     t.equal(err.code, 'AVV_ERR_PLUGIN_EXEC_TIMEOUT')
   })
 })
