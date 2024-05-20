@@ -177,9 +177,9 @@ Boot.prototype._addPlugin = function (pluginFn, opts, isAfter) {
 
   if (!current.loaded && current.timeout > 0) {
     const delta = Date.now() - current.startTime
-    // We need to decrease it by 2ms to make sure the internal timeout
+    // We need to decrease it by 3ms to make sure the internal timeout
     // is triggered earlier than the parent
-    timeout = current.timeout - (delta + 2)
+    timeout = current.timeout - (delta + 3)
   }
 
   const plugin = new Plugin(fastq(this, this._loadPluginNextTick, 1), pluginFn, opts, isAfter, timeout)
