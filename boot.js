@@ -173,17 +173,16 @@ Boot.prototype._addPlugin = function (pluginFn, opts, isAfter) {
   // we always add plugins to load at the current element
   const current = this._current[0]
 
-  // In case of promises, adjust the timeout
-  if (isAfter && this._lastUsed) {
+  let timeout = this._opts.timeout
+
+  if (!current.loaded && current.timeout > 0) {
+    const delta = Date.now() - current.startTime
     // We need to decrease it by 2ms to make sure the internal timeout
-    // is triggered earlier
-    const delta = Date.now() - current.startTime + 2
-    if (this._lastUsed.timeout > 0 && delta > 0) {
-      this._lastUsed.timeout = this._lastUsed.timeout - delta
-    }
+    // is triggered earlier than the parent
+    timeout = current.timeout - (delta + 2)
   }
 
-  const plugin = new Plugin(fastq(this, this._loadPluginNextTick, 1), pluginFn, opts, isAfter, this._opts.timeout)
+  const plugin = new Plugin(fastq(this, this._loadPluginNextTick, 1), pluginFn, opts, isAfter, timeout)
   this._trackPluginLoading(plugin)
 
   if (current.loaded) {
