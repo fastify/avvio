@@ -17,7 +17,8 @@ on:
 
 jobs:
   test:
-    uses: fastify/workflows/.github/workflows/plugins-ci.yml@v3
+    uses: fastify/workflows/.github/workflows/plugins-ci.yml@v4.2.1
     with:
       lint: true
       license-check: true
+      node-versions: '["18", "20", "21", "22"]'
