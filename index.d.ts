@@ -20,6 +20,8 @@ declare namespace avvio {
       use?: string;
       after?: string;
       ready?: string;
+      close?: string;
+      onClose?: string;
     };
     autostart?: boolean;
   }
