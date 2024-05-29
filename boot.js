@@ -479,7 +479,7 @@ function callWithCbOrNextTick (func, cb) {
 }
 
 function timeoutCall (func, rootErr, context, cb) {
-  const name = func.name
+  const name = func.unwrappedName ?? func.name
   debug('setting up ready timeout', name, this._opts.timeout)
   let timer = setTimeout(() => {
     debug('timed out', name)
@@ -571,7 +571,9 @@ function encapsulateTwoParam (func, that) {
 }
 
 function encapsulateThreeParam (func, that) {
-  return _encapsulateThreeParam.bind(that)
+  const wrapped = _encapsulateThreeParam.bind(that)
+  wrapped.unwrappedName = func.name
+  return wrapped
   function _encapsulateThreeParam (err, cb) {
     let res
     if (!func) {
