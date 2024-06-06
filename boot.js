@@ -173,7 +173,16 @@ Boot.prototype._addPlugin = function (pluginFn, opts, isAfter) {
   // we always add plugins to load at the current element
   const current = this._current[0]
 
-  const plugin = new Plugin(fastq(this, this._loadPluginNextTick, 1), pluginFn, opts, isAfter, this._opts.timeout)
+  let timeout = this._opts.timeout
+
+  if (!current.loaded && current.timeout > 0) {
+    const delta = Date.now() - current.startTime
+    // We need to decrease it by 3ms to make sure the internal timeout
+    // is triggered earlier than the parent
+    timeout = current.timeout - (delta + 3)
+  }
+
+  const plugin = new Plugin(fastq(this, this._loadPluginNextTick, 1), pluginFn, opts, isAfter, timeout)
   this._trackPluginLoading(plugin)
 
   if (current.loaded) {
@@ -470,7 +479,7 @@ function callWithCbOrNextTick (func, cb) {
 }
 
 function timeoutCall (func, rootErr, context, cb) {
-  const name = func.name
+  const name = func.unwrappedName ?? func.name
   debug('setting up ready timeout', name, this._opts.timeout)
   let timer = setTimeout(() => {
     debug('timed out', name)
@@ -562,7 +571,9 @@ function encapsulateTwoParam (func, that) {
 }
 
 function encapsulateThreeParam (func, that) {
-  return _encapsulateThreeParam.bind(that)
+  const wrapped = _encapsulateThreeParam.bind(that)
+  wrapped.unwrappedName = func.name
+  return wrapped
   function _encapsulateThreeParam (err, cb) {
     let res
     if (!func) {
