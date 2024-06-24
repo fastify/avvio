@@ -46,7 +46,7 @@
     "typescript": "^5.0.2"
   },
   "dependencies": {
-    "@fastify/error": "^3.3.0",
+    "@fastify/error": "^4.0.0",
     "fastq": "^1.17.1"
   }
 }
