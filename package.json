@@ -38,15 +38,14 @@
   },
   "homepage": "https://github.com/fastify/avvio#readme",
   "devDependencies": {
-    "@fastify/pre-commit": "^2.0.2",
-    "@types/node": "^20.1.0",
-    "express": "^4.17.1",
-    "standard": "^17.0.0",
-    "tap": "^16.0.0",
-    "typescript": "^5.0.2"
+    "@fastify/pre-commit": "^2.1.0",
+    "@types/node": "^20.11.29",
+    "standard": "^17.1.0",
+    "tap": "^18.7.1",
+    "typescript": "^5.4.2"
   },
   "dependencies": {
-    "@fastify/error": "^3.3.0",
+    "@fastify/error": "^4.0.0",
     "fastq": "^1.17.1"
   }
 }

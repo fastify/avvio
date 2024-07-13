@@ -605,10 +605,3 @@ function encapsulateThreeParam (func, that) {
 }
 
 module.exports = Boot
-module.exports.express = function (app) {
-  return Boot(app, {
-    expose: {
-      use: 'load'
-    }
-  })
-}
