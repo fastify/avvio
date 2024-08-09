@@ -24,6 +24,7 @@ declare namespace avvio {
       onClose?: string;
     };
     autostart?: boolean;
+    timeout?: number;
   }
 
   interface Plugin<O, I> {
