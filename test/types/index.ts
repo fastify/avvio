@@ -386,7 +386,8 @@ import * as avvio from "../../";
   const server = { hello: "world" };
   const options = {
     autostart: false,
-    expose: { after: "after", ready: "ready", use: "use", close: "close", onClose : "onClose" }
+    expose: { after: "after", ready: "ready", use: "use", close: "close", onClose : "onClose" },
+    timeout: 50000
   };
   // avvio with server and options
   const app = avvio(server, options);
