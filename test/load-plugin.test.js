@@ -31,6 +31,17 @@ test('catch an error when loading a plugin with sync function', (t) => {
   })
 })
 
+test('successfully load a plugin with sync function without done as a parameter', (t) => {
+  t.plan(1)
+  const app = boot({})
+
+  const plugin = new Plugin(fastq(app, app._loadPluginNextTick, 1), function (instance, opts) { }, false, 0)
+
+  app._loadPlugin(plugin, function (err) {
+    t.equal(err, undefined)
+  })
+})
+
 test('successfully load a plugin with async function', (t) => {
   t.plan(1)
   const app = boot({})
