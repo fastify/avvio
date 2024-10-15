@@ -151,8 +151,6 @@ Loads one or more functions asynchronously.
 
 The function **must** have the signature: `instance, options, done`
 
-However, if the function returns a `Promise` (i.e. `async`), the above function signature is not required.
-
 Plugin example:
 ```js
 function plugin (server, opts, done) {
@@ -161,8 +159,11 @@ function plugin (server, opts, done) {
 
 app.use(plugin)
 ```
-`done` should be called only once, when your plugin is ready to go.  Additional
-calls to `done` are ignored.
+`done` should be called only once, when your plugin is ready to go.  Additional calls to `done` are ignored.
+
+If your plugin is ready to go immediately after the function is evaluated, you can omit `done` from the signature.
+
+If the function returns a `Promise` (i.e. `async`), the above function signature is not required.
 
 `use` returns a thenable wrapped instance on which `use` is called, to support a chainable API that can also be awaited.
 
