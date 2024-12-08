@@ -1,19 +1,19 @@
-import { EventEmitter } from "events";
+import { EventEmitter } from 'events'
 
-declare function avvio(done?: Function): avvio.Avvio<null>;
-declare function avvio<I>(
+declare function avvio (done?: Function): avvio.Avvio<null>
+declare function avvio<I> (
   instance: I,
   options?: avvio.Options,
   done?: Function
-): avvio.Avvio<I>;
+): avvio.Avvio<I>
 
 /**
  * Typescript cannot manage changes related to options "expose"
  * because undefined before runtime
  */
 declare namespace avvio {
-  type context<I> = I extends null ? Avvio<I> : mixedInstance<I>;
-  type mixedInstance<I> = I & Server<I>;
+  type context<I> = I extends null ? Avvio<I> : mixedInstance<I>
+  type mixedInstance<I> = I & Server<I>
 
   interface Options {
     expose?: {
@@ -40,9 +40,9 @@ declare namespace avvio {
   }
 
   interface Avvio<I> extends EventEmitter, Server<I> {
-    on(event: "start", listener: () => void): this;
-    on(event: "preReady", listener: () => void): this;
-    on(event: "close", listener: () => void): this;
+    on(event: 'start', listener: () => void): this;
+    on(event: 'preReady', listener: () => void): this;
+    on(event: 'close', listener: () => void): this;
 
     start(): this;
 
@@ -89,4 +89,4 @@ declare namespace avvio {
   }
 }
 
-export = avvio;
+export = avvio

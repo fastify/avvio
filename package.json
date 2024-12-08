@@ -5,8 +5,8 @@
   "main": "boot.js",
   "type": "commonjs",
   "scripts": {
-    "lint": "standard",
-    "lint:fix": "standard --fix",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
     "test": "npm run test:unit && npm run test:typescript",
     "test:unit": "tap",
     "test:typescript": "tsc --project ./test/types/tsconfig.json"
@@ -40,7 +40,7 @@
   "devDependencies": {
     "@fastify/pre-commit": "^2.1.0",
     "@types/node": "^22.0.0",
-    "standard": "^17.1.0",
+    "neostandard": "^0.11.9",
     "tap": "^18.7.1",
     "typescript": "~5.7.2"
   },
