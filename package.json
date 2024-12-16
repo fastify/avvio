@@ -4,6 +4,7 @@
   "description": "Asynchronous bootstrapping of Node applications",
   "main": "boot.js",
   "type": "commonjs",
+  "types": "index.d.ts",
   "scripts": {
     "lint": "eslint",
     "lint:fix": "eslint --fix",
@@ -40,6 +41,7 @@
   "devDependencies": {
     "@fastify/pre-commit": "^2.1.0",
     "@types/node": "^22.0.0",
+    "eslint": "^9.17.0",
     "neostandard": "^0.11.9",
     "tap": "^18.7.1",
     "typescript": "~5.7.2"
