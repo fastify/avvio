@@ -4,6 +4,7 @@
   "description": "Asynchronous bootstrapping of Node applications",
   "main": "boot.js",
   "type": "commonjs",
+  "types": "index.d.ts",
   "scripts": {
     "lint": "standard",
     "lint:fix": "standard --fix",
