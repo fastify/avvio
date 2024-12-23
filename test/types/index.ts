@@ -1,411 +1,412 @@
-import * as avvio from "../../";
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+import * as avvio from '../../'
 
 {
   // avvio with no argument
-  const app = avvio();
+  const app = avvio()
 
-  app.override = (server, fn, options) => server;
+  app.override = (server, fn, options) => server
 
   app.use(
     (server, opts, done) => {
-      server.use;
-      server.after;
-      server.ready;
-      server.on;
-      server.start;
-      server.override;
-      server.onClose;
-      server.close;
+      server.use
+      server.after
+      server.ready
+      server.on
+      server.start
+      server.override
+      server.onClose
+      server.close
 
-      opts.mySuper;
+      opts.mySuper
 
-      done();
+      done()
     },
-    { mySuper: "option" }
-  );
+    { mySuper: 'option' }
+  )
 
   app.use(async (server, options) => {
-    server.use;
-    server.after;
-    server.ready;
-    server.on;
-    server.start;
-    server.override;
-    server.onClose;
-    server.close;
-  });
+    server.use
+    server.after
+    server.ready
+    server.on
+    server.start
+    server.override
+    server.onClose
+    server.close
+  })
 
   app.use(async (server, options) => {},
     (server) => {
-      server.use;
-      server.after;
-      server.ready;
-      server.on;
-      server.start;
-      server.override;
-      server.onClose;
-      server.close;
-  });
+      server.use
+      server.after
+      server.ready
+      server.on
+      server.start
+      server.override
+      server.onClose
+      server.close
+    })
 
   app.after(err => {
-    if (err) throw err;
-  });
+    if (err) throw err
+  })
 
-  app.after((err: Error, done: Function) => {
-    done();
-  });
+  app.after((_err: Error, done: Function) => {
+    done()
+  })
 
-  app.after((err: Error, context: avvio.context<null>, done: Function) => {
-    context.use;
-    context.after;
-    context.ready;
-    context.on;
-    context.start;
-    context.override;
-    context.onClose;
-    context.close;
+  app.after((_err: Error, context: avvio.context<null>, done: Function) => {
+    context.use
+    context.after
+    context.ready
+    context.on
+    context.start
+    context.override
+    context.onClose
+    context.close
 
-    done();
-  });
+    done()
+  })
 
   app.ready().then(context => {
-    context.use;
-    context.after;
-    context.ready;
-    context.on;
-    context.start;
-    context.override;
-    context.onClose;
-    context.close;
-  });
+    context.use
+    context.after
+    context.ready
+    context.on
+    context.start
+    context.override
+    context.onClose
+    context.close
+  })
 
   app.ready(err => {
-    if (err) throw err;
-  });
+    if (err) throw err
+  })
 
-  app.ready((err: Error, done: Function) => {
-    done();
-  });
+  app.ready((_err: Error, done: Function) => {
+    done()
+  })
 
-  app.ready((err: Error, context: avvio.context<null>, done: Function) => {
-    context.use;
-    context.after;
-    context.ready;
-    context.on;
-    context.start;
-    context.override;
-    context.onClose;
-    context.close;
+  app.ready((_err: Error, context: avvio.context<null>, done: Function) => {
+    context.use
+    context.after
+    context.ready
+    context.on
+    context.start
+    context.override
+    context.onClose
+    context.close
 
-    done();
-  });
+    done()
+  })
 
   app.close(err => {
-    if (err) throw err;
-  });
+    if (err) throw err
+  })
 
-  app.close((err: Error, done: Function) => {
-    done();
-  });
+  app.close((_err: Error, done: Function) => {
+    done()
+  })
 
-  app.close((err: Error, context: avvio.context<null>, done: Function) => {
-    context.use;
-    context.after;
-    context.ready;
-    context.on;
-    context.start;
-    context.override;
-    context.onClose;
-    context.close;
+  app.close((_err: Error, context: avvio.context<null>, done: Function) => {
+    context.use
+    context.after
+    context.ready
+    context.on
+    context.start
+    context.override
+    context.onClose
+    context.close
 
-    done();
-  });
+    done()
+  })
 
   app.onClose((context, done) => {
-    context.use;
-    context.after;
-    context.ready;
-    context.on;
-    context.start;
-    context.override;
-    context.onClose;
-    context.close;
+    context.use
+    context.after
+    context.ready
+    context.on
+    context.start
+    context.override
+    context.onClose
+    context.close
 
-    done();
-  });
+    done()
+  })
 }
 
 {
   // avvio with done
-  const app = avvio(() => undefined);
+  const app = avvio(() => undefined)
 
   app.use(
     (server, opts, done) => {
-      server.use;
-      server.after;
-      server.ready;
-      server.on;
-      server.start;
-      server.override;
-      server.onClose;
-      server.close;
+      server.use
+      server.after
+      server.ready
+      server.on
+      server.start
+      server.override
+      server.onClose
+      server.close
 
-      opts.mySuper;
+      opts.mySuper
 
-      done();
+      done()
     },
-    { mySuper: "option" }
-  );
+    { mySuper: 'option' }
+  )
 
   app.use(async (server, options) => {
-    server.use;
-    server.after;
-    server.ready;
-    server.on;
-    server.start;
-    server.override;
-    server.onClose;
-    server.close;
-  });
+    server.use
+    server.after
+    server.ready
+    server.on
+    server.start
+    server.override
+    server.onClose
+    server.close
+  })
 
   app.use(async (server, options) => {},
     (server) => {
-      server.use;
-      server.after;
-      server.ready;
-      server.on;
-      server.start;
-      server.override;
-      server.onClose;
-      server.close;
-    });
+      server.use
+      server.after
+      server.ready
+      server.on
+      server.start
+      server.override
+      server.onClose
+      server.close
+    })
 
   app.after(err => {
-    if (err) throw err;
-  });
+    if (err) throw err
+  })
 
-  app.after((err: Error, done: Function) => {
-    done();
-  });
+  app.after((_err: Error, done: Function) => {
+    done()
+  })
 
-  app.after((err: Error, context: avvio.context<null>, done: Function) => {
-    context.use;
-    context.after;
-    context.ready;
-    context.on;
-    context.start;
-    context.override;
-    context.onClose;
-    context.close;
+  app.after((_err: Error, context: avvio.context<null>, done: Function) => {
+    context.use
+    context.after
+    context.ready
+    context.on
+    context.start
+    context.override
+    context.onClose
+    context.close
 
-    done();
-  });
+    done()
+  })
 
   app.ready().then(context => {
-    context.use;
-    context.after;
-    context.ready;
-    context.on;
-    context.start;
-    context.override;
-    context.onClose;
-    context.close;
-  });
+    context.use
+    context.after
+    context.ready
+    context.on
+    context.start
+    context.override
+    context.onClose
+    context.close
+  })
 
   app.ready(err => {
-    if (err) throw err;
-  });
+    if (err) throw err
+  })
 
-  app.ready((err: Error, done: Function) => {
-    done();
-  });
+  app.ready((_err: Error, done: Function) => {
+    done()
+  })
 
-  app.ready((err: Error, context: avvio.context<null>, done: Function) => {
-    context.use;
-    context.after;
-    context.ready;
-    context.on;
-    context.start;
-    context.override;
-    context.onClose;
-    context.close;
+  app.ready((_err: Error, context: avvio.context<null>, done: Function) => {
+    context.use
+    context.after
+    context.ready
+    context.on
+    context.start
+    context.override
+    context.onClose
+    context.close
 
-    done();
-  });
+    done()
+  })
 
   app.close(err => {
-    if (err) throw err;
-  });
+    if (err) throw err
+  })
 
-  app.close((err: Error, done: Function) => {
-    done();
-  });
+  app.close((_err: Error, done: Function) => {
+    done()
+  })
 
-  app.close((err: Error, context: avvio.context<null>, done: Function) => {
-    context.use;
-    context.after;
-    context.ready;
-    context.on;
-    context.start;
-    context.override;
-    context.onClose;
-    context.close;
+  app.close((_err: Error, context: avvio.context<null>, done: Function) => {
+    context.use
+    context.after
+    context.ready
+    context.on
+    context.start
+    context.override
+    context.onClose
+    context.close
 
-    done();
-  });
+    done()
+  })
 
   app.onClose((context, done) => {
-    context.use;
-    context.after;
-    context.ready;
-    context.on;
-    context.start;
-    context.override;
-    context.onClose;
-    context.close;
+    context.use
+    context.after
+    context.ready
+    context.on
+    context.start
+    context.override
+    context.onClose
+    context.close
 
-    done();
-  });
+    done()
+  })
 }
 
 {
-  const server = { typescriptIs: "amazing" };
+  const server = { typescriptIs: 'amazing' }
   // avvio with server
-  const app = avvio(server);
+  const app = avvio(server)
 
   app.use(
     (server, opts, done) => {
-      server.use;
-      server.after;
-      server.ready;
-      server.typescriptIs;
+      server.use
+      server.after
+      server.ready
+      server.typescriptIs
 
-      opts.mySuper;
+      opts.mySuper
 
-      done();
+      done()
     },
-    { mySuper: "option" }
-  );
+    { mySuper: 'option' }
+  )
 
   app.use(async (server, options) => {
-    server.use;
-    server.after;
-    server.ready;
-    server.typescriptIs;
-  });
+    server.use
+    server.after
+    server.ready
+    server.typescriptIs
+  })
 
   app.use(async (server, options) => {},
-   ((server) => {
-      server.use;
-      server.after;
-      server.ready;
-      server.typescriptIs;
-  }));
+    (server) => {
+      server.use
+      server.after
+      server.ready
+      server.typescriptIs
+    })
 
   app.after(err => {
-    if (err) throw err;
-  });
+    if (err) throw err
+  })
 
-  app.after((err: Error, done: Function) => {
-    done();
-  });
+  app.after((_err: Error, done: Function) => {
+    done()
+  })
 
   app.after(
-    (err: Error, context: avvio.context<typeof server>, done: Function) => {
-      context.use;
-      context.after;
-      context.ready;
-      context.typescriptIs;
+    (_err: Error, context: avvio.context<typeof server>, done: Function) => {
+      context.use
+      context.after
+      context.ready
+      context.typescriptIs
 
-      done();
+      done()
     }
-  );
+  )
 
   app.ready().then(context => {
-    context.use;
-    context.after;
-    context.ready;
-    context.typescriptIs;
-  });
+    context.use
+    context.after
+    context.ready
+    context.typescriptIs
+  })
 
   app.ready(err => {
-    if (err) throw err;
-  });
+    if (err) throw err
+  })
 
-  app.ready((err: Error, done: Function) => {
-    done();
-  });
+  app.ready((_err: Error, done: Function) => {
+    done()
+  })
 
   app.ready(
-    (err: Error, context: avvio.context<typeof server>, done: Function) => {
-      context.use;
-      context.after;
-      context.ready;
-      context.close;
-      context.onClose;
-      context.typescriptIs;
+    (_err: Error, context: avvio.context<typeof server>, done: Function) => {
+      context.use
+      context.after
+      context.ready
+      context.close
+      context.onClose
+      context.typescriptIs
 
-      done();
+      done()
     }
-  );
+  )
 
   app.close(err => {
-    if (err) throw err;
-  });
+    if (err) throw err
+  })
 
-  app.close((err: Error, done: Function) => {
-    done();
-  });
+  app.close((_err: Error, done: Function) => {
+    done()
+  })
 
   app.close(
-    (err: Error, context: avvio.context<typeof server>, done: Function) => {
-      context.use;
-      context.after;
-      context.ready;
-      context.close;
-      context.onClose;
-      context.typescriptIs;
+    (_err: Error, context: avvio.context<typeof server>, done: Function) => {
+      context.use
+      context.after
+      context.ready
+      context.close
+      context.onClose
+      context.typescriptIs
 
-      done();
+      done()
     }
-  );
+  )
 
   app.onClose((context, done) => {
-    context.use;
-    context.after;
-    context.ready;
-    context.close;
-    context.onClose;
-    context.typescriptIs;
+    context.use
+    context.after
+    context.ready
+    context.close
+    context.onClose
+    context.typescriptIs
 
-    done();
-  });
+    done()
+  })
 }
 
 {
-  const server = { hello: "world" };
+  const server = { hello: 'world' }
   const options = {
     autostart: false,
-    expose: { after: "after", ready: "ready", use: "use", close: "close", onClose : "onClose" },
+    expose: { after: 'after', ready: 'ready', use: 'use', close: 'close', onClose: 'onClose' },
     timeout: 50000
-  };
+  }
   // avvio with server and options
-  const app = avvio(server, options);
+  avvio(server, options)
 }
 
 {
-  const server = { hello: "world" };
+  const server = { hello: 'world' }
   const options = {
     autostart: false,
-    expose: { after: "after", ready: "ready", use: "use" }
-  };
+    expose: { after: 'after', ready: 'ready', use: 'use' }
+  }
   // avvio with server, options and done callback
-  const app = avvio(server, options, () => undefined);
+  avvio(server, options, () => undefined)
 }
 
 {
-  const app = avvio();
-  const plugin: avvio.Plugin<any, any> = async (): Promise<void> => {};
+  const app = avvio()
+  const plugin: avvio.Plugin<any, any> = async (): Promise<void> => {}
   const promise = plugin(app, {}, undefined as any);
-  (promise instanceof Promise);
+  (promise instanceof Promise)
 }
