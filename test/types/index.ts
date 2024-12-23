@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import * as avvio from '../../'
 
 {
@@ -51,11 +52,11 @@ import * as avvio from '../../'
     if (err) throw err
   })
 
-  app.after((err: Error, done: Function) => {
+  app.after((_err: Error, done: Function) => {
     done()
   })
 
-  app.after((err: Error, context: avvio.context<null>, done: Function) => {
+  app.after((_err: Error, context: avvio.context<null>, done: Function) => {
     context.use
     context.after
     context.ready
@@ -83,11 +84,11 @@ import * as avvio from '../../'
     if (err) throw err
   })
 
-  app.ready((err: Error, done: Function) => {
+  app.ready((_err: Error, done: Function) => {
     done()
   })
 
-  app.ready((err: Error, context: avvio.context<null>, done: Function) => {
+  app.ready((_err: Error, context: avvio.context<null>, done: Function) => {
     context.use
     context.after
     context.ready
@@ -104,11 +105,11 @@ import * as avvio from '../../'
     if (err) throw err
   })
 
-  app.close((err: Error, done: Function) => {
+  app.close((_err: Error, done: Function) => {
     done()
   })
 
-  app.close((err: Error, context: avvio.context<null>, done: Function) => {
+  app.close((_err: Error, context: avvio.context<null>, done: Function) => {
     context.use
     context.after
     context.ready
@@ -184,11 +185,11 @@ import * as avvio from '../../'
     if (err) throw err
   })
 
-  app.after((err: Error, done: Function) => {
+  app.after((_err: Error, done: Function) => {
     done()
   })
 
-  app.after((err: Error, context: avvio.context<null>, done: Function) => {
+  app.after((_err: Error, context: avvio.context<null>, done: Function) => {
     context.use
     context.after
     context.ready
@@ -216,11 +217,11 @@ import * as avvio from '../../'
     if (err) throw err
   })
 
-  app.ready((err: Error, done: Function) => {
+  app.ready((_err: Error, done: Function) => {
     done()
   })
 
-  app.ready((err: Error, context: avvio.context<null>, done: Function) => {
+  app.ready((_err: Error, context: avvio.context<null>, done: Function) => {
     context.use
     context.after
     context.ready
@@ -237,11 +238,11 @@ import * as avvio from '../../'
     if (err) throw err
   })
 
-  app.close((err: Error, done: Function) => {
+  app.close((_err: Error, done: Function) => {
     done()
   })
 
-  app.close((err: Error, context: avvio.context<null>, done: Function) => {
+  app.close((_err: Error, context: avvio.context<null>, done: Function) => {
     context.use
     context.after
     context.ready
@@ -306,12 +307,12 @@ import * as avvio from '../../'
     if (err) throw err
   })
 
-  app.after((err: Error, done: Function) => {
+  app.after((_err: Error, done: Function) => {
     done()
   })
 
   app.after(
-    (err: Error, context: avvio.context<typeof server>, done: Function) => {
+    (_err: Error, context: avvio.context<typeof server>, done: Function) => {
       context.use
       context.after
       context.ready
@@ -332,12 +333,12 @@ import * as avvio from '../../'
     if (err) throw err
   })
 
-  app.ready((err: Error, done: Function) => {
+  app.ready((_err: Error, done: Function) => {
     done()
   })
 
   app.ready(
-    (err: Error, context: avvio.context<typeof server>, done: Function) => {
+    (_err: Error, context: avvio.context<typeof server>, done: Function) => {
       context.use
       context.after
       context.ready
@@ -353,12 +354,12 @@ import * as avvio from '../../'
     if (err) throw err
   })
 
-  app.close((err: Error, done: Function) => {
+  app.close((_err: Error, done: Function) => {
     done()
   })
 
   app.close(
-    (err: Error, context: avvio.context<typeof server>, done: Function) => {
+    (_err: Error, context: avvio.context<typeof server>, done: Function) => {
       context.use
       context.after
       context.ready
@@ -390,7 +391,7 @@ import * as avvio from '../../'
     timeout: 50000
   }
   // avvio with server and options
-  const app = avvio(server, options)
+  avvio(server, options)
 }
 
 {
@@ -400,7 +401,7 @@ import * as avvio from '../../'
     expose: { after: 'after', ready: 'ready', use: 'use' }
   }
   // avvio with server, options and done callback
-  const app = avvio(server, options, () => undefined)
+  avvio(server, options, () => undefined)
 }
 
 {
