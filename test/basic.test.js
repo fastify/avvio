@@ -3,27 +3,27 @@
 const { test } = require('node:test')
 const boot = require('..')
 
-test('boot an empty app', (t, done_) => {
+test('boot an empty app', (t, testCompleted) => {
   t.plan(1)
   const app = boot()
   app.on('start', () => {
     t.assert.ok(true, 'booted')
-    done_()
+    testCompleted()
   })
 })
 
-test('start returns app', (t, done_) => {
+test('start returns app', (t, testCompleted) => {
   t.plan(1)
   const app = boot({}, { autostart: false })
   app
     .start()
     .ready((err) => {
       t.assert.ifError(err)
-      done_()
+      testCompleted()
     })
 })
 
-test('boot an app with a plugin', (t, done_) => {
+test('boot an app with a plugin', (t, testCompleted) => {
   t.plan(4)
 
   const app = boot()
@@ -40,11 +40,11 @@ test('boot an app with a plugin', (t, done_) => {
 
   app.on('start', () => {
     t.assert.ok(true, 'booted')
-    done_()
+    testCompleted()
   })
 })
 
-test('boot an app with a promisified plugin', (t, done_) => {
+test('boot an app with a promisified plugin', (t, testCompleted) => {
   t.plan(4)
 
   const app = boot()
@@ -61,11 +61,11 @@ test('boot an app with a promisified plugin', (t, done_) => {
 
   app.on('start', () => {
     t.assert.ok(true, 'booted')
-    done_()
+    testCompleted()
   })
 })
 
-test('boot an app with a plugin and a callback /1', (t, done_) => {
+test('boot an app with a plugin and a callback /1', (t, testCompleted) => {
   t.plan(2)
 
   const app = boot(() => {
@@ -75,11 +75,11 @@ test('boot an app with a plugin and a callback /1', (t, done_) => {
   app.use(function (server, opts, done) {
     t.assert.ok(true, 'plugin loaded')
     done()
-    done_()
+    testCompleted()
   })
 })
 
-test('boot an app with a plugin and a callback /2', (t, done_) => {
+test('boot an app with a plugin and a callback /2', (t, testCompleted) => {
   t.plan(2)
 
   const app = boot({}, () => {
@@ -89,11 +89,11 @@ test('boot an app with a plugin and a callback /2', (t, done_) => {
   app.use(function (server, opts, done) {
     t.assert.ok(true, 'plugin loaded')
     done()
-    done_()
+    testCompleted()
   })
 })
 
-test('boot a plugin with a custom server', (t, done_) => {
+test('boot a plugin with a custom server', (t, testCompleted) => {
   t.plan(4)
 
   const server = {}
@@ -107,7 +107,7 @@ test('boot a plugin with a custom server', (t, done_) => {
 
   app.onClose(() => {
     t.assert.ok(true, 'onClose called')
-    done_()
+    testCompleted()
   })
 
   app.on('start', () => {
@@ -117,7 +117,7 @@ test('boot a plugin with a custom server', (t, done_) => {
   })
 })
 
-test('custom instance should inherits avvio methods /1', (t, done_) => {
+test('custom instance should inherits avvio methods /1', (t, testCompleted) => {
   t.plan(6)
 
   const server = {}
@@ -133,7 +133,7 @@ test('custom instance should inherits avvio methods /1', (t, done_) => {
 
   server.onClose(() => {
     t.assert.ok(true, 'onClose called')
-    done_()
+    testCompleted()
   })
 
   server.ready(() => {
@@ -147,7 +147,7 @@ test('custom instance should inherits avvio methods /1', (t, done_) => {
   })
 })
 
-test('custom instance should inherits avvio methods /2', (t, done_) => {
+test('custom instance should inherits avvio methods /2', (t, testCompleted) => {
   t.plan(6)
 
   const server = {}
@@ -163,7 +163,7 @@ test('custom instance should inherits avvio methods /2', (t, done_) => {
 
   server.onClose(() => {
     t.assert.ok(true, 'onClose called')
-    done_()
+    testCompleted()
   })
 
   server.ready(() => {
@@ -177,7 +177,7 @@ test('custom instance should inherits avvio methods /2', (t, done_) => {
   })
 })
 
-test('boot a plugin with options', (t, done_) => {
+test('boot a plugin with options', (t, testCompleted) => {
   t.plan(3)
 
   const server = {}
@@ -194,11 +194,11 @@ test('boot a plugin with options', (t, done_) => {
 
   app.on('start', () => {
     t.assert.ok(true, 'booted')
-    done_()
+    testCompleted()
   })
 })
 
-test('boot a plugin with a function that returns the options', (t, done_) => {
+test('boot a plugin with a function that returns the options', (t, testCompleted) => {
   t.plan(4)
 
   const server = {}
@@ -224,7 +224,7 @@ test('boot a plugin with a function that returns the options', (t, done_) => {
 
   app.on('start', () => {
     t.assert.ok(true, 'booted')
-    done_()
+    testCompleted()
   })
 })
 
@@ -237,27 +237,27 @@ test('throw on non-function use', (t) => {
 })
 
 // https://github.com/mcollina/avvio/issues/20
-test('ready and nextTick', (t, done_) => {
+test('ready and nextTick', (t, testCompleted) => {
   const app = boot()
   process.nextTick(() => {
     app.ready(() => {
-      done_()
+      testCompleted()
     })
   })
 })
 
 // https://github.com/mcollina/avvio/issues/20
-test('promises and microtask', (t, done_) => {
+test('promises and microtask', (t, testCompleted) => {
   const app = boot()
   Promise.resolve()
     .then(() => {
       app.ready(function () {
-        done_()
+        testCompleted()
       })
     })
 })
 
-test('always loads nested plugins after the current one', (t, done_) => {
+test('always loads nested plugins after the current one', (t, testCompleted) => {
   t.plan(2)
 
   const server = {}
@@ -277,11 +277,11 @@ test('always loads nested plugins after the current one', (t, done_) => {
 
   app.on('start', () => {
     t.assert.ok(true, second)
-    done_()
+    testCompleted()
   })
 })
 
-test('promise long resolve', (t, done_) => {
+test('promise long resolve', (t, testCompleted) => {
   t.plan(2)
 
   const app = boot()
@@ -292,7 +292,7 @@ test('promise long resolve', (t, done_) => {
         done()
       })
     }, 'root plugin has already booted')
-    done_()
+    testCompleted()
   })
 
   app.ready(function (err) {
@@ -309,7 +309,7 @@ test('do not autostart', (t) => {
   })
 })
 
-test('start with ready', (t, done_) => {
+test('start with ready', (t, testCompleted) => {
   t.plan(2)
 
   const app = boot(null, {
@@ -318,7 +318,7 @@ test('start with ready', (t, done_) => {
 
   app.on('start', () => {
     t.assert.ok(true)
-    done_()
+    testCompleted()
   })
 
   app.ready(function (err) {
@@ -326,7 +326,7 @@ test('start with ready', (t, done_) => {
   })
 })
 
-test('load a plugin after start()', (t, done_) => {
+test('load a plugin after start()', (t, testCompleted) => {
   t.plan(1)
 
   let startCalled = false
@@ -337,7 +337,7 @@ test('load a plugin after start()', (t, done_) => {
   app.use((s, opts, done) => {
     t.assert.ok(startCalled)
     done()
-    done_()
+    testCompleted()
   })
 
   // we use a timer because
@@ -351,7 +351,7 @@ test('load a plugin after start()', (t, done_) => {
   }, 2)
 })
 
-test('booted should be set before ready', (t, done_) => {
+test('booted should be set before ready', (t, testCompleted) => {
   t.plan(2)
 
   const app = boot()
@@ -359,11 +359,11 @@ test('booted should be set before ready', (t, done_) => {
   app.ready(function (err) {
     t.assert.ifError(err)
     t.assert.ok(app.booted)
-    done_()
+    testCompleted()
   })
 })
 
-test('start should be emitted after ready resolves', (t, done_) => {
+test('start should be emitted after ready resolves', (t, testCompleted) => {
   t.plan(1)
 
   const app = boot()
@@ -375,11 +375,11 @@ test('start should be emitted after ready resolves', (t, done_) => {
 
   app.on('start', function () {
     t.assert.ok(ready)
-    done_()
+    testCompleted()
   })
 })
 
-test('throws correctly if registering after ready', (t, done_) => {
+test('throws correctly if registering after ready', (t, testCompleted) => {
   t.plan(1)
 
   const app = boot()
@@ -388,11 +388,11 @@ test('throws correctly if registering after ready', (t, done_) => {
     t.assert.throws(() => {
       app.use((a, b, done) => done())
     }, 'root plugin has already booted')
-    done_()
+    testCompleted()
   })
 })
 
-test('preReady errors must be managed', (t, done_) => {
+test('preReady errors must be managed', (t, testCompleted) => {
   t.plan(2)
 
   const app = boot()
@@ -408,11 +408,11 @@ test('preReady errors must be managed', (t, done_) => {
   app.ready(err => {
     t.assert.ok(true, 'ready function is called')
     t.assert.equal(err.message, 'boom')
-    done_()
+    testCompleted()
   })
 })
 
-test('preReady errors do not override plugin\'s errors', (t, done_) => {
+test('preReady errors do not override plugin\'s errors', (t, testCompleted) => {
   t.plan(3)
 
   const app = boot()
@@ -429,11 +429,11 @@ test('preReady errors do not override plugin\'s errors', (t, done_) => {
   app.ready(err => {
     t.assert.ok(true, 'ready function is called')
     t.assert.equal(err.message, 'baam')
-    done_()
+    testCompleted()
   })
 })
 
-test('support faux modules', (t, done_) => {
+test('support faux modules', (t, testCompleted) => {
   t.plan(4)
 
   const app = boot()
@@ -454,6 +454,6 @@ test('support faux modules', (t, done_) => {
 
   app.on('start', () => {
     t.assert.ok(true, 'booted')
-    done_()
+    testCompleted()
   })
 })
