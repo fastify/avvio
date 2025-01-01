@@ -1,9 +1,9 @@
 'use strict'
 
-const { test } = require('tap')
+const { test } = require('node:test')
 const boot = require('..')
 
-test('reentrant', (t) => {
+test('reentrant', (t, testCompleted) => {
   t.plan(7)
 
   const app = boot()
@@ -13,28 +13,29 @@ test('reentrant', (t) => {
   app
     .use(first)
     .after(() => {
-      t.ok(firstLoaded, 'first is loaded')
-      t.ok(secondLoaded, 'second is loaded')
-      t.pass('booted')
+      t.assert.ok(firstLoaded, 'first is loaded')
+      t.assert.ok(secondLoaded, 'second is loaded')
+      t.assert.ok(true)
+      testCompleted()
     })
 
   function first (s, opts, done) {
-    t.notOk(firstLoaded, 'first is not loaded')
-    t.notOk(secondLoaded, 'second is not loaded')
+    t.assert.strictEqual(firstLoaded, false, 'first is not loaded')
+    t.assert.strictEqual(secondLoaded, false, 'second is not loaded')
     firstLoaded = true
     s.use(second)
     done()
   }
 
   function second (s, opts, done) {
-    t.ok(firstLoaded, 'first is loaded')
-    t.notOk(secondLoaded, 'second is not loaded')
+    t.assert.ok(firstLoaded, 'first is loaded')
+    t.assert.strictEqual(secondLoaded, false, 'second is not loaded')
     secondLoaded = true
     done()
   }
 })
 
-test('reentrant with callbacks deferred', (t) => {
+test('reentrant with callbacks deferred', (t, testCompleted) => {
   t.plan(11)
 
   const app = boot()
@@ -45,25 +46,26 @@ test('reentrant with callbacks deferred', (t) => {
   app.use(first)
 
   function first (s, opts, done) {
-    t.notOk(firstLoaded, 'first is not loaded')
-    t.notOk(secondLoaded, 'second is not loaded')
-    t.notOk(thirdLoaded, 'third is not loaded')
+    t.assert.strictEqual(firstLoaded, false, 'first is not loaded')
+    t.assert.strictEqual(secondLoaded, false, 'second is not loaded')
+    t.assert.strictEqual(thirdLoaded, false, 'third is not loaded')
     firstLoaded = true
     s.use(second)
     setTimeout(() => {
       try {
         s.use(third)
       } catch (err) {
-        t.equal(err.message, 'Root plugin has already booted')
+        t.assert.strictEqual(err.message, 'Root plugin has already booted')
       }
+      testCompleted()
     }, 500)
     done()
   }
 
   function second (s, opts, done) {
-    t.ok(firstLoaded, 'first is loaded')
-    t.notOk(secondLoaded, 'second is not loaded')
-    t.notOk(thirdLoaded, 'third is not loaded')
+    t.assert.ok(firstLoaded, 'first is loaded')
+    t.assert.strictEqual(secondLoaded, false, 'second is not loaded')
+    t.assert.strictEqual(thirdLoaded, false, 'third is not loaded')
     secondLoaded = true
     done()
   }
@@ -74,14 +76,14 @@ test('reentrant with callbacks deferred', (t) => {
   }
 
   app.on('start', () => {
-    t.ok(firstLoaded, 'first is loaded')
-    t.ok(secondLoaded, 'second is loaded')
-    t.notOk(thirdLoaded, 'third is not loaded')
-    t.pass('booted')
+    t.assert.ok(firstLoaded, 'first is loaded')
+    t.assert.ok(secondLoaded, 'second is loaded')
+    t.assert.strictEqual(thirdLoaded, false, 'third is not loaded')
+    t.assert.ok(true)
   })
 })
 
-test('multiple loading time', t => {
+test('multiple loading time', (t, testCompleted) => {
   t.plan(1)
   const app = boot()
 
@@ -108,6 +110,7 @@ test('multiple loading time', t => {
       setTimeout(done, 0)
     })
     .after(() => {
-      t.pass('booted')
+      t.assert.ok(true)
+      testCompleted()
     })
 })
