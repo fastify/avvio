@@ -12,7 +12,7 @@ test('catch exceptions in parent.override', (t, testCompleted) => {
     autostart: false
   })
   app.override = function () {
-    throw new Error('catch it')
+    throw Error('catch it')
   }
 
   app
