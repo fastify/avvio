@@ -1,6 +1,6 @@
 'use strict'
 
-const { test } = require('tap')
+const { test } = require('node:test')
 const boot = require('..')
 
 test('after does not await itself', async (t) => {
@@ -10,11 +10,11 @@ test('after does not await itself', async (t) => {
   boot(app)
 
   app.use(async (app) => {
-    t.pass('plugin init')
+    t.assert.ok('plugin init')
   })
   app.after(() => app)
-  t.pass('reachable')
+  t.assert.ok('reachable')
 
   await app.ready()
-  t.pass('reachable')
+  t.assert.ok('reachable')
 })
