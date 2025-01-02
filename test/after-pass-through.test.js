@@ -1,9 +1,9 @@
 'use strict'
 
-const { test } = require('tap')
+const { test } = require('node:test')
 const boot = require('..')
 
-test('proper support for after with a passed async function in wrapped mode', (t) => {
+test('proper support for after with a passed async function in wrapped mode', (t, testCompleted) => {
   const app = {}
   boot(app)
 
@@ -14,19 +14,20 @@ test('proper support for after with a passed async function in wrapped mode', (t
   app.use(function (f, opts) {
     return Promise.reject(e)
   }).after(function (err, cb) {
-    t.equal(err, e)
+    t.assert.deepStrictEqual(err, e)
     cb(err)
   }).after(function () {
-    t.pass('this is just called')
+    t.assert.ok('this is just called')
   }).after(function (err, cb) {
-    t.equal(err, e)
+    t.assert.deepStrictEqual(err, e)
     cb(err)
   })
 
   app.ready().then(() => {
-    t.fail('this should not be called')
+    t.assert.fail('this should not be called')
   }).catch(err => {
-    t.ok(err)
-    t.equal(err.message, 'kaboom')
+    t.assert.ok(err)
+    t.assert.strictEqual(err.message, 'kaboom')
+    testCompleted()
   })
 })
