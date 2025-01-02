@@ -2,12 +2,8 @@
 
 /* eslint no-prototype-builtins: off */
 
-const { test } = require('tap')
-const sleep = function (ms) {
-  return new Promise(function (resolve) {
-    setTimeout(resolve, ms)
-  })
-}
+const { test } = require('node:test')
+const { setTimeout: sleep } = require('node:timers/promises')
 
 const boot = require('..')
 
@@ -23,34 +19,34 @@ test('one level', async (t) => {
   app.use(third)
 
   async function first (s, opts) {
-    t.notOk(firstLoaded, 'first is not loaded')
-    t.notOk(secondLoaded, 'second is not loaded')
-    t.notOk(thirdLoaded, 'third is not loaded')
+    t.assert.strictEqual(firstLoaded, false, 'first is not loaded')
+    t.assert.strictEqual(secondLoaded, false, 'second is not loaded')
+    t.assert.strictEqual(thirdLoaded, false, 'third is not loaded')
     firstLoaded = true
     s.use(second)
   }
 
   async function second (s, opts) {
-    t.ok(firstLoaded, 'first is loaded')
-    t.notOk(secondLoaded, 'second is not loaded')
-    t.notOk(thirdLoaded, 'third is not loaded')
+    t.assert.ok(firstLoaded, 'first is loaded')
+    t.assert.strictEqual(secondLoaded, false, 'second is not loaded')
+    t.assert.strictEqual(thirdLoaded, false, 'third is not loaded')
     secondLoaded = true
   }
 
   async function third (s, opts) {
-    t.ok(firstLoaded, 'first is loaded')
-    t.ok(secondLoaded, 'second is loaded')
-    t.notOk(thirdLoaded, 'third is not loaded')
+    t.assert.ok(firstLoaded, 'first is loaded')
+    t.assert.ok(secondLoaded, 'second is loaded')
+    t.assert.strictEqual(thirdLoaded, false, 'third is not loaded')
     thirdLoaded = true
   }
 
   const readyContext = await app.ready()
 
-  t.equal(app, readyContext)
-  t.ok(firstLoaded, 'first is loaded')
-  t.ok(secondLoaded, 'second is loaded')
-  t.ok(thirdLoaded, 'third is loaded')
-  t.pass('booted')
+  t.assert.deepStrictEqual(app, readyContext)
+  t.assert.ok(firstLoaded, 'first is loaded')
+  t.assert.ok(secondLoaded, 'second is loaded')
+  t.assert.ok(thirdLoaded, 'third is loaded')
+  t.assert.ok('booted')
 })
 
 test('multiple reentrant plugin loading', async (t) => {
@@ -67,21 +63,21 @@ test('multiple reentrant plugin loading', async (t) => {
   app.use(fifth)
 
   async function first (s, opts) {
-    t.notOk(firstLoaded, 'first is not loaded')
-    t.notOk(secondLoaded, 'second is not loaded')
-    t.notOk(thirdLoaded, 'third is not loaded')
-    t.notOk(fourthLoaded, 'fourth is not loaded')
-    t.notOk(fifthLoaded, 'fifth is not loaded')
+    t.assert.strictEqual(firstLoaded, false, 'first is not loaded')
+    t.assert.strictEqual(secondLoaded, false, 'second is not loaded')
+    t.assert.strictEqual(thirdLoaded, false, 'third is not loaded')
+    t.assert.strictEqual(fourthLoaded, false, 'fourth is not loaded')
+    t.assert.strictEqual(fifthLoaded, false, 'fifth is not loaded')
     firstLoaded = true
     s.use(second)
   }
 
   async function second (s, opts) {
-    t.ok(firstLoaded, 'first is loaded')
-    t.notOk(secondLoaded, 'second is not loaded')
-    t.notOk(thirdLoaded, 'third is not loaded')
-    t.notOk(fourthLoaded, 'fourth is not loaded')
-    t.notOk(fifthLoaded, 'fifth is not loaded')
+    t.assert.ok(firstLoaded, 'first is loaded')
+    t.assert.strictEqual(secondLoaded, false, 'second is not loaded')
+    t.assert.strictEqual(thirdLoaded, false, 'third is not loaded')
+    t.assert.strictEqual(fourthLoaded, false, 'fourth is not loaded')
+    t.assert.strictEqual(fifthLoaded, false, 'fifth is not loaded')
     secondLoaded = true
     s.use(third)
     await sleep(10)
@@ -89,39 +85,39 @@ test('multiple reentrant plugin loading', async (t) => {
   }
 
   async function third (s, opts) {
-    t.ok(firstLoaded, 'first is loaded')
-    t.ok(secondLoaded, 'second is loaded')
-    t.notOk(thirdLoaded, 'third is not loaded')
-    t.notOk(fourthLoaded, 'fourth is not loaded')
-    t.notOk(fifthLoaded, 'fifth is not loaded')
+    t.assert.ok(firstLoaded, 'first is loaded')
+    t.assert.ok(secondLoaded, 'second is loaded')
+    t.assert.strictEqual(thirdLoaded, false, 'third is not loaded')
+    t.assert.strictEqual(fourthLoaded, false, 'fourth is not loaded')
+    t.assert.strictEqual(fifthLoaded, false, 'fifth is not loaded')
     thirdLoaded = true
   }
 
   async function fourth (s, opts) {
-    t.ok(firstLoaded, 'first is loaded')
-    t.ok(secondLoaded, 'second is loaded')
-    t.ok(thirdLoaded, 'third is loaded')
-    t.notOk(fourthLoaded, 'fourth is not loaded')
-    t.notOk(fifthLoaded, 'fifth is not loaded')
+    t.assert.ok(firstLoaded, 'first is loaded')
+    t.assert.ok(secondLoaded, 'second is loaded')
+    t.assert.ok(thirdLoaded, 'third is loaded')
+    t.assert.strictEqual(fourthLoaded, false, 'fourth is not loaded')
+    t.assert.strictEqual(fifthLoaded, false, 'fifth is not loaded')
     fourthLoaded = true
   }
 
   async function fifth (s, opts) {
-    t.ok(firstLoaded, 'first is loaded')
-    t.ok(secondLoaded, 'second is loaded')
-    t.ok(thirdLoaded, 'third is loaded')
-    t.ok(fourthLoaded, 'fourth is loaded')
-    t.notOk(fifthLoaded, 'fifth is not loaded')
+    t.assert.ok(firstLoaded, 'first is loaded')
+    t.assert.ok(secondLoaded, 'second is loaded')
+    t.assert.ok(thirdLoaded, 'third is loaded')
+    t.assert.ok(fourthLoaded, 'fourth is loaded')
+    t.assert.strictEqual(fifthLoaded, false, 'fifth is not loaded')
     fifthLoaded = true
   }
 
   await app.ready()
-  t.ok(firstLoaded, 'first is loaded')
-  t.ok(secondLoaded, 'second is loaded')
-  t.ok(thirdLoaded, 'third is loaded')
-  t.ok(fourthLoaded, 'fourth is loaded')
-  t.ok(fifthLoaded, 'fifth is loaded')
-  t.pass('booted')
+  t.assert.ok(firstLoaded, 'first is loaded')
+  t.assert.ok(secondLoaded, 'second is loaded')
+  t.assert.ok(thirdLoaded, 'third is loaded')
+  t.assert.ok(fourthLoaded, 'fourth is loaded')
+  t.assert.ok(fifthLoaded, 'fifth is loaded')
+  t.assert.ok('booted')
 })
 
 test('async ready plugin registration (errored)', async (t) => {
@@ -136,9 +132,9 @@ test('async ready plugin registration (errored)', async (t) => {
 
   try {
     await app.ready()
-    t.fail('we should not be here')
+    t.assert.fail('we should not be here')
   } catch (err) {
-    t.equal(err.message, 'kaboom')
+    t.assert.strictEqual(err.message, 'kaboom')
   }
 })
 
@@ -153,38 +149,38 @@ test('after', async (t) => {
   app.use(first)
 
   async function first (s, opts) {
-    t.notOk(firstLoaded, 'first is not loaded')
-    t.notOk(secondLoaded, 'second is not loaded')
-    t.notOk(thirdLoaded, 'third is not loaded')
+    t.assert.strictEqual(firstLoaded, false, 'first is not loaded')
+    t.assert.strictEqual(secondLoaded, false, 'second is not loaded')
+    t.assert.strictEqual(thirdLoaded, false, 'third is not loaded')
     firstLoaded = true
     s.after(second)
     s.after(third)
   }
 
   async function second (err) {
-    t.error(err)
-    t.ok(firstLoaded, 'first is loaded')
-    t.notOk(secondLoaded, 'second is not loaded')
-    t.notOk(thirdLoaded, 'third is not loaded')
+    t.assert.ifError(err)
+    t.assert.ok(firstLoaded, 'first is loaded')
+    t.assert.strictEqual(secondLoaded, false, 'second is not loaded')
+    t.assert.strictEqual(thirdLoaded, false, 'third is not loaded')
     await sleep(10)
     secondLoaded = true
   }
 
   async function third () {
-    t.ok(firstLoaded, 'first is loaded')
-    t.ok(secondLoaded, 'second is loaded')
-    t.notOk(thirdLoaded, 'third is not loaded')
+    t.assert.ok(firstLoaded, 'first is loaded')
+    t.assert.ok(secondLoaded, 'second is loaded')
+    t.assert.strictEqual(thirdLoaded, false, 'third is not loaded')
     await sleep(10)
     thirdLoaded = true
   }
 
   const readyContext = await app.ready()
 
-  t.equal(app, readyContext)
-  t.ok(firstLoaded, 'first is loaded')
-  t.ok(secondLoaded, 'second is loaded')
-  t.ok(thirdLoaded, 'third is loaded')
-  t.pass('booted')
+  t.assert.deepStrictEqual(app, readyContext)
+  t.assert.ok(firstLoaded, 'first is loaded')
+  t.assert.ok(secondLoaded, 'second is loaded')
+  t.assert.ok(thirdLoaded, 'third is loaded')
+  t.assert.ok('booted')
 })
 
 test('after wrapped', async (t) => {
@@ -199,38 +195,38 @@ test('after wrapped', async (t) => {
   app.use(first)
 
   async function first (s, opts) {
-    t.notOk(firstLoaded, 'first is not loaded')
-    t.notOk(secondLoaded, 'second is not loaded')
-    t.notOk(thirdLoaded, 'third is not loaded')
+    t.assert.strictEqual(firstLoaded, false, 'first is not loaded')
+    t.assert.strictEqual(secondLoaded, false, 'second is not loaded')
+    t.assert.strictEqual(thirdLoaded, false, 'third is not loaded')
     firstLoaded = true
     s.after(second)
     s.after(third)
   }
 
   async function second (err) {
-    t.error(err)
-    t.ok(firstLoaded, 'first is loaded')
-    t.notOk(secondLoaded, 'second is not loaded')
-    t.notOk(thirdLoaded, 'third is not loaded')
+    t.assert.ifError(err)
+    t.assert.ok(firstLoaded, 'first is loaded')
+    t.assert.strictEqual(secondLoaded, false, 'second is not loaded')
+    t.assert.strictEqual(thirdLoaded, false, 'third is not loaded')
     await sleep(10)
     secondLoaded = true
   }
 
   async function third () {
-    t.ok(firstLoaded, 'first is loaded')
-    t.ok(secondLoaded, 'second is loaded')
-    t.notOk(thirdLoaded, 'third is not loaded')
+    t.assert.ok(firstLoaded, 'first is loaded')
+    t.assert.ok(secondLoaded, 'second is loaded')
+    t.assert.strictEqual(thirdLoaded, false, 'third is not loaded')
     await sleep(10)
     thirdLoaded = true
   }
 
   const readyContext = await app.ready()
 
-  t.equal(app, readyContext)
-  t.ok(firstLoaded, 'first is loaded')
-  t.ok(secondLoaded, 'second is loaded')
-  t.ok(thirdLoaded, 'third is loaded')
-  t.pass('booted')
+  t.assert.deepStrictEqual(app, readyContext)
+  t.assert.ok(firstLoaded, 'first is loaded')
+  t.assert.ok(secondLoaded, 'second is loaded')
+  t.assert.ok(thirdLoaded, 'third is loaded')
+  t.assert.ok('booted')
 })
 
 test('promise plugins', async (t) => {
@@ -246,9 +242,9 @@ test('promise plugins', async (t) => {
 
   async function first () {
     return async function (s, opts) {
-      t.notOk(firstLoaded, 'first is not loaded')
-      t.notOk(secondLoaded, 'second is not loaded')
-      t.notOk(thirdLoaded, 'third is not loaded')
+      t.assert.strictEqual(firstLoaded, false, 'first is not loaded')
+      t.assert.strictEqual(secondLoaded, false, 'second is not loaded')
+      t.assert.strictEqual(thirdLoaded, false, 'third is not loaded')
       firstLoaded = true
       s.use(second())
     }
@@ -256,39 +252,39 @@ test('promise plugins', async (t) => {
 
   async function second () {
     return async function (s, opts) {
-      t.ok(firstLoaded, 'first is loaded')
-      t.notOk(secondLoaded, 'second is not loaded')
-      t.notOk(thirdLoaded, 'third is not loaded')
+      t.assert.ok(firstLoaded, 'first is loaded')
+      t.assert.strictEqual(secondLoaded, false, 'second is not loaded')
+      t.assert.strictEqual(thirdLoaded, false, 'third is not loaded')
       secondLoaded = true
     }
   }
 
   async function third () {
     return async function (s, opts) {
-      t.ok(firstLoaded, 'first is loaded')
-      t.ok(secondLoaded, 'second is loaded')
-      t.notOk(thirdLoaded, 'third is not loaded')
+      t.assert.ok(firstLoaded, 'first is loaded')
+      t.assert.ok(secondLoaded, 'second is loaded')
+      t.assert.strictEqual(thirdLoaded, false, 'third is not loaded')
       thirdLoaded = true
     }
   }
 
   const readyContext = await app.ready()
 
-  t.equal(app, readyContext)
-  t.ok(firstLoaded, 'first is loaded')
-  t.ok(secondLoaded, 'second is loaded')
-  t.ok(thirdLoaded, 'third is loaded')
-  t.pass('booted')
+  t.assert.deepStrictEqual(app, readyContext)
+  t.assert.ok(firstLoaded, 'first is loaded')
+  t.assert.ok(secondLoaded, 'second is loaded')
+  t.assert.ok(thirdLoaded, 'third is loaded')
+  t.assert.ok('booted')
 })
 
-test('skip override with promise', (t) => {
+test('skip override with promise', async (t) => {
   t.plan(3)
 
   const server = { my: 'server' }
   const app = boot(server)
 
   app.override = function (s, func) {
-    t.pass('override called')
+    t.assert.ok('override called')
 
     if (func[Symbol.for('skip-override')]) {
       return s
@@ -300,14 +296,16 @@ test('skip override with promise', (t) => {
 
   async function first () {
     async function fn (s, opts) {
-      t.equal(s, server)
-      t.notOk(Object.prototype.isPrototypeOf.call(server, s))
+      t.assert.deepStrictEqual(s, server)
+      t.assert.strictEqual(Object.prototype.isPrototypeOf.call(server, s), false)
     }
 
     fn[Symbol.for('skip-override')] = true
 
     return fn
   }
+
+  await app.ready()
 })
 
 test('ready queue error', async (t) => {
@@ -321,5 +319,5 @@ test('ready queue error', async (t) => {
     done(error)
   })
 
-  await t.rejects(app.ready(), { message: 'kaboom' })
+  await t.assert.rejects(app.ready(), { message: 'kaboom' })
 })
