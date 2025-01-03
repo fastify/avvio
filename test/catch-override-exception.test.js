@@ -3,7 +3,7 @@
 const { test } = require('node:test')
 const boot = require('..')
 
-test('catch exceptions in parent.override', (t, testCompleted) => {
+test('catch exceptions in parent.override', (t, testDone) => {
   t.plan(1)
 
   const server = {}
@@ -21,6 +21,6 @@ test('catch exceptions in parent.override', (t, testCompleted) => {
 
   app.ready(function (err) {
     t.assert.strictEqual(err.message, 'catch it')
-    testCompleted()
+    testDone()
   })
 })
