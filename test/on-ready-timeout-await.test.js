@@ -2,7 +2,7 @@
 
 /* eslint no-prototype-builtins: off */
 
-const { test } = require('tap')
+const { test } = require('node:test')
 const boot = require('../boot')
 
 test('onReadyTimeout', async (t) => {
@@ -12,10 +12,10 @@ test('onReadyTimeout', async (t) => {
   })
 
   app.use(function one (innerApp, opts, next) {
-    t.pass('loaded')
+    t.assert.ok('loaded')
     innerApp.ready(function readyNoResolve (err, done) {
-      t.notOk(err)
-      t.pass('first ready called')
+      t.assert.ifError(err)
+      t.assert.ok('first ready called')
       // Do not call done() to timeout
     })
     next()
@@ -25,9 +25,9 @@ test('onReadyTimeout', async (t) => {
 
   try {
     await app.ready()
-    t.fail('should throw')
+    t.assert.fail('should throw')
   } catch (err) {
-    t.equal(err.message, 'Plugin did not start in time: \'readyNoResolve\'. You may have forgotten to call \'done\' function or to resolve a Promise')
+    t.assert.strictEqual(err.message, 'Plugin did not start in time: \'readyNoResolve\'. You may have forgotten to call \'done\' function or to resolve a Promise')
     // And not Plugin did not start in time: 'bound _encapsulateThreeParam'. You may have forgotten to call 'done' function or to resolve a Promise
   }
 })
