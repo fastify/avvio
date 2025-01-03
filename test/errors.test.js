@@ -1,6 +1,6 @@
 'use strict'
 
-const { test } = require('tap')
+const { test } = require('node:test')
 const errors = require('../lib/errors')
 
 test('Correct codes of AvvioErrors', t => {
@@ -17,10 +17,10 @@ test('Correct codes of AvvioErrors', t => {
 
   t.plan(testcases.length + 1)
   // errors.js exposes errors and the createError fn
-  t.equal(testcases.length, Object.keys(errors).length)
+  t.assert.strictEqual(testcases.length, Object.keys(errors).length)
 
   for (const testcase of testcases) {
     const error = new errors[testcase]()
-    t.equal(error.code, testcase)
+    t.assert.strictEqual(error.code, testcase)
   }
 })
