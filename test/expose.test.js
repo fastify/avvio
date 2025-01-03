@@ -24,7 +24,7 @@ for (const key of ['use', 'after', 'ready', 'onClose', 'close']) {
     t.assert.throws(() => boot(app, { expose: { [key]: 'cust' + key } }), new AVV_ERR_EXPOSE_ALREADY_DEFINED('cust' + key, key))
   })
 
-  test('support expose for ' + key, (t, testDone) => {
+  test('support expose for ' + key, (t) => {
     const app = {}
     app[key] = () => { }
 
@@ -34,8 +34,6 @@ for (const key of ['use', 'after', 'ready', 'onClose', 'close']) {
     boot(app, {
       expose
     })
-
-    testDone()
   })
 }
 
@@ -51,34 +49,30 @@ test('set the kAvvio to true on the server', (t) => {
 test('.then()', (t, testDone) => {
   t.plan(3)
 
-  t.test('.then() can not be overwritten', (t, testDone) => {
+  t.test('.then() can not be overwritten', (t) => {
     t.plan(1)
 
     const server = {
       then: () => {}
     }
     t.assert.throws(() => boot(server), AVV_ERR_ATTRIBUTE_ALREADY_DEFINED('then'))
-    testDone()
   })
 
-  t.test('.then() is a function', (t, testDone) => {
+  t.test('.then() is a function', (t) => {
     t.plan(1)
 
     const server = {}
     boot(server)
-    console.log(typeof server.then, 'typeof server.then')
     t.assert.strictEqual(typeof server.then, 'function')
-    testDone()
   })
 
-  t.test('.then() can not be overwritten', (t, testDone) => {
+  t.test('.then() can not be overwritten', (t) => {
     t.plan(1)
 
     const server = {}
     boot(server)
 
     t.assert.throws(() => { server.then = 'invalid' }, TypeError('Cannot set property then of #<Object> which has only a getter'))
-    testDone()
   })
 
   process.nextTick(testDone)
