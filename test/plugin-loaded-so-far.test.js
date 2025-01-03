@@ -1,12 +1,11 @@
 'use strict'
 
-const { test } = require('tap')
+const { test } = require('node:test')
 const fastq = require('fastq')
 const boot = require('..')
 const { Plugin } = require('../lib/plugin')
 
 test('loadedSoFar resolves a Promise, if plugin.loaded is set to true', async (t) => {
-  t.plan(1)
   const app = boot({})
 
   const plugin = new Plugin(fastq(app, app._loadPluginNextTick, 1), function (instance, opts, done) {
@@ -15,11 +14,11 @@ test('loadedSoFar resolves a Promise, if plugin.loaded is set to true', async (t
 
   plugin.loaded = true
 
-  await t.resolves(plugin.loadedSoFar())
+  await plugin.loadedSoFar()
 })
 
 test('loadedSoFar resolves a Promise, if plugin was loaded by avvio', async (t) => {
-  t.plan(2)
+  t.plan(1)
   const app = boot({})
 
   const plugin = new Plugin(fastq(app, app._loadPluginNextTick, 1), function (instance, opts, done) {
@@ -27,16 +26,15 @@ test('loadedSoFar resolves a Promise, if plugin was loaded by avvio', async (t) 
   }, false, 0)
 
   app._loadPlugin(plugin, function (err) {
-    t.equal(err, undefined)
+    t.assert.ifError(err)
   })
 
   await app.ready()
 
-  await t.resolves(plugin.loadedSoFar())
+  await plugin.loadedSoFar()
 })
 
 test('loadedSoFar resolves a Promise, if .after() has no error', async t => {
-  t.plan(1)
   const app = boot()
 
   app.after = function (callback) {
@@ -49,7 +47,7 @@ test('loadedSoFar resolves a Promise, if .after() has no error', async t => {
 
   app._loadPlugin(plugin, function () {})
 
-  await t.resolves(plugin.loadedSoFar())
+  await plugin.loadedSoFar()
 })
 
 test('loadedSoFar rejects a Promise, if .after() has an error', async t => {
@@ -66,12 +64,10 @@ test('loadedSoFar rejects a Promise, if .after() has an error', async t => {
 
   app._loadPlugin(plugin, function () {})
 
-  await t.rejects(plugin.loadedSoFar(), new Error('ArbitraryError'))
+  await t.assert.rejects(plugin.loadedSoFar(), new Error('ArbitraryError'))
 })
 
 test('loadedSoFar resolves a Promise, if Plugin is attached to avvio after it the Plugin was instantiated', async t => {
-  t.plan(1)
-
   const plugin = new Plugin(fastq(null, null, 1), function (instance, opts, done) {
     done()
   }, false, 0)
@@ -80,5 +76,5 @@ test('loadedSoFar resolves a Promise, if Plugin is attached to avvio after it th
 
   plugin.server = boot()
   plugin.emit('start')
-  await t.resolves(promise)
+  await promise
 })
