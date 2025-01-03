@@ -1,18 +1,19 @@
 'use strict'
 
-const { test } = require('tap')
+const { test } = require('node:test')
 const boot = require('..')
 
-test('not taking done does not throw error.', (t) => {
+test('not taking done does not throw error.', (t, testDone) => {
   t.plan(2)
 
   const app = boot()
 
   app.use(noDone).ready((err) => {
-    t.notOk(err, 'no error')
+    t.assert.strictEqual(err, null, 'no error')
+    testDone()
   })
 
   function noDone (s, opts) {
-    t.pass('did not throw')
+    t.assert.ok('did not throw')
   }
 })
