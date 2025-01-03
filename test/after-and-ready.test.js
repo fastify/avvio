@@ -3,7 +3,7 @@
 const { test } = require('node:test')
 const boot = require('..')
 
-test('boot a plugin and then execute a call after that', (t, testCompleted) => {
+test('boot a plugin and then execute a call after that', (t, testDone) => {
   t.plan(5)
 
   const app = boot()
@@ -26,11 +26,11 @@ test('boot a plugin and then execute a call after that', (t, testCompleted) => {
   app.on('start', () => {
     t.assert.ok(afterCalled, 'after called')
     t.assert.ok(pluginLoaded, 'plugin loaded')
-    testCompleted()
+    testDone()
   })
 })
 
-test('after without a done callback', (t, testCompleted) => {
+test('after without a done callback', (t, testDone) => {
   t.plan(5)
 
   const app = boot()
@@ -52,11 +52,11 @@ test('after without a done callback', (t, testCompleted) => {
   app.on('start', () => {
     t.assert.ok(afterCalled, 'after called')
     t.assert.ok(pluginLoaded, 'plugin loaded')
-    testCompleted()
+    testDone()
   })
 })
 
-test('verify when a afterred call happens', (t, testCompleted) => {
+test('verify when a afterred call happens', (t, testDone) => {
   t.plan(3)
 
   const app = boot()
@@ -73,11 +73,11 @@ test('verify when a afterred call happens', (t, testCompleted) => {
 
   app.on('start', () => {
     t.assert.ok(true)
-    testCompleted()
+    testDone()
   })
 })
 
-test('internal after', (t, testCompleted) => {
+test('internal after', (t, testDone) => {
   t.plan(18)
 
   const app = boot()
@@ -128,11 +128,11 @@ test('internal after', (t, testCompleted) => {
     t.assert.ok(thirdLoaded, 'third is loaded')
     t.assert.ok(afterCalled, 'after was called')
     t.assert.ok(true)
-    testCompleted()
+    testDone()
   })
 })
 
-test('ready adds at the end of the queue', (t, testCompleted) => {
+test('ready adds at the end of the queue', (t, testDone) => {
   t.plan(14)
 
   const app = boot()
@@ -174,11 +174,11 @@ test('ready adds at the end of the queue', (t, testCompleted) => {
     t.assert.ok(afterCalled, 'after called')
     t.assert.ok(pluginLoaded, 'plugin loaded')
     t.assert.ok(readyCalled, 'ready called')
-    testCompleted()
+    testDone()
   })
 })
 
-test('if the after/ready callback has three parameters, the second one must be the context', (t, testCompleted) => {
+test('if the after/ready callback has three parameters, the second one must be the context', (t, testDone) => {
   t.plan(4)
 
   const server = { my: 'server' }
@@ -198,11 +198,11 @@ test('if the after/ready callback has three parameters, the second one must be t
     t.assert.ifError(err)
     t.assert.deepStrictEqual(server, context)
     cb()
-    testCompleted()
+    testDone()
   })
 })
 
-test('if the after/ready async, the returns must be the context generated', (t, testCompleted) => {
+test('if the after/ready async, the returns must be the context generated', (t, testDone) => {
   t.plan(3)
 
   const server = { my: 'server', index: 0 }
@@ -215,7 +215,7 @@ test('if the after/ready async, the returns must be the context generated', (t, 
     s.use(function (s, opts, done) {
       s.ready().then(itself => {
         t.assert.deepStrictEqual(itself, s, 'deep deep')
-        testCompleted()
+        testDone()
       })
       done()
     })
@@ -230,7 +230,7 @@ test('if the after/ready async, the returns must be the context generated', (t, 
   })
 })
 
-test('if the after/ready callback, the returns must be the context generated', (t, testCompleted) => {
+test('if the after/ready callback, the returns must be the context generated', (t, testDone) => {
   t.plan(3)
 
   const server = { my: 'server', index: 0 }
@@ -244,7 +244,7 @@ test('if the after/ready callback, the returns must be the context generated', (
       s.ready((_, itself, done) => {
         t.assert.deepStrictEqual(itself, s, 'deep deep')
         done()
-        testCompleted()
+        testDone()
       })
       done()
     })
@@ -261,7 +261,7 @@ test('if the after/ready callback, the returns must be the context generated', (
   })
 })
 
-test('error should come in the first after - one parameter', (t, testCompleted) => {
+test('error should come in the first after - one parameter', (t, testDone) => {
   t.plan(3)
 
   const server = { my: 'server' }
@@ -278,11 +278,11 @@ test('error should come in the first after - one parameter', (t, testCompleted) 
 
   app.ready(function (err) {
     t.assert.ifError(err)
-    testCompleted()
+    testDone()
   })
 })
 
-test('error should come in the first after - two parameters', (t, testCompleted) => {
+test('error should come in the first after - two parameters', (t, testDone) => {
   t.plan(3)
 
   const server = { my: 'server' }
@@ -300,11 +300,11 @@ test('error should come in the first after - two parameters', (t, testCompleted)
 
   app.ready(function (err) {
     t.assert.ifError(err)
-    testCompleted()
+    testDone()
   })
 })
 
-test('error should come in the first after - three parameter', (t, testCompleted) => {
+test('error should come in the first after - three parameter', (t, testDone) => {
   t.plan(4)
 
   const server = { my: 'server' }
@@ -323,11 +323,11 @@ test('error should come in the first after - three parameter', (t, testCompleted
 
   app.ready(function (err) {
     t.assert.ifError(err)
-    testCompleted()
+    testDone()
   })
 })
 
-test('error should come in the first ready - one parameter', (t, testCompleted) => {
+test('error should come in the first ready - one parameter', (t, testDone) => {
   t.plan(2)
 
   const server = { my: 'server' }
@@ -340,11 +340,11 @@ test('error should come in the first ready - one parameter', (t, testCompleted) 
   app.ready(function (err) {
     t.assert.ok(err instanceof Error)
     t.assert.strictEqual(err.message, 'err')
-    testCompleted()
+    testDone()
   })
 })
 
-test('error should come in the first ready - two parameters', (t, testCompleted) => {
+test('error should come in the first ready - two parameters', (t, testDone) => {
   t.plan(2)
 
   const server = { my: 'server' }
@@ -358,11 +358,11 @@ test('error should come in the first ready - two parameters', (t, testCompleted)
     t.assert.ok(err instanceof Error)
     t.assert.strictEqual(err.message, 'err')
     cb()
-    testCompleted()
+    testDone()
   })
 })
 
-test('error should come in the first ready - three parameters', (t, testCompleted) => {
+test('error should come in the first ready - three parameters', (t, testDone) => {
   t.plan(3)
 
   const server = { my: 'server' }
@@ -377,11 +377,11 @@ test('error should come in the first ready - three parameters', (t, testComplete
     t.assert.strictEqual(err.message, 'err')
     t.assert.deepStrictEqual(context, server)
     cb()
-    testCompleted()
+    testDone()
   })
 })
 
-test('if `use` has a callback with more then one parameter, the error must not reach ready', (t, testCompleted) => {
+test('if `use` has a callback with more then one parameter, the error must not reach ready', (t, testDone) => {
   t.plan(1)
 
   const server = { my: 'server' }
@@ -393,11 +393,11 @@ test('if `use` has a callback with more then one parameter, the error must not r
 
   app.ready(function (err) {
     t.assert.ok(err)
-    testCompleted()
+    testDone()
   })
 })
 
-test('if `use` has a callback without parameters, the error must reach ready', (t, testCompleted) => {
+test('if `use` has a callback without parameters, the error must reach ready', (t, testDone) => {
   t.plan(1)
 
   const server = { my: 'server' }
@@ -409,11 +409,11 @@ test('if `use` has a callback without parameters, the error must reach ready', (
 
   app.ready(function (err) {
     t.assert.ok(err)
-    testCompleted()
+    testDone()
   })
 })
 
-test('should pass the errors from after to ready', (t, testCompleted) => {
+test('should pass the errors from after to ready', (t, testDone) => {
   t.plan(6)
 
   const server = {}
@@ -430,7 +430,7 @@ test('should pass the errors from after to ready', (t, testCompleted) => {
 
   server.onClose(() => {
     t.assert.ok(true)
-    testCompleted()
+    testDone()
   })
 
   server.ready(err => {
@@ -444,7 +444,7 @@ test('should pass the errors from after to ready', (t, testCompleted) => {
   })
 })
 
-test('after no encapsulation', (t, testCompleted) => {
+test('after no encapsulation', (t, testDone) => {
   t.plan(4)
 
   const app = boot()
@@ -467,11 +467,11 @@ test('after no encapsulation', (t, testCompleted) => {
     t.assert.ifError(err)
     t.assert.strictEqual(i.test, undefined)
     done()
-    testCompleted()
+    testDone()
   })
 })
 
-test('ready no encapsulation', (t, testCompleted) => {
+test('ready no encapsulation', (t, testDone) => {
   t.plan(4)
 
   const app = boot()
@@ -486,7 +486,7 @@ test('ready no encapsulation', (t, testCompleted) => {
       t.assert.ifError(err)
       t.assert.strictEqual(i.test, undefined)
       done()
-      testCompleted()
+      testDone()
     })
     next()
   })
@@ -498,7 +498,7 @@ test('ready no encapsulation', (t, testCompleted) => {
   })
 })
 
-test('after encapsulation with a server', (t, testCompleted) => {
+test('after encapsulation with a server', (t, testDone) => {
   t.plan(4)
 
   const server = { my: 'server' }
@@ -522,11 +522,11 @@ test('after encapsulation with a server', (t, testCompleted) => {
     t.assert.ifError(err)
     t.assert.strictEqual(i.test, undefined)
     done()
-    testCompleted()
+    testDone()
   })
 })
 
-test('ready encapsulation with a server', (t, testCompleted) => {
+test('ready encapsulation with a server', (t, testDone) => {
   t.plan(4)
 
   const server = { my: 'server' }
@@ -542,7 +542,7 @@ test('ready encapsulation with a server', (t, testCompleted) => {
       t.assert.ifError(err)
       t.assert.ok(i.test)
       done()
-      testCompleted()
+      testDone()
     })
     next()
   })
@@ -554,7 +554,7 @@ test('ready encapsulation with a server', (t, testCompleted) => {
   })
 })
 
-test('after should passthrough the errors', (t, testCompleted) => {
+test('after should passthrough the errors', (t, testDone) => {
   t.plan(5)
 
   const app = boot()
@@ -576,11 +576,11 @@ test('after should passthrough the errors', (t, testCompleted) => {
     t.assert.ok(err)
     t.assert.ok(afterCalled, 'after called')
     t.assert.ok(pluginLoaded, 'plugin loaded')
-    testCompleted()
+    testDone()
   })
 })
 
-test('stop loading plugins if it errors', (t, testCompleted) => {
+test('stop loading plugins if it errors', (t, testDone) => {
   t.plan(2)
 
   const app = boot()
@@ -596,11 +596,11 @@ test('stop loading plugins if it errors', (t, testCompleted) => {
 
   app.ready((err) => {
     t.assert.strictEqual(err.message, 'kaboom')
-    testCompleted()
+    testDone()
   })
 })
 
-test('keep loading if there is an .after', (t, testCompleted) => {
+test('keep loading if there is an .after', (t, testDone) => {
   t.plan(4)
 
   const app = boot()
@@ -621,11 +621,11 @@ test('keep loading if there is an .after', (t, testCompleted) => {
 
   app.ready((err) => {
     t.assert.ifError(err)
-    testCompleted()
+    testDone()
   })
 })
 
-test('do not load nested plugin if parent errors', (t, testCompleted) => {
+test('do not load nested plugin if parent errors', (t, testDone) => {
   t.plan(4)
 
   const app = boot()
@@ -651,11 +651,11 @@ test('do not load nested plugin if parent errors', (t, testCompleted) => {
 
   app.ready((err) => {
     t.assert.ifError(err)
-    testCompleted()
+    testDone()
   })
 })
 
-test('.after nested', (t, testCompleted) => {
+test('.after nested', (t, testDone) => {
   t.plan(4)
 
   const app = boot()
@@ -680,11 +680,11 @@ test('.after nested', (t, testCompleted) => {
 
   app.ready((err) => {
     t.assert.ifError(err)
-    testCompleted()
+    testDone()
   })
 })
 
-test('nested error', (t, testCompleted) => {
+test('nested error', (t, testDone) => {
   t.plan(4)
 
   const app = boot()
@@ -713,11 +713,11 @@ test('nested error', (t, testCompleted) => {
 
   app.ready((err) => {
     t.assert.ifError(err)
-    testCompleted()
+    testDone()
   })
 })
 
-test('preReady event', (t, testCompleted) => {
+test('preReady event', (t, testDone) => {
   t.plan(4)
 
   const app = boot()
@@ -739,11 +739,11 @@ test('preReady event', (t, testCompleted) => {
 
   app.ready(() => {
     t.assert.strictEqual(order.shift(), 2)
-    testCompleted()
+    testDone()
   })
 })
 
-test('preReady event (multiple)', (t, testCompleted) => {
+test('preReady event (multiple)', (t, testDone) => {
   t.plan(6)
 
   const app = boot()
@@ -773,11 +773,11 @@ test('preReady event (multiple)', (t, testCompleted) => {
 
   app.ready(() => {
     t.assert.strictEqual(order.shift(), 4)
-    testCompleted()
+    testDone()
   })
 })
 
-test('preReady event (nested)', (t, testCompleted) => {
+test('preReady event (nested)', (t, testDone) => {
   t.plan(6)
 
   const app = boot()
@@ -808,11 +808,11 @@ test('preReady event (nested)', (t, testCompleted) => {
 
   app.ready(() => {
     t.assert.strictEqual(order.shift(), 4)
-    testCompleted()
+    testDone()
   })
 })
 
-test('preReady event (errored)', (t, testCompleted) => {
+test('preReady event (errored)', (t, testDone) => {
   t.plan(5)
 
   const app = boot()
@@ -838,11 +838,11 @@ test('preReady event (errored)', (t, testCompleted) => {
   app.ready((err) => {
     t.assert.ok(err)
     t.assert.strictEqual(order.shift(), 3)
-    testCompleted()
+    testDone()
   })
 })
 
-test('after return self', (t, testCompleted) => {
+test('after return self', (t, testDone) => {
   t.plan(6)
 
   const app = boot()
@@ -873,11 +873,11 @@ test('after return self', (t, testCompleted) => {
     t.assert.ok(afterCalled, 'after called')
     t.assert.ok(pluginLoaded, 'plugin loaded')
     t.assert.ok(second, 'second plugin loaded')
-    testCompleted()
+    testDone()
   })
 })
 
-test('after 1 param swallows errors with server and timeout', (t, testCompleted) => {
+test('after 1 param swallows errors with server and timeout', (t, testDone) => {
   t.plan(3)
 
   const server = {}
@@ -898,6 +898,6 @@ test('after 1 param swallows errors with server and timeout', (t, testCompleted)
 
   server.ready(function (err) {
     t.assert.ifError(err)
-    testCompleted()
+    testDone()
   })
 })
