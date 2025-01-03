@@ -1,9 +1,9 @@
 'use strict'
 
-const { test } = require('tap')
+const { test } = require('node:test')
 const boot = require('..')
 
-test('calling done twice does not throw error', (t) => {
+test('calling done twice does not throw error', (t, testDone) => {
   t.plan(2)
 
   const app = boot()
@@ -11,12 +11,13 @@ test('calling done twice does not throw error', (t) => {
   app
     .use(twiceDone)
     .ready((err) => {
-      t.notOk(err, 'no error')
+      t.assert.ifError(err)
+      testDone()
     })
 
   function twiceDone (s, opts, done) {
     done()
     done()
-    t.pass('did not throw')
+    t.assert.ok('did not throw')
   }
 })
