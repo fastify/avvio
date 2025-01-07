@@ -417,7 +417,7 @@ Boot.prototype._loadPlugin = function (plugin, callback) {
     return
   }
 
-  let server = (last && last.server) || instance._server
+  let server = last?.server || instance._server
 
   if (!plugin.isAfter) {
     // Skip override for after
@@ -547,7 +547,7 @@ function encapsulateTwoParam (func, that) {
     let res
     if (func.length === 0) {
       res = func()
-      if (res && res.then) {
+      if (res?.then) {
         res.then(function () {
           process.nextTick(cb)
         }, cb)
@@ -557,7 +557,7 @@ function encapsulateTwoParam (func, that) {
     } else if (func.length === 1) {
       res = func(this)
 
-      if (res && res.then) {
+      if (res?.then) {
         res.then(function () {
           process.nextTick(cb)
         }, cb)
@@ -580,7 +580,7 @@ function encapsulateThreeParam (func, that) {
       process.nextTick(cb)
     } else if (func.length === 0) {
       res = func()
-      if (res && res.then) {
+      if (res?.then) {
         res.then(function () {
           process.nextTick(cb, err)
         }, cb)
@@ -589,7 +589,7 @@ function encapsulateThreeParam (func, that) {
       }
     } else if (func.length === 1) {
       res = func(err)
-      if (res && res.then) {
+      if (res?.then) {
         res.then(function () {
           process.nextTick(cb)
         }, cb)
