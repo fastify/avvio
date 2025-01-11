@@ -4,7 +4,7 @@
 [![NPM version](https://img.shields.io/npm/v/avvio.svg?style=flat)](https://www.npmjs.com/package/avvio)
 [![neostandard javascript style](https://img.shields.io/badge/code_style-neostandard-brightgreen?style=flat)](https://github.com/neostandard/neostandard)
 
-Asynchronous bootstrapping is hard, different things can go wrong, *error handling* and *load order* just to name a few. The aim of this module is to make it simple.
+Asynchronous bootstrapping is hard, different things can go wrong, *error handling* and *load order* just to name a few. The module aims to make it simple.
 
 `avvio` is fully *reentrant* and *graph-based*. You can load
 components/plugins *within* plugins, and be still sure that things will
@@ -13,7 +13,7 @@ happen in the right order. At the end of the loading, your application will star
 * [Install](#install)
 * [Example](#example)
 * [API](#api)
-* [Acknowledgements](#acknowledgements)
+* [Acknowledgments](#acknowledgments)
 * [License](#license)
 
 <a name="install"></a>
@@ -29,7 +29,7 @@ npm i avvio
 ## Example
 
 The example below can be found [here][example] and run using `node example.js`.
-It demonstrates how to use `avvio` to load functions / plugins in order.
+It demonstrates how to use `avvio` to load functions/plugins in order.
 
 
 ```js
@@ -93,7 +93,7 @@ async function third (instance, opts) {
 
 Starts the avvio sequence.
 As the name suggests, `instance` is the object representing your application.
-Avvio will add the functions `use`, `after` and `ready` to the instance.
+Avvio will add the functions `use`, `after`, and `ready` to the instance.
 
 ```js
 const server = {}
@@ -114,10 +114,10 @@ server.use(function first (s, opts, cb) {
 
 Options:
 
-* `expose`: a key/value property to change how `use`, `after` and `ready` are exposed.
+* `expose`: a key/value property to change how `use`, `after`, and `ready` are exposed.
 * `autostart`: do not start loading plugins automatically, but wait for
   a call to [`.start()`](#start)  or [`.ready()`](#ready).
-* `timeout`: the number of millis to wait for a plugin to load after which
+* `timeout`: the number of milliseconds to wait for a plugin to load after which
   it will error with code `ERR_AVVIO_PLUGIN_TIMEOUT`. Default
   `0` (disabled).
 
@@ -264,7 +264,7 @@ app.use(import('./fixtures/esm.mjs'))
 <a name="error-handling"></a>
 #### Error handling
 
-In order to handle errors in the loading plugins, you must use the
+To handle errors in the loading plugins, you must use the
 `.ready()` method, like so:
 
 ```js
@@ -295,7 +295,7 @@ The callback changes based on the parameters you give:
 1. If no parameter is given to the callback and there is an error, that error will be passed to the next error handler.
 2. If one parameter is given to the callback, that parameter will be the `error` object.
 3. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.
-4. If three parameters are given to the callback, the first will be the `error` object, the second will be the top level `context` and the third the `done` callback.
+4. If three parameters are given to the callback, the first will be the `error` object, the second will be the top-level `context`, and the third the `done` callback.
 
 In the "no parameter" and "one parameter" variants, the callback can return a `Promise`.
 
@@ -383,7 +383,7 @@ The callback changes based on the parameters you give:
 1. If no parameter is given to the callback and there is an error, that error will be passed to the next error handler.
 2. If one parameter is given to the callback, that parameter will be the `error` object.
 3. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.
-4. If three parameters are given to the callback, the first will be the `error` object, the second will be the top level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, and the third the `done` callback.
+4. If three parameters are given to the callback, the first will be the `error` object, the second will be the top-level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, and the third the `done` callback.
 
 If no callback is provided `ready` will return a Promise that is resolved or rejected once plugins and `after` calls are completed.  On success `context` is provided to the `.then` callback, if an error occurs it is provided to the `.catch` callback.
 
@@ -491,10 +491,10 @@ app.use(function first (s1, opts, cb) {
 
 Registers a new callback that will be fired once then `close` api is called.
 
-The callback changes basing on the parameters you give:
+The callback changes based on the parameters you give:
 1. If one parameter is given to the callback, that parameter will be the `context`.
 2. If zero or one parameter is given, the callback may return a promise
-3. If two parameters are given to the callback, the first will be the top level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, the second will be the `done` callback.
+3. If two parameters are given to the callback, the first will be the top-level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, the second will be the `done` callback.
 
 ```js
 const server = {}
@@ -536,12 +536,12 @@ Returns the instance on which `onClose` is called, to support a chainable API.
 <a name="close"></a>
 ### app.close(func(error, [context], [done]))
 
-Starts the shutdown procedure, the callback is called once all the registered callbacks with `onClose` has been executed.
+Starts the shutdown procedure, the callback is called once all the registered callbacks with `onClose` have been executed.
 
 The callback changes based on the parameters you give:
 1. If one parameter is given to the callback, that parameter will be the `error` object.
 2. If two parameters are given to the callback, the first will be the `error` object, the second will be the `done` callback.
-3. If three parameters are given to the callback, the first will be the `error` object, the second will be the top level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, and the third the `done` callback.
+3. If three parameters are given to the callback, the first will be the `error` object, the second will be the top-level `context` unless you have specified both server and override, in that case the `context` will be what the override returns, and the third the `done` callback.
 
 If no callback is provided `close` will return a Promise.
 
@@ -658,7 +658,7 @@ avvio 56 ms
 
 -------------------------------------------------------
 
-## Acknowledgements
+## Acknowledgments
 
 This project was kindly sponsored by [nearForm](https://nearform.com).
 
