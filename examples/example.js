@@ -26,21 +26,20 @@ avvio
       .use(b)
     setTimeout(cb, 42)
   })
-  .after(function (err, cb) {
-    if (err) {
-      console.log('something bad happened')
-      console.log(err)
-    }
+  .then((avvio) => {
     console.log('after first and second')
-    cb()
-  })
-  .use(duplicate, { count: 4 })
-  .use(third)
-  .ready(function (err) {
-    if (err) {
-      throw err
-    }
-    console.log('application booted!')
+    avvio
+      .use(duplicate, { count: 4 })
+      .use(third)
+      .ready(function (err) {
+        if (err) {
+          throw err
+        }
+        console.log('application booted!')
+      })
+  }, (error) => {
+    console.log('something bad happened')
+    console.log(error)
   })
 
 avvio.on('preReady', () => {
