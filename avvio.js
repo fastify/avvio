@@ -2,13 +2,14 @@
 
 const { Plugin } = require('./lib/plugin')
 const { isPromiseLike, withResolvers } = require('./lib/promise')
-const { kContext, kOptions, kExpose, kAvvio, kPluginRoot, kAddPlugin, kStart, kPluginQueue, kError, kLoadPlugin, kLoadPluginNext, kReadyQueue, kCloseQueue, kOnCloseFunction, kWrappedThen } = require('./lib/symbols')
+const { kContext, kOptions, kExpose, kAvvio, kPluginRoot, kAddPlugin, kStart, kPluginQueue, kError, kLoadPlugin, kLoadPluginNext, kReadyQueue, kCloseQueue, kOnCloseFunction, kWrappedThen, kTracker, kTrackPlugin } = require('./lib/symbols')
 const { resolveBundledFunction, noop } = require('./lib/utils')
 const EventEmitter = require('node:events').EventEmitter
 const inherits = require('node:util').inherits
 const fastq = require('fastq')
 const { readyWorker, closeWorker } = require('./lib/workers')
 const { AVV_ERR_CALLBACK_NOT_FN } = require('./lib/errors')
+const { Tracker } = require('./lib/tracker')
 
 /**
  *
@@ -96,6 +97,7 @@ function Avvio (instance, options, done) {
   // status
   this.started = false // true when called start
   this.booted = false // true when ready
+  this[kTracker] = new Tracker()
 
   this[kPluginQueue] = []
   this[kStart] = null
@@ -111,6 +113,7 @@ function Avvio (instance, options, done) {
     options,
     0
   )
+  this[kTrackPlugin](this[kPluginRoot])
 
   this[kLoadPlugin](this[kPluginRoot], (error) => {
     try {
@@ -225,8 +228,16 @@ Avvio.prototype.use = function use (plugin, options) {
   return this
 }
 
-Avvio.prototype.override = function (context, fn, options) {
+Avvio.prototype.override = function override (context, fn, options) {
   return context
+}
+
+Avvio.prototype.prettyPrint = function prettyPrint () {
+  return this[kTracker].prettyPrint()
+}
+
+Avvio.prototype.toJSON = function toJSON () {
+  return this[kTracker].toJSON()
 }
 
 Object.defineProperties(Avvio.prototype, {
@@ -326,6 +337,7 @@ Avvio.prototype[kAddPlugin] = function (fn, options) {
     options,
     timeout
   )
+  this[kTrackPlugin](plugin)
 
   if (parent.loaded) {
     throw Error(plugin.name, parent.name)
@@ -370,6 +382,16 @@ Avvio.prototype[kLoadPlugin] = function (plugin, callback) {
 
 Avvio.prototype[kLoadPluginNext] = function (plugin, callback) {
   process.nextTick(this[kLoadPlugin].bind(this), plugin, callback)
+}
+
+Avvio.prototype[kTrackPlugin] = function (plugin) {
+  const parentName = this[kPluginQueue][0]?.name ?? null
+  plugin.once('start', (contextName, fnName, startTime) => {
+    const nodeId = this[kTracker].start(parentName, fnName, startTime)
+    plugin.once('loaded', (contextName, fnName, endTime) => {
+      this[kTracker].stop(nodeId, endTime)
+    })
+  })
 }
 
 /**
