@@ -14,7 +14,7 @@ test('loadedSoFar resolves a Promise, if plugin.loaded is set to true', async (t
 
   plugin.loaded = true
 
-  await plugin.loadedSoFar()
+  await t.assert.doesNotReject(() => plugin.loadedSoFar())
 })
 
 test('loadedSoFar resolves a Promise, if plugin was loaded by avvio', async (t) => {
@@ -76,5 +76,6 @@ test('loadedSoFar resolves a Promise, if Plugin is attached to avvio after it th
 
   plugin.server = boot()
   plugin.emit('start')
-  await promise
+
+  await t.assert.doesNotReject(promise)
 })
