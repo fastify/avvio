@@ -1,4 +1,4 @@
-import { EventEmitter } from 'events'
+import { EventEmitter } from 'node:events'
 
 declare function avvio (done?: Function): avvio.Avvio<null>
 declare function avvio<I> (
