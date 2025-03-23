@@ -2,7 +2,7 @@
 
 /* eslint no-prototype-builtins: off */
 
-const { test } = require('tap')
+const { test } = require('node:test')
 const boot = require('..')
 
 test('do not load', async (t) => {
@@ -26,8 +26,8 @@ test('do not load', async (t) => {
 
   try {
     await app.start()
-    t.fail('should throw')
+    t.assert.fail('should throw')
   } catch (err) {
-    t.equal(err.message, 'Plugin did not start in time: \'third\'. You may have forgotten to call \'done\' function or to resolve a Promise')
+    t.assert.strictEqual(err.message, 'Plugin did not start in time: \'third\'. You may have forgotten to call \'done\' function or to resolve a Promise')
   }
 })
