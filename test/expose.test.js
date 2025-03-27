@@ -1,6 +1,6 @@
 'use strict'
 
-const { test } = require('tap')
+const { test } = require('node:test')
 const boot = require('..')
 const { AVV_ERR_EXPOSE_ALREADY_DEFINED, AVV_ERR_ATTRIBUTE_ALREADY_DEFINED } = require('../lib/errors')
 const { kAvvio } = require('../lib/symbols')
@@ -12,7 +12,7 @@ for (const key of ['use', 'after', 'ready', 'onClose', 'close']) {
     const app = {}
     app[key] = () => { }
 
-    t.throws(() => boot(app), new AVV_ERR_EXPOSE_ALREADY_DEFINED(key, key))
+    t.assert.throws(() => boot(app), new AVV_ERR_EXPOSE_ALREADY_DEFINED(key, key))
   })
 
   test('throws if ' + key + ' is already there', (t) => {
@@ -21,7 +21,7 @@ for (const key of ['use', 'after', 'ready', 'onClose', 'close']) {
     const app = {}
     app['cust' + key] = () => { }
 
-    t.throws(() => boot(app, { expose: { [key]: 'cust' + key } }), new AVV_ERR_EXPOSE_ALREADY_DEFINED('cust' + key, key))
+    t.assert.throws(() => boot(app, { expose: { [key]: 'cust' + key } }), new AVV_ERR_EXPOSE_ALREADY_DEFINED('cust' + key, key))
   })
 
   test('support expose for ' + key, (t) => {
@@ -34,8 +34,6 @@ for (const key of ['use', 'after', 'ready', 'onClose', 'close']) {
     boot(app, {
       expose
     })
-
-    t.end()
   })
 }
 
@@ -45,10 +43,10 @@ test('set the kAvvio to true on the server', (t) => {
   const server = {}
   boot(server)
 
-  t.ok(server[kAvvio])
+  t.assert.ok(server[kAvvio])
 })
 
-test('.then()', t => {
+test('.then()', (t, testDone) => {
   t.plan(3)
 
   t.test('.then() can not be overwritten', (t) => {
@@ -57,7 +55,7 @@ test('.then()', t => {
     const server = {
       then: () => {}
     }
-    t.throws(() => boot(server), AVV_ERR_ATTRIBUTE_ALREADY_DEFINED('then'))
+    t.assert.throws(() => boot(server), AVV_ERR_ATTRIBUTE_ALREADY_DEFINED('then'))
   })
 
   t.test('.then() is a function', (t) => {
@@ -65,8 +63,7 @@ test('.then()', t => {
 
     const server = {}
     boot(server)
-
-    t.type(server.then, 'function')
+    t.assert.strictEqual(typeof server.then, 'function')
   })
 
   t.test('.then() can not be overwritten', (t) => {
@@ -75,6 +72,8 @@ test('.then()', t => {
     const server = {}
     boot(server)
 
-    t.throws(() => { server.then = 'invalid' }, TypeError('Cannot set property then of #<Object> which has only a getter'))
+    t.assert.throws(() => { server.then = 'invalid' }, TypeError('Cannot set property then of #<Object> which has only a getter'))
   })
+
+  process.nextTick(testDone)
 })
