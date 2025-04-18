@@ -134,7 +134,7 @@ test('await use - error handling, async throw, nested', async (t) => {
     })
   }), Error('kaboom'), 'b')
 
-  t.assert.rejects(() => app.ready(), Error('kaboom'))
+  await t.assert.rejects(() => app.ready(), Error('kaboom'))
 })
 
 test('await use - error handling, same tick cb err', async (t) => {
@@ -163,7 +163,7 @@ test('await use - error handling, same tick cb err, nested', async (t) => {
     cb()
   }), Error('kaboom'))
 
-  t.assert.rejects(() => app.ready(), Error('kaboom'))
+  await t.assert.rejects(() => app.ready(), Error('kaboom'))
 })
 
 test('await use - error handling, future tick cb err', async (t) => {
@@ -176,7 +176,7 @@ test('await use - error handling, future tick cb err', async (t) => {
     setImmediate(() => { cb(Error('kaboom')) })
   }), Error('kaboom'))
 
-  t.assert.rejects(() => app.ready(), Error('kaboom'))
+  await t.assert.rejects(() => app.ready(), Error('kaboom'))
 })
 
 test('await use - error handling, future tick cb err, nested', async (t) => {
@@ -192,7 +192,7 @@ test('await use - error handling, future tick cb err, nested', async (t) => {
     cb()
   }), Error('kaboom'))
 
-  t.assert.rejects(() => app.ready(), Error('kaboom'))
+  await t.assert.rejects(() => app.ready(), Error('kaboom'))
 })
 
 test('mixed await use and non-awaited use ', async (t) => {
