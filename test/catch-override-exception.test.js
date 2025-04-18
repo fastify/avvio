@@ -1,9 +1,9 @@
 'use strict'
 
-const { test } = require('tap')
+const { test } = require('node:test')
 const boot = require('..')
 
-test('catch exceptions in parent.override', (t) => {
+test('catch exceptions in parent.override', (t, testDone) => {
   t.plan(2)
 
   const server = {}
@@ -20,7 +20,8 @@ test('catch exceptions in parent.override', (t) => {
     .start()
 
   app.ready(function (err) {
-    t.type(err, Error)
-    t.match(err, /catch it/)
+    t.assert.ok(err instanceof Error)
+    t.assert.strictEqual(err.message, 'catch it')
+    testDone()
   })
 })
