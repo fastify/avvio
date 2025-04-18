@@ -1,8 +1,7 @@
 'use strict'
 
-const { test } = require('tap')
-const { promisify } = require('node:util')
-const sleep = promisify(setTimeout)
+const { test } = require('node:test')
+const { setTimeout: sleep } = require('node:timers/promises')
 const boot = require('..')
 
 test('await use - nested plugins with same tick callbacks', async (t) => {
@@ -12,17 +11,17 @@ test('await use - nested plugins with same tick callbacks', async (t) => {
   t.plan(4)
 
   await app.use((f, opts, cb) => {
-    t.pass('plugin init')
+    t.assert.ok('plugin init')
     app.use((f, opts, cb) => {
-      t.pass('plugin2 init')
+      t.assert.ok('plugin2 init')
       cb()
     })
     cb()
   })
-  t.pass('reachable')
+  t.assert.ok('reachable')
 
   await app.ready()
-  t.pass('reachable')
+  t.assert.ok('reachable')
 })
 
 test('await use - nested plugins with future tick callbacks', async (t) => {
@@ -32,17 +31,17 @@ test('await use - nested plugins with future tick callbacks', async (t) => {
   t.plan(4)
 
   await app.use((f, opts, cb) => {
-    t.pass('plugin init')
+    t.assert.ok('plugin init')
     app.use((f, opts, cb) => {
-      t.pass('plugin2 init')
+      t.assert.ok('plugin2 init')
       setImmediate(cb)
     })
     setImmediate(cb)
   })
-  t.pass('reachable')
+  t.assert.ok('reachable')
 
   await app.ready()
-  t.pass('reachable')
+  t.assert.ok('reachable')
 })
 
 test('await use - nested async function plugins', async (t) => {
@@ -52,16 +51,16 @@ test('await use - nested async function plugins', async (t) => {
   t.plan(5)
 
   await app.use(async (f, opts) => {
-    t.pass('plugin init')
+    t.assert.ok('plugin init')
     await app.use(async (f, opts) => {
-      t.pass('plugin2 init')
+      t.assert.ok('plugin2 init')
     })
-    t.pass('reachable')
+    t.assert.ok('reachable')
   })
-  t.pass('reachable')
+  t.assert.ok('reachable')
 
   await app.ready()
-  t.pass('reachable')
+  t.assert.ok('reachable')
 })
 
 test('await use - promise returning function plugins + promise chaining', async (t) => {
@@ -71,21 +70,21 @@ test('await use - promise returning function plugins + promise chaining', async 
   t.plan(6)
 
   await app.use((f, opts) => {
-    t.pass('plugin init')
+    t.assert.ok('plugin init')
     return app.use((f, opts) => {
-      t.pass('plugin2 init')
+      t.assert.ok('plugin2 init')
       return Promise.resolve()
     }).then(() => {
-      t.pass('reachable')
+      t.assert.ok('reachable')
       return 'test'
     }).then((val) => {
-      t.equal(val, 'test')
+      t.assert.strictEqual(val, 'test')
     })
   })
-  t.pass('reachable')
+  t.assert.ok('reachable')
 
   await app.ready()
-  t.pass('reachable')
+  t.assert.ok('reachable')
 })
 
 test('await use - await and use chaining', async (t) => {
@@ -96,18 +95,18 @@ test('await use - await and use chaining', async (t) => {
 
   app.use(async (f, opts, cb) => {
     await app.use(async (f, opts) => {
-      t.pass('plugin init')
+      t.assert.ok('plugin init')
     }).use(async (f, opts) => {
-      t.pass('plugin2 init')
+      t.assert.ok('plugin2 init')
     })
   })
 
   await app.ready()
-  t.pass('reachable')
+  t.assert.ok('reachable')
 })
 
 function thenableRejects (t, thenable, err, msg) {
-  return t.rejects(async () => { await thenable }, err, msg)
+  return t.assert.rejects(async () => { await thenable }, err, msg)
 }
 
 test('await use - error handling, async throw', async (t) => {
@@ -120,7 +119,7 @@ test('await use - error handling, async throw', async (t) => {
     throw Error('kaboom')
   }), Error('kaboom'))
 
-  await t.rejects(app.ready(), Error('kaboom'))
+  await t.assert.rejects(app.ready(), Error('kaboom'))
 })
 
 test('await use - error handling, async throw, nested', async (t) => {
@@ -133,9 +132,9 @@ test('await use - error handling, async throw, nested', async (t) => {
     await app.use(async function b (f, opts) {
       throw Error('kaboom')
     })
-  }, Error('kaboom')), 'b')
+  }), Error('kaboom'), 'b')
 
-  t.rejects(() => app.ready(), Error('kaboom'))
+  await t.assert.rejects(() => app.ready(), Error('kaboom'))
 })
 
 test('await use - error handling, same tick cb err', async (t) => {
@@ -148,7 +147,7 @@ test('await use - error handling, same tick cb err', async (t) => {
     cb(Error('kaboom'))
   }), Error('kaboom'))
 
-  t.rejects(() => app.ready(), Error('kaboom'))
+  t.assert.rejects(() => app.ready(), Error('kaboom'))
 })
 
 test('await use - error handling, same tick cb err, nested', async (t) => {
@@ -164,7 +163,7 @@ test('await use - error handling, same tick cb err, nested', async (t) => {
     cb()
   }), Error('kaboom'))
 
-  t.rejects(() => app.ready(), Error('kaboom'))
+  await t.assert.rejects(() => app.ready(), Error('kaboom'))
 })
 
 test('await use - error handling, future tick cb err', async (t) => {
@@ -177,7 +176,7 @@ test('await use - error handling, future tick cb err', async (t) => {
     setImmediate(() => { cb(Error('kaboom')) })
   }), Error('kaboom'))
 
-  t.rejects(() => app.ready(), Error('kaboom'))
+  await t.assert.rejects(() => app.ready(), Error('kaboom'))
 })
 
 test('await use - error handling, future tick cb err, nested', async (t) => {
@@ -193,7 +192,7 @@ test('await use - error handling, future tick cb err, nested', async (t) => {
     cb()
   }), Error('kaboom'))
 
-  t.rejects(() => app.ready(), Error('kaboom'))
+  await t.assert.rejects(() => app.ready(), Error('kaboom'))
 })
 
 test('mixed await use and non-awaited use ', async (t) => {
@@ -207,25 +206,25 @@ test('mixed await use and non-awaited use ', async (t) => {
   let fourthLoaded = false
 
   await app.use(first)
-  t.ok(firstLoaded, 'first is loaded')
-  t.notOk(secondLoaded, 'second is not loaded')
-  t.notOk(thirdLoaded, 'third is not loaded')
-  t.notOk(fourthLoaded, 'fourth is not loaded')
+  t.assert.ok(firstLoaded, 'first is loaded')
+  t.assert.strictEqual(secondLoaded, false, 'second is not loaded')
+  t.assert.strictEqual(thirdLoaded, false, 'third is not loaded')
+  t.assert.strictEqual(fourthLoaded, false, 'fourth is not loaded')
   app.use(second)
-  t.ok(firstLoaded, 'first is loaded')
-  t.notOk(secondLoaded, 'second is not loaded')
-  t.notOk(thirdLoaded, 'third is not loaded')
-  t.notOk(fourthLoaded, 'fourth is not loaded')
+  t.assert.ok(firstLoaded, 'first is loaded')
+  t.assert.strictEqual(secondLoaded, false, 'second is not loaded')
+  t.assert.strictEqual(thirdLoaded, false, 'third is not loaded')
+  t.assert.strictEqual(fourthLoaded, false, 'fourth is not loaded')
   await app.use(third)
-  t.ok(firstLoaded, 'first is loaded')
-  t.ok(secondLoaded, 'second is loaded')
-  t.ok(thirdLoaded, 'third is loaded')
-  t.ok(fourthLoaded, 'fourth is loaded')
+  t.assert.ok(firstLoaded, 'first is loaded')
+  t.assert.ok(secondLoaded, 'second is loaded')
+  t.assert.ok(thirdLoaded, 'third is loaded')
+  t.assert.ok(fourthLoaded, 'fourth is loaded')
   await app.ready()
-  t.ok(firstLoaded, 'first is loaded')
-  t.ok(secondLoaded, 'second is loaded')
-  t.ok(thirdLoaded, 'third is loaded')
-  t.ok(fourthLoaded, 'fourth is loaded')
+  t.assert.ok(firstLoaded, 'first is loaded')
+  t.assert.ok(secondLoaded, 'second is loaded')
+  t.assert.ok(thirdLoaded, 'third is loaded')
+  t.assert.ok(fourthLoaded, 'fourth is loaded')
 
   async function first () {
     firstLoaded = true
@@ -253,25 +252,25 @@ test('await use - mix of same and future tick callbacks', async (t) => {
   t.plan(4)
 
   await app.use(async function plugin0 () {
-    t.pass('plugin0 init')
+    t.assert.ok('plugin0 init')
     record += 'plugin0|'
   })
   await app.use(async function plugin1 () {
-    t.pass('plugin1 init')
+    t.assert.ok('plugin1 init')
     await sleep(500)
     record += 'plugin1|'
   })
   await sleep(1)
   await app.use(async function plugin2 () {
-    t.pass('plugin2 init')
+    t.assert.ok('plugin2 init')
     await sleep(500)
     record += 'plugin2|'
   })
   record += 'ready'
-  t.equal(record, 'plugin0|plugin1|plugin2|ready')
+  t.assert.strictEqual(record, 'plugin0|plugin1|plugin2|ready')
 })
 
-test('await use - fork the promise chain', (t) => {
+test('await use - fork the promise chain', async (t) => {
   t.plan(3)
   const app = {}
   boot(app, { autostart: false })
@@ -279,16 +278,18 @@ test('await use - fork the promise chain', (t) => {
   async function setup () {
     let set = false
     await app.use(async function plugin0 () {
-      t.pass('plugin0 init')
+      t.assert.ok('plugin0 init')
       await sleep(500)
       set = true
     })
-    t.equal(set, true)
+    t.assert.ok(set)
   }
   setup()
 
   app.ready((err, done) => {
-    t.error(err)
+    t.assert.ifError(err)
     done()
   })
+
+  await app.ready()
 })
