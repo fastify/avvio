@@ -1,9 +1,9 @@
 'use strict'
 
-const { test } = require('tap')
+const { test } = require('node:test')
 const boot = require('..')
 
-test('pretty print', t => {
+test('pretty print', async t => {
   t.plan(19)
 
   const app = boot()
@@ -32,17 +32,25 @@ test('pretty print', t => {
     /^├── bound _after \d+ ms$/,
     /^└─┬ duplicate \d+ ms$/,
     /^ {2}└── duplicate \d+ ms$/,
-    ''
+    /^$/
   ]
 
-  app.on('preReady', function show () {
-    const print = app.prettyPrint()
-    const lines = print.split('\n')
+  await new Promise((resolve) => {
+    app.on('preReady', () => {
+      const print = app.prettyPrint()
+      const lines = print.split('\n')
 
-    t.equal(lines.length, linesExpected.length)
-    lines.forEach((l, i) => {
-      t.match(l, linesExpected[i])
+      t.assert.strictEqual(lines.length, linesExpected.length)
+      lines.forEach((l, i) => {
+        t.assert.match(l, linesExpected[i])
+      })
+
+      resolve()
     })
+
+    if (typeof app.ready === 'function') {
+      app.ready()
+    }
   })
 
   function first (s, opts, done) {
