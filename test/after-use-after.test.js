@@ -39,7 +39,7 @@ test('multi after', async (t) => {
 })
 
 test('after grouping - use called after after called', async (t) => {
-  t.plan(9)
+  t.plan(8)
   const app = {}
   boot(app)
 
@@ -83,10 +83,5 @@ test('after grouping - use called after after called', async (t) => {
     done()
   })
 
-  await app.ready().then(() => {
-    t.assert.ok('ready')
-  }).catch((e) => {
-    console.log(e)
-    t.assert.fail('this should not be called')
-  })
+  await app.ready()
 })
