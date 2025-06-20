@@ -3,7 +3,7 @@
 const { test } = require('node:test')
 const boot = require('..')
 
-test('pretty print', async t => {
+test('pretty print', (t, done) => {
   t.plan(19)
 
   const app = boot()
@@ -35,22 +35,15 @@ test('pretty print', async t => {
     /^$/
   ]
 
-  await new Promise((resolve) => {
-    app.on('preReady', () => {
-      const print = app.prettyPrint()
-      const lines = print.split('\n')
+  app.on('preReady', () => {
+    const print = app.prettyPrint()
+    const lines = print.split('\n')
 
-      t.assert.strictEqual(lines.length, linesExpected.length)
-      lines.forEach((l, i) => {
-        t.assert.match(l, linesExpected[i])
-      })
-
-      resolve()
+    t.assert.strictEqual(lines.length, linesExpected.length)
+    lines.forEach((l, i) => {
+      t.assert.match(l, linesExpected[i])
     })
-
-    if (typeof app.ready === 'function') {
-      app.ready()
-    }
+    done()
   })
 
   function first (s, opts, done) {
