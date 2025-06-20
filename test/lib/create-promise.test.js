@@ -1,28 +1,29 @@
 'use strict'
 
-const { test } = require('tap')
+const { test } = require('node:test')
 const { createPromise } = require('../../lib/create-promise')
 
-test('createPromise() returns an object', (t) => {
+test('createPromise() returns an object', async (t) => {
   t.plan(3)
-  t.type(createPromise(), 'object')
-  t.equal(Array.isArray(createPromise()), false)
-  t.notOk(Array.isArray(createPromise() !== null))
+
+  t.assert.strictEqual(typeof createPromise(), 'object')
+  t.assert.strictEqual(Array.isArray(createPromise()), false)
+  t.assert.notStrictEqual(Array.isArray(createPromise()), null)
 })
 
 test('createPromise() returns an attribute with attribute resolve', (t) => {
   t.plan(1)
-  t.ok('resolve' in createPromise())
+  t.assert.ok('resolve' in createPromise())
 })
 
 test('createPromise() returns an attribute with attribute reject', (t) => {
   t.plan(1)
-  t.ok('reject' in createPromise())
+  t.assert.ok('reject' in createPromise())
 })
 
 test('createPromise() returns an attribute with attribute createPromise', (t) => {
   t.plan(1)
-  t.ok('promise' in createPromise())
+  t.assert.ok('promise' in createPromise())
 })
 
 test('when resolve is called, createPromise attribute is resolved', (t) => {
@@ -31,10 +32,10 @@ test('when resolve is called, createPromise attribute is resolved', (t) => {
 
   p.promise
     .then(() => {
-      t.pass()
+      t.assert.ok('pass')
     })
     .catch(() => {
-      t.fail()
+      t.assert.fail()
     })
   p.resolve()
 })
@@ -45,10 +46,10 @@ test('when reject is called, createPromise attribute is rejected', (t) => {
 
   p.promise
     .then(() => {
-      t.fail()
+      t.assert.fail()
     })
     .catch(() => {
-      t.pass()
+      t.assert.ok('pass')
     })
 
   p.reject()
