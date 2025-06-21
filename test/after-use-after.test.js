@@ -1,43 +1,45 @@
 'use strict'
 
-const { test } = require('tap')
+const { test } = require('node:test')
 const boot = require('..')
 const app = {}
 
 boot(app)
 
-test('multi after', (t) => {
+test('multi after', async (t) => {
   t.plan(6)
+  const app = {}
+  boot(app)
 
   app.use(function (f, opts, cb) {
     cb()
   }).after(() => {
-    t.pass('this is just called')
+    t.assert.ok('this is just called')
 
     app.use(function (f, opts, cb) {
-      t.pass('this is just called')
+      t.assert.ok('this is just called')
       cb()
     })
   }).after(function () {
-    t.pass('this is just called')
+    t.assert.ok('this is just called')
     app.use(function (f, opts, cb) {
-      t.pass('this is just called')
+      t.assert.ok('this is just called')
       cb()
     })
   }).after(function (err, cb) {
-    t.pass('this is just called')
+    t.assert.ok('this is just called')
     cb(err)
   })
 
-  app.ready().then(() => {
-    t.pass('ready')
+  await app.ready().then(() => {
+    t.assert.ok('ready')
   }).catch(() => {
-    t.fail('this should not be called')
+    t.assert.fail('this should not be called')
   })
 })
 
-test('after grouping - use called after after called', (t) => {
-  t.plan(9)
+test('after grouping - use called after after called', async (t) => {
+  t.plan(8)
   const app = {}
   boot(app)
 
@@ -57,16 +59,16 @@ test('after grouping - use called after after called', (t) => {
   }))
 
   app.after(function (err, f, done) {
-    t.error(err)
-    t.equal(f.test, TEST_VALUE)
+    t.assert.ifError(err)
+    t.assert.strictEqual(f.test, TEST_VALUE)
 
     f.test2 = OTHER_TEST_VALUE
     done()
   })
 
   app.use(sO(function (f, options, next) {
-    t.equal(f.test, TEST_VALUE)
-    t.equal(f.test2, OTHER_TEST_VALUE)
+    t.assert.strictEqual(f.test, TEST_VALUE)
+    t.assert.strictEqual(f.test2, OTHER_TEST_VALUE)
 
     f.test3 = NEW_TEST_VALUE
 
@@ -74,17 +76,12 @@ test('after grouping - use called after after called', (t) => {
   }))
 
   app.after(function (err, f, done) {
-    t.error(err)
-    t.equal(f.test, TEST_VALUE)
-    t.equal(f.test2, OTHER_TEST_VALUE)
-    t.equal(f.test3, NEW_TEST_VALUE)
+    t.assert.ifError(err)
+    t.assert.strictEqual(f.test, TEST_VALUE)
+    t.assert.strictEqual(f.test2, OTHER_TEST_VALUE)
+    t.assert.strictEqual(f.test3, NEW_TEST_VALUE)
     done()
   })
 
-  app.ready().then(() => {
-    t.pass('ready')
-  }).catch((e) => {
-    console.log(e)
-    t.fail('this should not be called')
-  })
+  await app.ready()
 })
