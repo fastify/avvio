@@ -1,14 +1,8 @@
 'use strict'
 
-const { test } = require('tap')
+const { test } = require('node:test')
 
-test('support esm import', (t) => {
-  import('./esm.mjs').then(() => {
-    t.pass('esm is supported')
-    t.end()
-  }).catch((err) => {
-    process.nextTick(() => {
-      throw err
-    })
-  })
+test('support esm import', async t => {
+  await import('./esm.mjs')
+  t.assert.ok('esm is supported')
 })
