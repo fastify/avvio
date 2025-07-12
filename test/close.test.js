@@ -1,10 +1,10 @@
 'use strict'
 
-const { test } = require('tap')
+const { test } = require('node:test')
 const boot = require('..')
 const { AVV_ERR_CALLBACK_NOT_FN } = require('../lib/errors')
 
-test('boot an app with a plugin', (t) => {
+test('boot an app with a plugin', (t, done) => {
   t.plan(4)
 
   const app = boot()
@@ -12,8 +12,8 @@ test('boot an app with a plugin', (t) => {
 
   app.use(function (server, opts, done) {
     app.onClose(() => {
-      t.ok('onClose called')
-      t.notOk(last)
+      t.assert.ok('onClose called')
+      t.assert.ok(!last)
       last = true
     })
     done()
@@ -21,21 +21,22 @@ test('boot an app with a plugin', (t) => {
 
   app.on('start', () => {
     app.close(() => {
-      t.ok(last)
-      t.pass('Closed in the correct order')
+      t.assert.ok(last)
+      t.assert.ok('Closed in the correct order')
+      done()
     })
   })
 })
 
-test('onClose arguments', (t) => {
+test('onClose arguments', (t, done) => {
   t.plan(5)
 
   const app = boot()
 
   app.use(function (server, opts, next) {
     server.onClose((instance, done) => {
-      t.ok('called')
-      t.equal(server, instance)
+      t.assert.ok('called')
+      t.assert.strictEqual(server, instance)
       done()
     })
     next()
@@ -43,20 +44,21 @@ test('onClose arguments', (t) => {
 
   app.use(function (server, opts, next) {
     server.onClose((instance) => {
-      t.ok('called')
-      t.equal(server, instance)
+      t.assert.ok('called')
+      t.assert.strictEqual(server, instance)
     })
     next()
   })
 
   app.on('start', () => {
     app.close(() => {
-      t.pass('Closed in the correct order')
+      t.assert.ok('Closed in the correct order')
+      done()
     })
   })
 })
 
-test('onClose arguments - fastify encapsulation test case', (t) => {
+test('onClose arguments - fastify encapsulation test case', (t, done) => {
   t.plan(5)
 
   const server = { my: 'server' }
@@ -70,30 +72,31 @@ test('onClose arguments - fastify encapsulation test case', (t) => {
   app.use(function (instance, opts, next) {
     instance.test = true
     instance.onClose((i, done) => {
-      t.ok(i.test)
+      t.assert.ok(i.test)
       done()
     })
     next()
   })
 
   app.use(function (instance, opts, next) {
-    t.notOk(instance.test)
+    t.assert.ok(!instance.test)
     instance.onClose((i, done) => {
-      t.notOk(i.test)
+      t.assert.ok(!i.test)
       done()
     })
     next()
   })
 
   app.on('start', () => {
-    t.notOk(app.test)
+    t.assert.ok(!app.test)
     app.close(() => {
-      t.pass('Closed in the correct order')
+      t.assert.ok('Closed in the correct order')
+      done()
     })
   })
 })
 
-test('onClose arguments - fastify encapsulation test case / 2', (t) => {
+test('onClose arguments - fastify encapsulation test case / 2', (t, testDone) => {
   t.plan(5)
 
   const server = { my: 'server' }
@@ -107,33 +110,34 @@ test('onClose arguments - fastify encapsulation test case / 2', (t) => {
   server.use(function (instance, opts, next) {
     instance.test = true
     instance.onClose((i, done) => {
-      t.ok(i.test)
+      t.assert.ok(i.test)
       done()
+      testDone()
     })
     next()
   })
 
   server.use(function (instance, opts, next) {
-    t.notOk(instance.test)
+    t.assert.ok(!instance.test)
     instance.onClose((i, done) => {
-      t.notOk(i.test)
+      t.assert.ok(!i.test)
       done()
     })
     next()
   })
 
   app.on('start', () => {
-    t.notOk(server.test)
+    t.assert.ok(!server.test)
     try {
       server.close()
-      t.pass()
+      t.assert.ok(true)
     } catch (err) {
-      t.fail(err)
+      t.assert.fail(err)
     }
   })
 })
 
-test('onClose arguments - encapsulation test case no server', (t) => {
+test('onClose arguments - encapsulation test case no server', (t, done) => {
   t.plan(5)
 
   const app = boot()
@@ -146,36 +150,37 @@ test('onClose arguments - encapsulation test case no server', (t) => {
   app.use(function (instance, opts, next) {
     instance.test = true
     instance.onClose((i, done) => {
-      t.notOk(i.test)
+      t.assert.ok(!i.test)
       done()
     })
     next()
   })
 
   app.use(function (instance, opts, next) {
-    t.notOk(instance.test)
+    t.assert.ok(!instance.test)
     instance.onClose((i) => {
-      t.notOk(i.test)
+      t.assert.ok(!i.test)
     })
     next()
   })
 
   app.on('start', () => {
-    t.notOk(app.test)
+    t.assert.ok(!app.test)
     app.close(() => {
-      t.pass('Closed in the correct order')
+      t.assert.ok('Closed in the correct order')
+      done()
     })
   })
 })
 
-test('onClose should handle errors', (t) => {
+test('onClose should handle errors', (t, done) => {
   t.plan(3)
 
   const app = boot()
 
   app.use(function (server, opts, done) {
     app.onClose((instance, done) => {
-      t.ok('called')
+      t.assert.ok('called')
       done(new Error('some error'))
     })
     done()
@@ -183,13 +188,14 @@ test('onClose should handle errors', (t) => {
 
   app.on('start', () => {
     app.close(err => {
-      t.equal(err.message, 'some error')
-      t.pass('Closed in the correct order')
+      t.assert.strictEqual(err.message, 'some error')
+      t.assert.ok('Closed in the correct order')
+      done()
     })
   })
 })
 
-test('#54 close handlers should receive same parameters when queue is not empty', (t) => {
+test('#54 close handlers should receive same parameters when queue is not empty', (t, done) => {
   t.plan(6)
 
   const context = { test: true }
@@ -200,34 +206,35 @@ test('#54 close handlers should receive same parameters when queue is not empty'
   })
   app.on('start', () => {
     app.close((err, done) => {
-      t.equal(err, null)
-      t.pass('Closed in the correct order')
+      t.assert.strictEqual(err, null)
+      t.assert.ok('Closed in the correct order')
       setImmediate(done)
     })
     app.close(err => {
-      t.equal(err, null)
-      t.pass('Closed in the correct order')
+      t.assert.strictEqual(err, null)
+      t.assert.ok('Closed in the correct order')
     })
     app.close(err => {
-      t.equal(err, null)
-      t.pass('Closed in the correct order')
+      t.assert.strictEqual(err, null)
+      t.assert.ok('Closed in the correct order')
+      done()
     })
   })
 })
 
-test('onClose should handle errors / 2', (t) => {
+test('onClose should handle errors / 2', (t, done) => {
   t.plan(4)
 
   const app = boot()
 
   app.onClose((instance, done) => {
-    t.ok('called')
+    t.assert.ok('called')
     done(new Error('some error'))
   })
 
   app.use(function (server, opts, done) {
     app.onClose((instance, done) => {
-      t.ok('called')
+      t.assert.ok('called')
       done()
     })
     done()
@@ -235,20 +242,21 @@ test('onClose should handle errors / 2', (t) => {
 
   app.on('start', () => {
     app.close(err => {
-      t.equal(err.message, 'some error')
-      t.pass('Closed in the correct order')
+      t.assert.strictEqual(err.message, 'some error')
+      t.assert.ok('Closed in the correct order')
+      done()
     })
   })
 })
 
-test('close arguments', (t) => {
+test('close arguments', (t, testDone) => {
   t.plan(4)
 
   const app = boot()
 
   app.use(function (server, opts, done) {
     app.onClose((instance, done) => {
-      t.ok('called')
+      t.assert.ok('called')
       done()
     })
     done()
@@ -256,15 +264,16 @@ test('close arguments', (t) => {
 
   app.on('start', () => {
     app.close((err, instance, done) => {
-      t.error(err)
-      t.equal(instance, app)
+      t.assert.ifError(err)
+      t.assert.strictEqual(instance, app)
       done()
-      t.pass('Closed in the correct order')
+      t.assert.ok('Closed in the correct order')
+      testDone()
     })
   })
 })
 
-test('close event', (t) => {
+test('close event', (t, done) => {
   t.plan(3)
 
   const app = boot()
@@ -272,18 +281,19 @@ test('close event', (t) => {
 
   app.on('start', () => {
     app.close(() => {
-      t.notOk(last)
+      t.assert.ok(!last)
       last = true
     })
   })
 
   app.on('close', () => {
-    t.ok(last)
-    t.pass('event fired')
+    t.assert.ok(last)
+    t.assert.ok('event fired')
+    done()
   })
 })
 
-test('close order', (t) => {
+test('close order', (t, testDone) => {
   t.plan(5)
 
   const app = boot()
@@ -291,12 +301,12 @@ test('close order', (t) => {
 
   app.use(function (server, opts, done) {
     app.onClose(() => {
-      t.equal(order.shift(), 3)
+      t.assert.strictEqual(order.shift(), 3)
     })
 
     app.use(function (server, opts, done) {
       app.onClose(() => {
-        t.equal(order.shift(), 2)
+        t.assert.strictEqual(order.shift(), 2)
       })
       done()
     })
@@ -305,33 +315,35 @@ test('close order', (t) => {
 
   app.use(function (server, opts, done) {
     app.onClose(() => {
-      t.equal(order.shift(), 1)
+      t.assert.strictEqual(order.shift(), 1)
     })
     done()
   })
 
   app.on('start', () => {
     app.close(() => {
-      t.equal(order.shift(), 4)
-      t.pass('Closed in the correct order')
+      t.assert.strictEqual(order.shift(), 4)
+      t.assert.ok('Closed in the correct order')
+      testDone()
     })
   })
 })
 
-test('close without a cb', (t) => {
+test('close without a cb', (t, testDone) => {
   t.plan(1)
 
   const app = boot()
 
   app.onClose((instance, done) => {
-    t.ok('called')
+    t.assert.ok('called')
     done()
+    testDone()
   })
 
   app.close()
 })
 
-test('onClose with 0 parameters', (t) => {
+test('onClose with 0 parameters', (t, testDone) => {
   t.plan(4)
 
   const server = { my: 'server' }
@@ -339,19 +351,20 @@ test('onClose with 0 parameters', (t) => {
 
   app.use(function (instance, opts, next) {
     instance.onClose(function () {
-      t.ok('called')
-      t.equal(arguments.length, 0)
+      t.assert.ok('called')
+      t.assert.strictEqual(arguments.length, 0)
     })
     next()
   })
 
   app.close(err => {
-    t.error(err)
-    t.pass('Closed')
+    t.assert.ifError(err)
+    t.assert.ok('Closed')
+    testDone()
   })
 })
 
-test('onClose with 1 parameter', (t) => {
+test('onClose with 1 parameter', (t, testDone) => {
   t.plan(3)
 
   const server = { my: 'server' }
@@ -359,14 +372,15 @@ test('onClose with 1 parameter', (t) => {
 
   app.use(function (instance, opts, next) {
     instance.onClose(function (context) {
-      t.equal(arguments.length, 1)
+      t.assert.strictEqual(arguments.length, 1)
     })
     next()
   })
 
   app.close(err => {
-    t.error(err)
-    t.pass('Closed')
+    t.assert.ifError(err)
+    t.assert.ok('Closed')
+    testDone()
   })
 })
 
@@ -376,11 +390,11 @@ test('close passing not a function', (t) => {
   const app = boot()
 
   app.onClose((instance, done) => {
-    t.ok('called')
+    t.assert.ok('called')
     done()
   })
 
-  t.throws(() => app.close({}), { message: 'not a function' })
+  return t.assert.throws(() => app.close({}), /not a function/)
 })
 
 test('close passing not a function', (t) => {
@@ -389,11 +403,11 @@ test('close passing not a function', (t) => {
   const app = boot()
 
   app.onClose((instance, done) => {
-    t.ok('called')
+    t.assert.ok('called')
     done()
   })
 
-  t.throws(() => app.close({}), { message: 'not a function' })
+  return t.assert.throws(() => app.close({}), /not a function/)
 })
 
 test('close passing not a function when wrapping', (t) => {
@@ -403,14 +417,14 @@ test('close passing not a function when wrapping', (t) => {
   boot(app)
 
   app.onClose((instance, done) => {
-    t.ok('called')
+    t.assert.ok('called')
     done()
   })
 
-  t.throws(() => app.close({}), { message: 'not a function' })
+  return t.assert.throws(() => app.close({}), /not a function/)
 })
 
-test('close should trigger ready()', (t) => {
+test('close should trigger ready()', (t, done) => {
   t.plan(2)
 
   const app = boot(null, {
@@ -420,11 +434,12 @@ test('close should trigger ready()', (t) => {
   app.on('start', () => {
     // this will be emitted after the
     // callback in close() is fired
-    t.pass('started')
+    t.assert.ok('started')
   })
 
   app.close(() => {
-    t.pass('closed')
+    t.assert.ok('closed')
+    done()
   })
 })
 
@@ -432,8 +447,8 @@ test('close without a cb returns a promise', (t) => {
   t.plan(1)
 
   const app = boot()
-  app.close().then(() => {
-    t.pass('promise resolves')
+  return app.close().then(() => {
+    t.assert.ok('promise resolves')
   })
 })
 
@@ -442,12 +457,12 @@ test('close without a cb returns a promise when attaching to a server', (t) => {
 
   const server = {}
   boot(server)
-  server.close().then(() => {
-    t.pass('promise resolves')
+  return server.close().then(() => {
+    t.assert.ok('promise resolves')
   })
 })
 
-test('close with async onClose handlers', t => {
+test('close with async onClose handlers', (t, done) => {
   t.plan(7)
 
   const app = boot()
@@ -455,52 +470,54 @@ test('close with async onClose handlers', t => {
 
   app.onClose(() => {
     return new Promise(resolve => setTimeout(resolve, 500)).then(() => {
-      t.equal(order.shift(), 5)
+      t.assert.strictEqual(order.shift(), 5)
     })
   })
 
   app.onClose(() => {
-    t.equal(order.shift(), 4)
+    t.assert.strictEqual(order.shift(), 4)
   })
 
   app.onClose(instance => {
     return new Promise(resolve => setTimeout(resolve, 500)).then(() => {
-      t.equal(order.shift(), 3)
+      t.assert.strictEqual(order.shift(), 3)
     })
   })
 
   app.onClose(async instance => {
     return new Promise(resolve => setTimeout(resolve, 500)).then(() => {
-      t.equal(order.shift(), 2)
+      t.assert.strictEqual(order.shift(), 2)
     })
   })
 
   app.onClose(async () => {
     return new Promise(resolve => setTimeout(resolve, 500)).then(() => {
-      t.equal(order.shift(), 1)
+      t.assert.strictEqual(order.shift(), 1)
     })
   })
 
   app.on('start', () => {
     app.close(() => {
-      t.equal(order.shift(), 6)
-      t.pass('Closed in the correct order')
+      t.assert.strictEqual(order.shift(), 6)
+      t.assert.ok('Closed in the correct order')
+      done()
     })
   })
 })
 
-test('onClose callback must be a function', (t) => {
+test('onClose callback must be a function', (t, testDone) => {
   t.plan(1)
 
   const app = boot()
 
-  app.use(function (server, opts, done) {
-    t.throws(() => app.onClose({}), new AVV_ERR_CALLBACK_NOT_FN('onClose', 'object'))
+  app.use(async function (server, opts, done) {
+    await t.assert.throws(() => app.onClose({}), new AVV_ERR_CALLBACK_NOT_FN('onClose', 'object'))
     done()
+    testDone()
   })
 })
 
-test('close custom server with async onClose handlers', t => {
+test('close custom server with async onClose handlers', (t, done) => {
   t.plan(7)
 
   const server = {}
@@ -509,36 +526,37 @@ test('close custom server with async onClose handlers', t => {
 
   server.onClose(() => {
     return new Promise(resolve => setTimeout(resolve, 500)).then(() => {
-      t.equal(order.shift(), 5)
+      t.assert.strictEqual(order.shift(), 5)
     })
   })
 
   server.onClose(() => {
-    t.equal(order.shift(), 4)
+    t.assert.strictEqual(order.shift(), 4)
   })
 
   server.onClose(instance => {
     return new Promise(resolve => setTimeout(resolve, 500)).then(() => {
-      t.equal(order.shift(), 3)
+      t.assert.strictEqual(order.shift(), 3)
     })
   })
 
   server.onClose(async instance => {
     return new Promise(resolve => setTimeout(resolve, 500)).then(() => {
-      t.equal(order.shift(), 2)
+      t.assert.strictEqual(order.shift(), 2)
     })
   })
 
   server.onClose(async () => {
     return new Promise(resolve => setTimeout(resolve, 500)).then(() => {
-      t.equal(order.shift(), 1)
+      t.assert.strictEqual(order.shift(), 1)
     })
   })
 
   app.on('start', () => {
     app.close(() => {
-      t.equal(order.shift(), 6)
-      t.pass('Closed in the correct order')
+      t.assert.strictEqual(order.shift(), 6)
+      t.assert.ok('Closed in the correct order')
+      done()
     })
   })
 })
