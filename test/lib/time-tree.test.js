@@ -1,43 +1,43 @@
 'use strict'
 
-const { test } = require('tap')
+const { test } = require('node:test')
 const { TimeTree } = require('../../lib/time-tree')
 
 test('TimeTree is constructed with a root attribute, set to null', t => {
   t.plan(1)
 
   const tree = new TimeTree()
-  t.equal(tree.root, null)
+  t.assert.strictEqual(tree.root, null)
 })
 
 test('TimeTree is constructed with an empty tableId-Map', t => {
   t.plan(2)
 
   const tree = new TimeTree()
-  t.ok(tree.tableId instanceof Map)
-  t.equal(tree.tableId.size, 0)
+  t.assert.ok(tree.tableId instanceof Map)
+  t.assert.strictEqual(tree.tableId.size, 0)
 })
 
 test('TimeTree is constructed with an empty tableLabel-Map', t => {
   t.plan(2)
 
   const tree = new TimeTree()
-  t.ok(tree.tableLabel instanceof Map)
-  t.equal(tree.tableLabel.size, 0)
+  t.assert.ok(tree.tableLabel instanceof Map)
+  t.assert.strictEqual(tree.tableLabel.size, 0)
 })
 
 test('TimeTree#toJSON dumps the content of the TimeTree', t => {
   t.plan(1)
 
   const tree = new TimeTree()
-  t.same(tree.toJSON(), {})
+  t.assert.deepStrictEqual(tree.toJSON(), {})
 })
 
 test('TimeTree#toJSON is creating new instances of its content, ensuring being immutable', t => {
   t.plan(1)
 
   const tree = new TimeTree()
-  t.not(tree.toJSON(), tree.toJSON())
+  t.assert.notStrictEqual(tree.toJSON(), tree.toJSON())
 })
 
 test('TimeTree#start is adding a node with correct shape, root-node', t => {
@@ -48,21 +48,21 @@ test('TimeTree#start is adding a node with correct shape, root-node', t => {
 
   const rootNode = tree.root
 
-  t.equal(Object.keys(rootNode).length, 7)
-  t.ok('parent' in rootNode)
-  t.equal(rootNode.parent, null)
-  t.ok('id' in rootNode)
-  t.type(rootNode.id, 'string')
-  t.ok('label' in rootNode)
-  t.type(rootNode.label, 'string')
-  t.ok('nodes' in rootNode)
-  t.ok(Array.isArray(rootNode.nodes))
-  t.ok('start' in rootNode)
-  t.ok(Number.isInteger(rootNode.start))
-  t.ok('stop' in rootNode)
-  t.type(rootNode.stop, 'null')
-  t.ok('diff' in rootNode)
-  t.type(rootNode.diff, 'number')
+  t.assert.strictEqual(Object.keys(rootNode).length, 7)
+  t.assert.ok('parent' in rootNode)
+  t.assert.strictEqual(rootNode.parent, null)
+  t.assert.ok('id' in rootNode)
+  t.assert.strictEqual(typeof rootNode.id, 'string')
+  t.assert.ok('label' in rootNode)
+  t.assert.strictEqual(typeof rootNode.label, 'string')
+  t.assert.ok('nodes' in rootNode)
+  t.assert.ok(Array.isArray(rootNode.nodes))
+  t.assert.ok('start' in rootNode)
+  t.assert.ok(Number.isInteger(rootNode.start))
+  t.assert.ok('stop' in rootNode)
+  t.assert.strictEqual(typeof rootNode.stop, 'object')
+  t.assert.ok('diff' in rootNode)
+  t.assert.strictEqual(typeof rootNode.diff, 'number')
 })
 
 test('TimeTree#start is adding a node with correct shape, child-node', t => {
@@ -74,25 +74,25 @@ test('TimeTree#start is adding a node with correct shape, child-node', t => {
 
   const rootNode = tree.root
 
-  t.equal(rootNode.nodes.length, 1)
+  t.assert.strictEqual(rootNode.nodes.length, 1)
 
   const childNode = rootNode.nodes[0]
 
-  t.equal(Object.keys(childNode).length, 7)
-  t.ok('parent' in childNode)
-  t.type(childNode.parent, 'string')
-  t.ok('id' in childNode)
-  t.type(childNode.id, 'string')
-  t.ok('label' in childNode)
-  t.type(childNode.label, 'string')
-  t.ok('nodes' in childNode)
-  t.ok(Array.isArray(childNode.nodes))
-  t.ok('start' in childNode)
-  t.ok(Number.isInteger(childNode.start))
-  t.ok('stop' in childNode)
-  t.type(childNode.stop, 'null')
-  t.ok('diff' in childNode)
-  t.type(childNode.diff, 'number')
+  t.assert.strictEqual(Object.keys(childNode).length, 7)
+  t.assert.ok('parent' in childNode)
+  t.assert.strictEqual(typeof childNode.parent, 'string')
+  t.assert.ok('id' in childNode)
+  t.assert.strictEqual(typeof childNode.id, 'string')
+  t.assert.ok('label' in childNode)
+  t.assert.strictEqual(typeof childNode.label, 'string')
+  t.assert.ok('nodes' in childNode)
+  t.assert.ok(Array.isArray(childNode.nodes))
+  t.assert.ok('start' in childNode)
+  t.assert.ok(Number.isInteger(childNode.start))
+  t.assert.ok('stop' in childNode)
+  t.assert.strictEqual(typeof childNode.stop, 'object')
+  t.assert.ok('diff' in childNode)
+  t.assert.strictEqual(typeof childNode.diff, 'number')
 })
 
 test('TimeTree#start is adding a root element when parent is null', t => {
@@ -103,15 +103,15 @@ test('TimeTree#start is adding a root element when parent is null', t => {
 
   const rootNode = tree.root
 
-  t.type(rootNode, 'object')
-  t.equal(Object.keys(rootNode).length, 7)
-  t.equal(rootNode.parent, null)
-  t.equal(rootNode.id, 'root')
-  t.equal(rootNode.label, 'root')
-  t.ok(Array.isArray(rootNode.nodes))
-  t.equal(rootNode.nodes.length, 0)
-  t.ok(Number.isInteger(rootNode.start))
-  t.type(rootNode.diff, 'number')
+  t.assert.strictEqual(typeof rootNode, 'object')
+  t.assert.strictEqual(Object.keys(rootNode).length, 7)
+  t.assert.strictEqual(rootNode.parent, null)
+  t.assert.strictEqual(rootNode.id, 'root')
+  t.assert.strictEqual(rootNode.label, 'root')
+  t.assert.ok(Array.isArray(rootNode.nodes))
+  t.assert.strictEqual(rootNode.nodes.length, 0)
+  t.assert.ok(Number.isInteger(rootNode.start))
+  t.assert.strictEqual(typeof rootNode.diff, 'number')
 })
 
 test('TimeTree#start is adding a root element when parent does not exist', t => {
@@ -122,15 +122,15 @@ test('TimeTree#start is adding a root element when parent does not exist', t => 
 
   const rootNode = tree.root
 
-  t.type(rootNode, 'object')
-  t.equal(Object.keys(rootNode).length, 7)
-  t.equal(rootNode.parent, null)
-  t.equal(rootNode.id, 'root')
-  t.equal(rootNode.label, 'root')
-  t.ok(Array.isArray(rootNode.nodes))
-  t.equal(rootNode.nodes.length, 0)
-  t.ok(Number.isInteger(rootNode.start))
-  t.type(rootNode.diff, 'number')
+  t.assert.strictEqual(typeof rootNode, 'object')
+  t.assert.strictEqual(Object.keys(rootNode).length, 7)
+  t.assert.strictEqual(rootNode.parent, null)
+  t.assert.strictEqual(rootNode.id, 'root')
+  t.assert.strictEqual(rootNode.label, 'root')
+  t.assert.ok(Array.isArray(rootNode.nodes))
+  t.assert.strictEqual(rootNode.nodes.length, 0)
+  t.assert.ok(Number.isInteger(rootNode.start))
+  t.assert.strictEqual(typeof rootNode.diff, 'number')
 })
 
 test('TimeTree#start parameter start can override automatically generated start time', t => {
@@ -139,21 +139,21 @@ test('TimeTree#start parameter start can override automatically generated start 
   const tree = new TimeTree()
   tree.start(null, 'root', 1337)
 
-  t.ok(tree.root.start, 1337)
+  t.assert.strictEqual(tree.root.start, 1337)
 })
 
 test('TimeTree#start returns id of root, when adding a root node /1', t => {
   t.plan(1)
 
   const tree = new TimeTree()
-  t.equal(tree.start(null, 'root'), 'root')
+  t.assert.strictEqual(tree.start(null, 'root'), 'root')
 })
 
 test('TimeTree#start returns id of root, when adding a root node /2', t => {
   t.plan(1)
 
   const tree = new TimeTree()
-  t.equal(tree.start(null, '/'), 'root')
+  t.assert.strictEqual(tree.start(null, '/'), 'root')
 })
 
 test('TimeTree#start returns id of child, when adding a child node', t => {
@@ -161,7 +161,7 @@ test('TimeTree#start returns id of child, when adding a child node', t => {
 
   const tree = new TimeTree()
   tree.start(null, 'root')
-  t.match(tree.start('root', 'child'), /^child-[0-9.]+$/)
+  t.assert.match(tree.start('root', 'child'), /^child-[0-9.]+$/)
 })
 
 test('TimeTree tracks node ids /1', t => {
@@ -171,9 +171,9 @@ test('TimeTree tracks node ids /1', t => {
   tree.start(null, 'root')
   tree.start('root', 'child')
 
-  t.equal(tree.tableId.size, 2)
-  t.ok(tree.tableId.has('root'))
-  t.ok(tree.tableId.has(tree.root.nodes[0].id))
+  t.assert.strictEqual(tree.tableId.size, 2)
+  t.assert.ok(tree.tableId.has('root'))
+  t.assert.ok(tree.tableId.has(tree.root.nodes[0].id))
 })
 
 test('TimeTree tracks node ids /2', t => {
@@ -184,10 +184,10 @@ test('TimeTree tracks node ids /2', t => {
   tree.start('root', 'child')
   tree.start('child', 'grandchild')
 
-  t.equal(tree.tableId.size, 3)
-  t.ok(tree.tableId.has('root'))
-  t.ok(tree.tableId.has(tree.root.nodes[0].id))
-  t.ok(tree.tableId.has(tree.root.nodes[0].nodes[0].id))
+  t.assert.strictEqual(tree.tableId.size, 3)
+  t.assert.ok(tree.tableId.has('root'))
+  t.assert.ok(tree.tableId.has(tree.root.nodes[0].id))
+  t.assert.ok(tree.tableId.has(tree.root.nodes[0].nodes[0].id))
 })
 
 test('TimeTree tracks node ids /3', t => {
@@ -198,10 +198,10 @@ test('TimeTree tracks node ids /3', t => {
   tree.start('root', 'child')
   tree.start('root', 'child')
 
-  t.equal(tree.tableId.size, 3)
-  t.ok(tree.tableId.has('root'))
-  t.ok(tree.tableId.has(tree.root.nodes[0].id))
-  t.ok(tree.tableId.has(tree.root.nodes[1].id))
+  t.assert.strictEqual(tree.tableId.size, 3)
+  t.assert.ok(tree.tableId.has('root'))
+  t.assert.ok(tree.tableId.has(tree.root.nodes[0].id))
+  t.assert.ok(tree.tableId.has(tree.root.nodes[1].id))
 })
 
 test('TimeTree tracks node labels /1', t => {
@@ -212,10 +212,10 @@ test('TimeTree tracks node labels /1', t => {
   tree.start('root', 'child')
   tree.start('root', 'sibling')
 
-  t.equal(tree.tableLabel.size, 3)
-  t.ok(tree.tableLabel.has('root'))
-  t.ok(tree.tableLabel.has('child'))
-  t.ok(tree.tableLabel.has('sibling'))
+  t.assert.strictEqual(tree.tableLabel.size, 3)
+  t.assert.ok(tree.tableLabel.has('root'))
+  t.assert.ok(tree.tableLabel.has('child'))
+  t.assert.ok(tree.tableLabel.has('sibling'))
 })
 
 test('TimeTree tracks node labels /2', t => {
@@ -226,9 +226,9 @@ test('TimeTree tracks node labels /2', t => {
   tree.start('root', 'child')
   tree.start('root', 'child')
 
-  t.equal(tree.tableLabel.size, 2)
-  t.ok(tree.tableLabel.has('root'))
-  t.ok(tree.tableLabel.has('child'))
+  t.assert.strictEqual(tree.tableLabel.size, 2)
+  t.assert.ok(tree.tableLabel.has('root'))
+  t.assert.ok(tree.tableLabel.has('child'))
 })
 
 test('TimeTree#stop returns undefined', t => {
@@ -237,7 +237,7 @@ test('TimeTree#stop returns undefined', t => {
   const tree = new TimeTree()
   tree.start(null, 'root')
 
-  t.type(tree.stop('root'), 'undefined')
+  t.assert.strictEqual(typeof tree.stop('root'), 'undefined')
 })
 
 test('TimeTree#stop sets stop value of node', t => {
@@ -245,11 +245,11 @@ test('TimeTree#stop sets stop value of node', t => {
 
   const tree = new TimeTree()
   tree.start(null, 'root')
-  t.type(tree.root.stop, 'null')
+  t.assert.strictEqual(typeof tree.root.stop, 'object')
 
   tree.stop('root')
-  t.type(tree.root.stop, 'number')
-  t.ok(Number.isInteger(tree.root.stop))
+  t.assert.strictEqual(typeof tree.root.stop, 'number')
+  t.assert.ok(Number.isInteger(tree.root.stop))
 })
 
 test('TimeTree#stop parameter stop is used as stop value of node', t => {
@@ -257,11 +257,11 @@ test('TimeTree#stop parameter stop is used as stop value of node', t => {
 
   const tree = new TimeTree()
   tree.start(null, 'root')
-  t.type(tree.root.stop, 'null')
+  t.assert.strictEqual(typeof tree.root.stop, 'object')
 
   tree.stop('root', 1337)
-  t.type(tree.root.stop, 'number')
-  t.equal(tree.root.stop, 1337)
+  t.assert.strictEqual(typeof tree.root.stop, 'number')
+  t.assert.strictEqual(tree.root.stop, 1337)
 })
 
 test('TimeTree#stop calculates the diff', t => {
@@ -269,12 +269,12 @@ test('TimeTree#stop calculates the diff', t => {
 
   const tree = new TimeTree()
   tree.start(null, 'root', 1)
-  t.type(tree.root.diff, 'number')
-  t.equal(tree.root.diff, -1)
+  t.assert.strictEqual(typeof tree.root.diff, 'number')
+  t.assert.strictEqual(tree.root.diff, -1)
   tree.stop('root', 5)
 
-  t.type(tree.root.diff, 'number')
-  t.equal(tree.root.diff, 4)
+  t.assert.strictEqual(typeof tree.root.diff, 'number')
+  t.assert.strictEqual(tree.root.diff, 4)
 })
 
 test('TimeTree#stop does nothing when node is not found', t => {
@@ -282,10 +282,10 @@ test('TimeTree#stop does nothing when node is not found', t => {
 
   const tree = new TimeTree()
   tree.start(null, 'root')
-  t.type(tree.root.stop, 'null')
+  t.assert.strictEqual(typeof tree.root.stop, 'object')
 
   tree.stop('invalid')
-  t.type(tree.root.stop, 'null')
+  t.assert.strictEqual(typeof tree.root.stop, 'object')
 })
 
 test('TimeTree untracks node ids /1', t => {
@@ -296,8 +296,8 @@ test('TimeTree untracks node ids /1', t => {
   tree.start('root', 'child')
 
   tree.stop(tree.root.nodes[0].id)
-  t.equal(tree.tableId.size, 1)
-  t.ok(tree.tableId.has('root'))
+  t.assert.strictEqual(tree.tableId.size, 1)
+  t.assert.ok(tree.tableId.has('root'))
 })
 
 test('TimeTree untracks node ids /2', t => {
@@ -310,9 +310,9 @@ test('TimeTree untracks node ids /2', t => {
 
   tree.stop(tree.root.nodes[0].nodes[0].id)
 
-  t.equal(tree.tableId.size, 2)
-  t.ok(tree.tableId.has('root'))
-  t.ok(tree.tableId.has(tree.root.nodes[0].id))
+  t.assert.strictEqual(tree.tableId.size, 2)
+  t.assert.ok(tree.tableId.has('root'))
+  t.assert.ok(tree.tableId.has(tree.root.nodes[0].id))
 })
 
 test('TimeTree untracks node ids /3', t => {
@@ -325,9 +325,9 @@ test('TimeTree untracks node ids /3', t => {
 
   tree.stop(tree.root.nodes[0].id)
 
-  t.equal(tree.tableId.size, 2)
-  t.ok(tree.tableId.has('root'))
-  t.ok(tree.tableId.has(tree.root.nodes[1].id))
+  t.assert.strictEqual(tree.tableId.size, 2)
+  t.assert.ok(tree.tableId.has('root'))
+  t.assert.ok(tree.tableId.has(tree.root.nodes[1].id))
 })
 
 test('TimeTree untracks node ids /4', t => {
@@ -340,9 +340,9 @@ test('TimeTree untracks node ids /4', t => {
 
   tree.stop(tree.root.nodes[1].id)
 
-  t.equal(tree.tableId.size, 2)
-  t.ok(tree.tableId.has('root'))
-  t.ok(tree.tableId.has(tree.root.nodes[0].id))
+  t.assert.strictEqual(tree.tableId.size, 2)
+  t.assert.ok(tree.tableId.has('root'))
+  t.assert.ok(tree.tableId.has(tree.root.nodes[0].id))
 })
 
 test('TimeTree untracks node labels /1', t => {
@@ -355,9 +355,9 @@ test('TimeTree untracks node labels /1', t => {
 
   tree.stop(tree.root.nodes[1].id)
 
-  t.equal(tree.tableLabel.size, 2)
-  t.ok(tree.tableLabel.has('root'))
-  t.ok(tree.tableLabel.has('child'))
+  t.assert.strictEqual(tree.tableLabel.size, 2)
+  t.assert.ok(tree.tableLabel.has('root'))
+  t.assert.ok(tree.tableLabel.has('child'))
 })
 
 test('TimeTree untracks node labels /2', t => {
@@ -370,9 +370,9 @@ test('TimeTree untracks node labels /2', t => {
 
   tree.stop(tree.root.nodes[0].id)
 
-  t.equal(tree.tableLabel.size, 2)
-  t.ok(tree.tableLabel.has('root'))
-  t.ok(tree.tableLabel.has('sibling'))
+  t.assert.strictEqual(tree.tableLabel.size, 2)
+  t.assert.ok(tree.tableLabel.has('root'))
+  t.assert.ok(tree.tableLabel.has('sibling'))
 })
 
 test('TimeTree does not untrack label if used by other node', t => {
@@ -385,7 +385,7 @@ test('TimeTree does not untrack label if used by other node', t => {
 
   tree.stop(tree.root.nodes[0].id)
 
-  t.equal(tree.tableLabel.size, 2)
-  t.ok(tree.tableLabel.has('root'))
-  t.ok(tree.tableLabel.has('child'))
+  t.assert.strictEqual(tree.tableLabel.size, 2)
+  t.assert.ok(tree.tableLabel.has('root'))
+  t.assert.ok(tree.tableLabel.has('child'))
 })
