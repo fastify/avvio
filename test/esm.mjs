@@ -1,4 +1,4 @@
-import { test } from 'node:test'
+import { test } from 'tap'
 import boot from '../boot.js'
 
 test('support import', async (t) => {
@@ -8,5 +8,5 @@ test('support import', async (t) => {
 
   await app.ready()
 
-  t.assert.ok(app.loaded)
+  t.equal(app.loaded, true)
 })
