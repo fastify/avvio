@@ -1,12 +1,10 @@
 'use strict'
 
-const { test } = require('node:test')
+const { describe, test: t } = require('node:test')
 const { executeWithThenable } = require('../../lib/execute-with-thenable')
 const { kAvvio } = require('../../lib/symbols')
 
-test('executeWithThenable', async (t) => {
-  t.plan(6)
-
+describe('executeWithThenable', async () => {
   await t.test('passes the arguments to the function', (t, done) => {
     t.plan(5)
 
