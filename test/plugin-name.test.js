@@ -1,11 +1,11 @@
 'use strict'
 
-const { test } = require('tap')
+const { test } = require('node:test')
 const boot = require('..')
 const { kPluginMeta } = require('../lib/symbols')
 
 test('plugins get a name from the plugin metadata if it is set', async (t) => {
-  t.plan(1)
+  t.plan(2)
   const app = boot()
 
   const func = (app, opts, next) => next()
@@ -13,57 +13,46 @@ test('plugins get a name from the plugin metadata if it is set', async (t) => {
   app.use(func)
   await app.ready()
 
-  t.match(app.toJSON(), {
-    label: 'root',
-    nodes: [
-      { label: 'a-test-plugin' }
-    ]
-  })
+  const jsonToCompare = app.toJSON()
+
+  t.assert.strictEqual(jsonToCompare.label, 'root')
+  t.assert.strictEqual(jsonToCompare.nodes[0].label, 'a-test-plugin')
 })
 
 test('plugins get a name from the options if theres no metadata', async (t) => {
-  t.plan(1)
+  t.plan(2)
   const app = boot()
 
   function testPlugin (app, opts, next) { next() }
   app.use(testPlugin, { name: 'test registration options name' })
   await app.ready()
 
-  t.match(app.toJSON(), {
-    label: 'root',
-    nodes: [
-      { label: 'test registration options name' }
-    ]
-  })
+  const jsonToCompare = app.toJSON()
+  t.assert.strictEqual(jsonToCompare.label, 'root')
+  t.assert.strictEqual(jsonToCompare.nodes[0].label, 'test registration options name')
 })
 
 test('plugins get a name from the function name if theres no name in the options and no metadata', async (t) => {
-  t.plan(1)
+  t.plan(2)
   const app = boot()
 
   function testPlugin (app, opts, next) { next() }
   app.use(testPlugin)
   await app.ready()
 
-  t.match(app.toJSON(), {
-    label: 'root',
-    nodes: [
-      { label: 'testPlugin' }
-    ]
-  })
+  const jsonToCompare = app.toJSON()
+  t.assert.strictEqual(jsonToCompare.label, 'root')
+  t.assert.strictEqual(jsonToCompare.nodes[0].label, 'testPlugin')
 })
 
 test('plugins get a name from the function source if theres no other option', async (t) => {
-  t.plan(1)
+  t.plan(2)
   const app = boot()
 
   app.use((app, opts, next) => next())
   await app.ready()
 
-  t.match(app.toJSON(), {
-    label: 'root',
-    nodes: [
-      { label: '(app, opts, next) => next()' }
-    ]
-  })
+  const jsonToCompare = app.toJSON()
+  t.assert.strictEqual(jsonToCompare.label, 'root')
+  t.assert.strictEqual(jsonToCompare.nodes[0].label, '(app, opts, next) => next()')
 })
