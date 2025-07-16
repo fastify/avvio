@@ -4,8 +4,8 @@ const { describe, test: t } = require('node:test')
 const { executeWithThenable } = require('../../lib/execute-with-thenable')
 const { kAvvio } = require('../../lib/symbols')
 
-describe('executeWithThenable', async () => {
-  await t.test('passes the arguments to the function', (t, done) => {
+describe('executeWithThenable', () => {
+  t.test('passes the arguments to the function', (t, done) => {
     t.plan(5)
 
     executeWithThenable((...args) => {
@@ -19,7 +19,7 @@ describe('executeWithThenable', async () => {
     })
   })
 
-  await t.test('function references this to itself', (t, done) => {
+  t.test('function references this to itself', (t, done) => {
     t.plan(2)
 
     const func = function () {
@@ -31,7 +31,7 @@ describe('executeWithThenable', async () => {
     })
   })
 
-  await t.test('handle resolving Promise of func', (t, done) => {
+  t.test('handle resolving Promise of func', (t, done) => {
     t.plan(1)
 
     const fn = function () {
@@ -44,7 +44,7 @@ describe('executeWithThenable', async () => {
     })
   })
 
-  await t.test('handle rejecting Promise of func', (t, done) => {
+  t.test('handle rejecting Promise of func', (t, done) => {
     t.plan(1)
 
     const fn = function () {
@@ -57,7 +57,7 @@ describe('executeWithThenable', async () => {
     })
   })
 
-  await t.test('dont handle avvio mocks PromiseLike results but use callback if provided', (t, done) => {
+  t.test('dont handle avvio mocks PromiseLike results but use callback if provided', (t, done) => {
     t.plan(1)
 
     const fn = function () {
@@ -71,7 +71,7 @@ describe('executeWithThenable', async () => {
     })
   })
 
-  await t.test('dont handle avvio mocks Promises and if no callback is provided', (t, done) => {
+  t.test('dont handle avvio mocks Promises and if no callback is provided', (t, done) => {
     t.plan(1)
 
     const fn = function () {
