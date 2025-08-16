@@ -2,19 +2,21 @@
 
 const { test } = require('node:test')
 const { kThenifyDoNotWrap } = require('../../lib/symbols')
+const libDebug = require('../../lib/debug')
 
 test('thenify', async (t) => {
   t.plan(7)
 
   const mockDebug = (t, debugImpl) => {
-    const originalDebug = require('../../lib/debug').debug
-    require('../../lib/debug').debug = debugImpl
+    const originalDebug = libDebug.debug.bind(libDebug)
 
-    delete require.cache[require.resolve('../../lib/thenify')]
-
-    t.after(() => {
-      require('../../lib/debug').debug = originalDebug
+    t.before((ctx) => {
+      libDebug.debug = debugImpl
       delete require.cache[require.resolve('../../lib/thenify')]
+    })
+
+    t.after((ctx) => {
+      libDebug.debug = originalDebug
     })
   }
 
