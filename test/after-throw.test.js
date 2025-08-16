@@ -2,9 +2,8 @@
 
 const { test } = require('node:test')
 const boot = require('..')
-const { setTimeout } = require('timers/promises')
 
-test('catched error by Promise.reject', async (t) => {
+test('catched error by Promise.reject', (t, end) => {
   const app = boot()
   t.plan(2)
 
@@ -15,10 +14,10 @@ test('catched error by Promise.reject', async (t) => {
     .once('uncaughtException', (err) => {
       t.assert.strictEqual(err.message, 'kaboom2')
 
-      // Restore original handlers
       uncaughtExceptionHandlers.forEach((handler) =>
         process.on('uncaughtException', handler)
       )
+      end()
     })
 
   app
@@ -30,10 +29,7 @@ test('catched error by Promise.reject', async (t) => {
       throw new Error('kaboom2')
     })
 
-  // Wait for the uncaught exception to be thrown
   app.ready(function () {
     t.assert.fail('the ready callback should never be called')
   })
-
-  await setTimeout(100)
 })
