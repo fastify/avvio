@@ -1,11 +1,41 @@
 'use strict'
 
-const { test } = require('tap')
+const { test } = require('node:test')
 const boot = require('..')
 
-test('to json', (t) => {
-  t.plan(4)
+function matchObject (t, actual, expected) {
+  const isExpectedArray = Array.isArray(expected)
+  const isExpectedRegex = expected instanceof RegExp
 
+  if (typeof expected === 'object' && expected !== null && !isExpectedArray && !isExpectedRegex) {
+    for (const key in expected) {
+      if (!(key in actual)) {
+        throw new Error(`Missing key: ${key}`)
+      }
+      matchObject(t, actual[key], expected[key])
+    }
+    return
+  }
+
+  if (isExpectedArray) {
+    t.assert.ok(Array.isArray(actual))
+    t.assert.strictEqual(actual.length, expected.length)
+    for (let i = 0; i < expected.length; i++) {
+      matchObject(t, actual[i], expected[i])
+    }
+    return
+  }
+
+  if (isExpectedRegex) {
+    t.assert.match(actual.toString(), expected)
+    return
+  }
+
+  t.assert.strictEqual(actual, expected)
+}
+
+test('to json', (t, end) => {
+  t.plan(58)
   const app = boot()
   app
     .use(one)
@@ -23,7 +53,7 @@ test('to json', (t) => {
     const json = app.toJSON()
     outJson.stop = /\d*/
     outJson.diff = /\d*/
-    t.match(json, outJson)
+    matchObject(t, json, outJson)
   })
 
   function one (s, opts, done) {
@@ -34,7 +64,7 @@ test('to json', (t) => {
       label: 'one',
       start: /\d+/
     })
-    t.match(json, outJson)
+    matchObject(t, json, outJson)
     done()
   }
   function two (s, opts, done) {
@@ -45,7 +75,7 @@ test('to json', (t) => {
       label: 'two',
       start: /\d+/
     })
-    t.match(json, outJson)
+    matchObject(t, json, outJson)
     done()
   }
   function three (s, opts, done) {
@@ -56,14 +86,14 @@ test('to json', (t) => {
       label: 'three',
       start: /\d+/
     })
-    t.match(json, outJson)
+    matchObject(t, json, outJson)
     done()
+    end()
   }
 })
 
-test('to json multi-level hierarchy', (t) => {
-  t.plan(4)
-
+test('to json multi-level hierarchy', (t, done) => {
+  t.plan(42)
   const server = { name: 'asd', count: 0 }
   const app = boot(server)
 
@@ -117,7 +147,7 @@ test('to json multi-level hierarchy', (t) => {
 
   app.on('preReady', function show () {
     const json = app.toJSON()
-    t.match(json, outJson)
+    matchObject(t, json, outJson)
   })
 
   app.override = function (s) {
@@ -133,19 +163,20 @@ test('to json multi-level hierarchy', (t) => {
     cb()
 
     function second (s2, opts, cb) {
-      t.equal(s2.count, 2)
+      t.assert.strictEqual(s2.count, 2)
       cb()
     }
 
     function third (s3, opts, cb) {
       s3.use(fourth)
-      t.equal(s3.count, 2)
+      t.assert.strictEqual(s3.count, 2)
       cb()
     }
 
     function fourth (s4, opts, cb) {
-      t.equal(s4.count, 3)
+      t.assert.strictEqual(s4.count, 3)
       cb()
+      done()
     }
   })
 })
