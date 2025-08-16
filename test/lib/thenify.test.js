@@ -1,20 +1,32 @@
 'use strict'
 
-const { mockRequire } = require('tap')
 const { test } = require('node:test')
 const { kThenifyDoNotWrap } = require('../../lib/symbols')
 
 test('thenify', async (t) => {
   t.plan(7)
 
+  const mockDebug = (t, debugImpl) => {
+    const originalDebug = require('../../lib/debug').debug
+    require('../../lib/debug').debug = debugImpl
+
+    delete require.cache[require.resolve('../../lib/thenify')]
+
+    t.after(() => {
+      require('../../lib/debug').debug = originalDebug
+      delete require.cache[require.resolve('../../lib/thenify')]
+    })
+  }
+
   await t.test('return undefined if booted', (t) => {
     t.plan(2)
 
-    const { thenify } = mockRequire('../../lib/thenify', {
-      '../../lib/debug': {
-        debug: (message) => { t.assert.strictEqual(message, 'thenify returning undefined because we are already booted') }
-      }
+    mockDebug(t, (message) => {
+      t.assert.strictEqual(message, 'thenify returning undefined because we are already booted')
     })
+
+    const { thenify } = require('../../lib/thenify')
+
     const result = thenify.call({
       booted: true
     })
@@ -34,11 +46,12 @@ test('thenify', async (t) => {
   await t.test('return PromiseConstructorLike if kThenifyDoNotWrap is false', (t) => {
     t.plan(3)
 
-    const { thenify } = mockRequire('../../lib/thenify', {
-      '../../lib/debug': {
-        debug: (message) => { t.assert.strictEqual(message, 'thenify') }
-      }
+    mockDebug(t, (message) => {
+      t.assert.strictEqual(message, 'thenify')
     })
+
+    const { thenify } = require('../../lib/thenify')
+
     const promiseContructorLike = thenify.call({
       [kThenifyDoNotWrap]: false
     })
@@ -50,11 +63,12 @@ test('thenify', async (t) => {
   await t.test('return PromiseConstructorLike', (t) => {
     t.plan(3)
 
-    const { thenify } = mockRequire('../../lib/thenify', {
-      '../../lib/debug': {
-        debug: (message) => { t.assert.strictEqual(message, 'thenify') }
-      }
+    mockDebug(t, (message) => {
+      t.assert.strictEqual(message, 'thenify')
     })
+
+    const { thenify } = require('../../lib/thenify')
+
     const promiseContructorLike = thenify.call({})
 
     t.assert.strictEqual(typeof promiseContructorLike, 'function')
