@@ -1,24 +1,26 @@
 'use strict'
 
-const { test } = require('tap')
+const { test } = require('node:test')
 const boot = require('..')
 
-test('catched error by Promise.reject', (t) => {
+test('catched error by Promise.reject', async (t) => {
   const app = boot()
-  t.plan(2)
+  t.plan(3)
 
-  t.threw = function (err) {
-    t.equal(err.message, 'kaboom2')
+  try {
+    await app
+      .use(function (f, opts) {
+        return Promise.reject(new Error('kaboom'))
+      })
+      .after(async function (err) {
+        t.assert.strictEqual(err.message, 'kaboom')
+        throw new Error('kaboom2')
+      })
+  } catch (err) {
+    t.assert.strictEqual(err.message, 'kaboom2')
   }
 
-  app.use(function (f, opts) {
-    return Promise.reject(new Error('kaboom'))
-  }).after(function (err) {
-    t.equal(err.message, 'kaboom')
-    throw new Error('kaboom2')
-  })
-
   app.ready(function () {
-    t.fail('the ready callback should never be called')
+    t.assert.fail('the ready callback should never be called')
   })
 })
