@@ -13,10 +13,6 @@
     "test:coverage": "c8 borp --reporter=@jsumners/line-reporter",
     "test:typescript": "tsc --project ./test/types/tsconfig.json"
   },
-  "precommit": [
-    "lint",
-    "test"
-  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/fastify/avvio.git"
@@ -63,7 +59,6 @@
     }
   ],
   "devDependencies": {
-    "@fastify/pre-commit": "^2.1.0",
     "@jsumners/line-reporter": "^1.0.1",
     "@types/node": "^24.0.8",
     "borp": "^0.20.1",
