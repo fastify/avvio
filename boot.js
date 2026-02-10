@@ -122,7 +122,14 @@ inherits(Boot, EE)
 // Older nodejs versions may not have asyncDispose
 if ('asyncDispose' in Symbol) {
   Boot.prototype[Symbol.asyncDispose] = function () {
-    return this.close()
+    return new Promise((resolve, reject) => {
+      this.close((err) => {
+        if (err) {
+          return reject(err)
+        }
+        resolve()
+      })
+    })
   }
 }
 
