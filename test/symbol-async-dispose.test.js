@@ -7,24 +7,22 @@ const boot = require('..')
 test('Symbol.asyncDispose should close avvio', { skip: !('asyncDispose' in Symbol) }, async (t) => {
   t.plan(2)
 
+  const app = boot()
   let closeHandlerCalled = false
 
-  {
-    await using app = boot()
-
-    app.use(function (server, opts, done) {
-      app.onClose(() => {
-        closeHandlerCalled = true
-      })
-      done()
+  app.use(function (server, opts, done) {
+    app.onClose(() => {
+      closeHandlerCalled = true
     })
+    done()
+  })
 
-    await app.ready()
+  await app.ready()
 
-    t.assert.strictEqual(app.booted, true)
+  t.assert.strictEqual(app.booted, true)
 
-    // Simulates using keyword
-  }
+  // Simulates using keyword behavior: await using app = boot()
+  await app[Symbol.asyncDispose]()
 
   t.assert.ok(closeHandlerCalled, 'onClose handler should be called')
 })

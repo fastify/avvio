@@ -82,7 +82,6 @@ declare namespace avvio {
   }
 
   interface Close<I, C = context<I>> {
-    (): Promise<void>;
     (fn: (err: Error) => void): void;
     (fn: (err: Error, done: Function) => void): void;
     (fn: (err: Error, context: C, done: Function) => void): void;
