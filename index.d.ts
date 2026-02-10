@@ -58,6 +58,9 @@ declare namespace avvio {
 
     started: boolean;
     booted: boolean;
+
+    /** Alias for {@linkcode Avvio.close} */
+    [Symbol.asyncDispose](): Promise<void>;
   }
 
   // Avvio methods
@@ -79,6 +82,7 @@ declare namespace avvio {
   }
 
   interface Close<I, C = context<I>> {
+    (): Promise<void>;
     (fn: (err: Error) => void): void;
     (fn: (err: Error, done: Function) => void): void;
     (fn: (err: Error, context: C, done: Function) => void): void;
