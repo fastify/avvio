@@ -119,6 +119,20 @@ function Boot (server, opts, done) {
 
 inherits(Boot, EE)
 
+// Older nodejs versions may not have asyncDispose
+if ('asyncDispose' in Symbol) {
+  Boot.prototype[Symbol.asyncDispose] = function () {
+    return new Promise((resolve, reject) => {
+      this.close((err) => {
+        if (err) {
+          return reject(err)
+        }
+        resolve()
+      })
+    })
+  }
+}
+
 Boot.prototype.start = function () {
   this.started = true
 
