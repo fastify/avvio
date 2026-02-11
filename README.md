@@ -83,7 +83,7 @@ async function third (instance, opts) {
   * <a href="#override"><code>instance.<b>override()</b></code></a>
   * <a href="#onClose"><code>instance.<b>onClose()</b></code></a>
   * <a href="#close"><code>instance.<b>close()</b></code></a>
-  * <a href="#symbol-asyncdispose"><code>instance.<b>[Symbol.asyncDispose]()</b></code></a>
+  * <a href="#symbol-asyncdispose"><code>instance<b>\[Symbol.asyncDispose\]()</b></code></a>
   * <a href="#toJSON"><code>avvio.<b>toJSON()</b></code></a>
   * <a href="#prettyPrint"><code>avvio.<b>prettyPrint()</b></code></a>
 
