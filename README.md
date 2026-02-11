@@ -593,7 +593,7 @@ This is especially useful in unit tests and short-lived processes where you need
 Example:
 
 ```js
-async function example() {
+test('my test', async () => {
   await using app = avvio()
   
   app.use(function (server, opts, done) {
@@ -604,7 +604,7 @@ async function example() {
   await app.ready()
   
   // app.close() will be called automatically when exiting this scope
-}
+})
 ```
 
 **Note:** This feature requires Node.js 20 or later, as `Symbol.asyncDispose` is not available in earlier versions. The implementation includes a runtime check to ensure compatibility with older Node.js versions.
