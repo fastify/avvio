@@ -58,6 +58,9 @@ declare namespace avvio {
 
     started: boolean;
     booted: boolean;
+
+    /** Alias for {@linkcode Avvio.close} */
+    [Symbol.asyncDispose](): Promise<void>;
   }
 
   // Avvio methods

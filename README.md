@@ -83,6 +83,7 @@ async function third (instance, opts) {
   * <a href="#override"><code>instance.<b>override()</b></code></a>
   * <a href="#onClose"><code>instance.<b>onClose()</b></code></a>
   * <a href="#close"><code>instance.<b>close()</b></code></a>
+  * <a href="#symbol-asyncdispose"><code>instance<b>\[Symbol.asyncDispose\]()</b></code></a>
   * <a href="#toJSON"><code>avvio.<b>toJSON()</b></code></a>
   * <a href="#prettyPrint"><code>avvio.<b>prettyPrint()</b></code></a>
 
@@ -578,6 +579,35 @@ app.close()
 ```
 
 `done` must be called only once.
+
+-------------------------------------------------------
+
+<a name="symbol-asyncdispose"></a>
+
+### app[Symbol.asyncDispose]()
+
+This method is an alias for [`app.close()`](#close) and is used to support the [ECMAScript Explicit Resource Management](https://tc39.es/proposal-explicit-resource-management/) proposal. It allows you to use the `await using` syntax to automatically close the avvio instance when it goes out of scope.
+
+This is especially useful in unit tests and short-lived processes where you need to ensure resources are cleaned up automatically.
+
+Example:
+
+```js
+test('my test', async () => {
+  await using app = avvio()
+  
+  app.use(function (server, opts, done) {
+    // Your plugin code
+    done()
+  })
+  
+  await app.ready()
+  
+  // app.close() will be called automatically when exiting this scope
+})
+```
+
+**Note:** This feature requires Node.js 20 or later, as `Symbol.asyncDispose` is not available in earlier versions. The implementation includes a runtime check to ensure compatibility with older Node.js versions.
 
 -------------------------------------------------------
 
