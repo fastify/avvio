@@ -584,7 +584,7 @@ app.close()
 
 <a name="symbol-asyncdispose"></a>
 
-### app[Symbol.asyncDispose]()
+### app\[Symbol.asyncDispose\]()
 
 This method is an alias for [`app.close()`](#close) and is used to support the [ECMAScript Explicit Resource Management](https://tc39.es/proposal-explicit-resource-management/) proposal. It allows you to use the `await using` syntax to automatically close the avvio instance when it goes out of scope.
 
