@@ -595,14 +595,14 @@ Example:
 ```js
 test('my test', async () => {
   await using app = avvio()
-  
+
   app.use(function (server, opts, done) {
     // Your plugin code
     done()
   })
-  
+
   await app.ready()
-  
+
   // app.close() will be called automatically when exiting this scope
 })
 ```
