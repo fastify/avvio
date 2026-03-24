@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import * as avvio from '../../'
+import avvio from '../../'
 
 {
   // avvio with no argument
