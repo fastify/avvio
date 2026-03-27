@@ -65,7 +65,7 @@
     "c8": "^11.0.0",
     "eslint": "^9.17.0",
     "neostandard": "^0.12.0",
-    "typescript": "~5.9.2"
+    "typescript": "~6.0.2"
   },
   "dependencies": {
     "@fastify/error": "^4.0.0",
