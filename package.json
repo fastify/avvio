@@ -2,7 +2,7 @@
   "name": "avvio",
   "version": "9.2.0",
   "description": "Asynchronous bootstrapping of Node applications",
-  "main": "boot.js",
+  "main": "index.js",
   "type": "commonjs",
   "types": "index.d.ts",
   "scripts": {

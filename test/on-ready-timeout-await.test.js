@@ -3,7 +3,7 @@
 /* eslint no-prototype-builtins: off */
 
 const { test } = require('node:test')
-const boot = require('../boot')
+const boot = require('..')
 
 test('onReadyTimeout', async (t) => {
   const app = boot({}, {
