@@ -1,5 +1,5 @@
 import { test } from 'node:test'
-import boot from '../boot.js'
+import boot from '../index.js'
 
 await test('support import', async (t) => {
   const app = boot()
