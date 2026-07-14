@@ -476,9 +476,14 @@ function callWithCbOrNextTick (func, cb) {
     executeWithThenable(func, [err], cb)
   } else {
     if (this._opts.timeout === 0) {
+      let completed = false
       const wrapCb = (err) => {
+        if (completed) {
+          return
+        }
+        completed = true
         this._error = err
-        cb(this._error)
+        process.nextTick(cb, this._error)
       }
 
       if (func.length === 2) {
@@ -513,8 +518,9 @@ function timeoutCall (func, rootErr, context, cb) {
   function timeoutCb (err) {
     if (timer) {
       clearTimeout(timer)
+      timer = null
       this._error = err
-      cb(this._error)
+      process.nextTick(cb, this._error)
     } else {
       // timeout has been triggered
       // can not call cb twice
