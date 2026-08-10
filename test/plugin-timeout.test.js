@@ -74,6 +74,21 @@ test('timeout without calling next - use code as name', (t, done) => {
   })
 })
 
+test('timeout without calling next - use the name of the resolved thenable', (t, done) => {
+  t.plan(3)
+  const app = boot({}, {
+    timeout: 10 // 10 ms
+  })
+  app.use(import('./fixtures/esm-no-next.mjs'))
+
+  app.ready((err) => {
+    t.assert.ok(err)
+    t.assert.strictEqual(err.message, message('esmPluginNoNext'))
+    t.assert.strictEqual(err.code, 'AVV_ERR_PLUGIN_EXEC_TIMEOUT')
+    done()
+  })
+})
+
 test('does not keep going', (t, done) => {
   t.plan(2)
   const app = boot({}, {
