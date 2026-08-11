@@ -56,3 +56,39 @@ test('plugins get a name from the function source if theres no other option', as
   t.assert.strictEqual(jsonToCompare.label, 'root')
   t.assert.strictEqual(jsonToCompare.nodes[0].label, '(app, opts, next) => next()')
 })
+
+test('thenable plugins get a name from the resolved plugin metadata if it is set', async (t) => {
+  t.plan(2)
+  const app = boot()
+
+  app.use(import('./fixtures/esm-plugin-meta.mjs'))
+  await app.ready()
+
+  const jsonToCompare = app.toJSON()
+  t.assert.strictEqual(jsonToCompare.label, 'root')
+  t.assert.strictEqual(jsonToCompare.nodes[0].label, 'esm-plugin-meta')
+})
+
+test('thenable plugins get a name from the options if theres no metadata', async (t) => {
+  t.plan(2)
+  const app = boot()
+
+  app.use(import('./fixtures/esm-named.mjs'), { name: 'test registration options name' })
+  await app.ready()
+
+  const jsonToCompare = app.toJSON()
+  t.assert.strictEqual(jsonToCompare.label, 'root')
+  t.assert.strictEqual(jsonToCompare.nodes[0].label, 'test registration options name')
+})
+
+test('thenable plugins get a name from the resolved function name if theres no name in the options and no metadata', async (t) => {
+  t.plan(2)
+  const app = boot()
+
+  app.use(import('./fixtures/esm-named.mjs'))
+  await app.ready()
+
+  const jsonToCompare = app.toJSON()
+  t.assert.strictEqual(jsonToCompare.label, 'root')
+  t.assert.strictEqual(jsonToCompare.nodes[0].label, 'esmNamedPlugin')
+})

@@ -414,7 +414,7 @@ Boot.prototype._loadPlugin = function (plugin, callback) {
       if (typeof fn.default === 'function') {
         fn = fn.default
       }
-      plugin.func = fn
+      plugin.setFunc(fn)
       this._loadPlugin(plugin, callback)
     }, callback)
     return
