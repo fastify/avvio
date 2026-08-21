@@ -560,3 +560,272 @@ test('close custom server with async onClose handlers', (t, done) => {
     })
   })
 })
+
+test('close callback receives close error from onClose callback', async (t) => {
+  const app = boot()
+  const error = new Error('close error')
+
+  await app.ready()
+
+  app.onClose(function (context, done) {
+    t.assert.strictEqual(context, app._server)
+    done(error)
+  })
+
+  await new Promise((resolve, reject) => {
+    app.close((err) => {
+      try {
+        t.assert.strictEqual(err, error)
+        resolve()
+      } catch (e) {
+        reject(e)
+      }
+    })
+  })
+})
+
+test('close callback receives close error from onClose promise', async (t) => {
+  const app = boot()
+  const error = new Error('close error')
+
+  await app.ready()
+
+  app.onClose(function () {
+    return Promise.reject(error)
+  })
+
+  await new Promise((resolve, reject) => {
+    app.close((err) => {
+      try {
+        t.assert.strictEqual(err, error)
+        resolve()
+      } catch (e) {
+        reject(e)
+      }
+    })
+  })
+})
+
+test('close without callback returns rejected promise on error', async (t) => {
+  const app = boot()
+  const error = new Error('close error')
+
+  await app.ready()
+
+  app.onClose(function () {
+    return Promise.reject(error)
+  })
+
+  await t.assert.rejects(app.close(), error)
+})
+
+test('onClose handler receives context', async (t) => {
+  const server = {}
+  const app = boot(server)
+
+  let receivedContext
+
+  app.onClose(function (context) {
+    receivedContext = context
+  })
+
+  await app.ready()
+  await app.close()
+
+  t.assert.strictEqual(receivedContext, server)
+})
+
+test('onClose handler with promise receives context', async (t) => {
+  const server = {}
+  const app = boot(server)
+
+  let receivedContext
+  let called = false
+
+  app.onClose(function (context) {
+    receivedContext = context
+
+    return new Promise((resolve) => {
+      setImmediate(() => {
+        called = true
+        resolve()
+      })
+    })
+  })
+
+  await app.ready()
+  await app.close()
+
+  t.assert.strictEqual(receivedContext, server)
+  t.assert.strictEqual(called, true)
+})
+
+test('onClose promise rejection is propagated', async (t) => {
+  const app = boot()
+  const error = new Error('onClose failed')
+
+  app.onClose(function () {
+    return Promise.reject(error)
+  })
+
+  await app.ready()
+
+  await t.assert.rejects(app.close(), error)
+})
+
+test('onClose callback can complete asynchronously', async (t) => {
+  const app = boot()
+  let called = false
+
+  app.onClose(function (context, done) {
+    setImmediate(() => {
+      called = true
+      done()
+    })
+  })
+
+  await app.ready()
+  await app.close()
+
+  t.assert.strictEqual(called, true)
+})
+
+test('close callback receives null on success', async (t) => {
+  const app = boot()
+
+  await app.ready()
+
+  await new Promise((resolve, reject) => {
+    app.close((err) => {
+      try {
+        t.assert.strictEqual(err, null)
+        resolve()
+      } catch (e) {
+        reject(e)
+      }
+    })
+  })
+})
+
+test('close succeeds without onClose handlers', async () => {
+  const app = boot()
+
+  await app.ready()
+  await app.close()
+})
+
+test('onClose handlers run in registration order', async (t) => {
+  const app = boot()
+  const calls = []
+
+  app.onClose(function () {
+    calls.push(1)
+  })
+
+  app.onClose(function () {
+    calls.push(2)
+  })
+
+  await app.ready()
+  await app.close()
+
+  t.assert.deepStrictEqual(calls, [2, 1])
+})
+
+test('onClose error is passed to the close callback', async (t) => {
+  const app = boot()
+
+  const firstError = new Error('first')
+  const secondError = new Error('second')
+
+  app.onClose(function () {
+    return Promise.reject(firstError)
+  })
+
+  app.onClose(function () {
+    return Promise.reject(secondError)
+  })
+
+  await app.ready()
+
+  const error = await new Promise((resolve) => {
+    app.close(resolve)
+  })
+
+  t.assert.strictEqual(error, firstError)
+})
+
+test('close callback is called once', async (t) => {
+  const app = boot()
+
+  await app.ready()
+
+  let calls = 0
+
+  await new Promise((resolve, reject) => {
+    app.close((err) => {
+      try {
+        t.assert.strictEqual(err, null)
+        calls++
+        resolve()
+      } catch (e) {
+        reject(e)
+      }
+    })
+  })
+
+  t.assert.strictEqual(calls, 1)
+})
+
+test('onClose callback is called once', async (t) => {
+  const app = boot()
+  let calls = 0
+
+  app.onClose(function (context, done) {
+    calls++
+    done()
+    done()
+  })
+
+  await app.ready()
+  await app.close()
+
+  t.assert.strictEqual(calls, 1)
+})
+
+test('close emits close event once', async (t) => {
+  const app = boot()
+  let closes = 0
+
+  app.on('close', () => {
+    closes++
+  })
+
+  await app.ready()
+  await app.close()
+
+  t.assert.strictEqual(closes, 1)
+})
+
+test('onClose handler with three parameters receives context and callback', async (t) => {
+  const app = boot()
+
+  let receivedContext
+  let receivedCallback
+  let receivedThirdArgument
+
+  app.onClose(function (context, cb, third) {
+    receivedContext = context
+    receivedCallback = cb
+    receivedThirdArgument = third
+
+    cb()
+  })
+
+  await app.ready()
+  await app.close()
+
+  t.assert.strictEqual(receivedContext, app._server)
+  t.assert.strictEqual(typeof receivedCallback, 'function')
+  t.assert.strictEqual(receivedThirdArgument, undefined)
+})

@@ -596,7 +596,9 @@ function encapsulateThreeParam (func, that) {
   return wrapped
   function _encapsulateThreeParam (err, cb) {
     let res
+    /* c8 ignore next */
     if (!func) {
+      /* c8 ignore next */
       process.nextTick(cb)
     } else if (func.length === 0) {
       res = func()

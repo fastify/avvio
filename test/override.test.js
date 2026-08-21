@@ -383,3 +383,13 @@ test('custom inheritance override in after', (t, testDone) => {
     }
   })
 })
+
+test('override returns supplied server', (t) => {
+  const app = boot()
+  const server = {}
+
+  t.assert.strictEqual(
+    app.override(server, function () {}, {}),
+    server
+  )
+})
