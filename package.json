@@ -9,7 +9,7 @@
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "test": "npm run test:unit && npm run test:typescript",
-    "test:unit": "borp --reporter=@jsumners/line-reporter",
+    "test:unit": "borp --coverage --check-coverage --reporter=@jsumners/line-reporter",
     "test:coverage": "c8 borp --reporter=@jsumners/line-reporter",
     "test:typescript": "tsc --project ./test/types/tsconfig.json"
   },

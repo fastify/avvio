@@ -901,3 +901,13 @@ test('after 1 param swallows errors with server and timeout', (t, testDone) => {
     testDone()
   })
 })
+
+test('after without callback returns a promise', async (t) => {
+  const app = boot()
+
+  const promise = app.after()
+
+  t.assert.ok(promise instanceof Promise)
+
+  await promise
+})

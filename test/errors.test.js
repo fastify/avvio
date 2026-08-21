@@ -1,6 +1,7 @@
 'use strict'
 
 const { test } = require('node:test')
+const boot = require('..')
 const errors = require('../lib/errors')
 
 test('Correct codes of AvvioErrors', t => {
@@ -23,4 +24,36 @@ test('Correct codes of AvvioErrors', t => {
     const error = new errors[testcase]()
     t.assert.strictEqual(error.code, testcase)
   }
+})
+
+test('adding plugin to an already booted root throws', async (t) => {
+  const app = boot()
+
+  await app.ready()
+
+  t.assert.throws(
+    () => {
+      app._addPlugin(function plugin () {}, {}, false)
+    },
+    {
+      code: 'AVV_ERR_ROOT_PLG_BOOTED'
+    }
+  )
+})
+
+test('adding plugin to loaded current plugin throws', (t) => {
+  const app = boot()
+  const current = app._current[0]
+
+  current.loaded = true
+  app.booted = false
+
+  t.assert.throws(
+    () => {
+      app._addPlugin(function plugin () {}, {}, false)
+    },
+    {
+      message: 'plugin'
+    }
+  )
 })

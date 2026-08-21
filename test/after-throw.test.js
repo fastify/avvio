@@ -24,3 +24,37 @@ test('catched error by Promise.reject', async (t) => {
     t.assert.fail('the ready callback should never be called')
   })
 })
+
+test('after callback receives plugin error', async (t) => {
+  const app = boot()
+  const error = new Error('plugin failed')
+
+  app.use(function (instance, opts, done) {
+    done(error)
+  })
+
+  await new Promise((resolve, reject) => {
+    app.after(function (err, done) {
+      t.assert.strictEqual(err, error)
+      done()
+      resolve()
+    })
+
+    app.ready(function (err) {
+      if (err && err !== error) {
+        reject(err)
+      }
+    })
+  })
+})
+
+test('after promise rejects on plugin error', async (t) => {
+  const app = boot()
+  const error = new Error('plugin failed')
+
+  app.use(function (instance, opts, done) {
+    done(error)
+  })
+
+  await t.assert.rejects(app.after(), error)
+})

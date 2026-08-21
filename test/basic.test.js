@@ -457,3 +457,145 @@ test('support faux modules', (t, testCompleted) => {
     testCompleted()
   })
 })
+
+test('ready rejects non-function callback', (t) => {
+  const app = boot()
+
+  t.assert.throws(() => app.ready('not a function'), {
+    code: 'AVV_ERR_CALLBACK_NOT_FN'
+  })
+})
+
+test('ready callback receives plugin error', async (t) => {
+  const app = boot()
+  const error = new Error('ready failed')
+
+  app.use(function (instance, opts, done) {
+    done(error)
+  })
+
+  await new Promise((resolve) => {
+    app.ready((err) => {
+      t.assert.strictEqual(err, error)
+      resolve()
+    })
+  })
+})
+
+test('constructor accepts callback as only argument', async (t) => {
+  let started = false
+
+  const app = boot(function onStart () {
+    started = true
+  })
+
+  await app.ready()
+
+  await new Promise((resolve) => {
+    if (started) {
+      resolve()
+      return
+    }
+
+    app.once('start', resolve)
+  })
+
+  t.assert.strictEqual(started, true)
+})
+
+test('constructor accepts options and callback', async (t) => {
+  let started = false
+
+  const app = boot(
+    {},
+    {
+      autostart: false
+    },
+    function onStart () {
+      started = true
+    }
+  )
+
+  app.start()
+
+  await app.ready()
+
+  await new Promise((resolve) => {
+    if (started) {
+      resolve()
+      return
+    }
+
+    app.once('start', resolve)
+  })
+
+  t.assert.strictEqual(started, true)
+})
+
+test('ready callback receives null on success', async (t) => {
+  const app = boot()
+  let receivedError
+
+  await new Promise((resolve) => {
+    app.ready(function (err) {
+      receivedError = err
+      resolve()
+    })
+  })
+
+  t.assert.strictEqual(receivedError, null)
+})
+
+test('ready callback with zero arguments is supported', async (t) => {
+  const app = boot()
+  let called = false
+
+  await new Promise((resolve, reject) => {
+    app.ready(function () {
+      called = true
+      resolve()
+    })
+
+    app.ready().catch(reject)
+  })
+
+  t.assert.strictEqual(called, true)
+})
+
+test('ready callback can be registered multiple times', async (t) => {
+  const app = boot()
+
+  let first = false
+  let second = false
+
+  await Promise.all([
+    new Promise((resolve) => {
+      app.ready((err) => {
+        t.assert.strictEqual(err, null)
+        first = true
+        resolve()
+      })
+    }),
+
+    new Promise((resolve) => {
+      app.ready((err) => {
+        t.assert.strictEqual(err, null)
+        second = true
+        resolve()
+      })
+    })
+  ])
+
+  t.assert.strictEqual(first, true)
+  t.assert.strictEqual(second, true)
+})
+
+test('application starts automatically', async (t) => {
+  const app = boot()
+
+  t.assert.strictEqual(app.started, true)
+
+  await app.ready()
+
+  t.assert.strictEqual(app.started, true)
+})

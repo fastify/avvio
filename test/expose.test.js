@@ -74,3 +74,119 @@ describe('.then()', () => {
     t.assert.throws(() => { server.then = 'invalid' }, TypeError('Cannot set property then of #<Object> which has only a getter'))
   })
 })
+
+test('exposed ready rejects non-function callback', (t) => {
+  const server = {}
+
+  boot(server)
+
+  t.assert.throws(() => server.ready('not a function'), {
+    code: 'AVV_ERR_CALLBACK_NOT_FN'
+  })
+})
+
+test('exposed onClose rejects non-function callback', (t) => {
+  const server = {}
+
+  boot(server)
+
+  t.assert.throws(() => server.onClose('not a function'), {
+    code: 'AVV_ERR_CALLBACK_NOT_FN'
+  })
+})
+
+test('exposed close rejects non-function callback', (t) => {
+  const server = {}
+
+  boot(server)
+
+  t.assert.throws(() => server.close('not a function'), {
+    code: 'AVV_ERR_CALLBACK_NOT_FN'
+  })
+})
+
+test('exposed close without callback returns a promise', async (t) => {
+  const server = {}
+  const app = boot(server)
+
+  await app.ready()
+
+  const promise = server.close()
+
+  t.assert.ok(promise instanceof Promise)
+
+  await promise
+})
+
+test('exposed after without callback returns a promise', async (t) => {
+  const server = {}
+
+  boot(server)
+
+  const promise = server.after()
+
+  t.assert.ok(promise instanceof Promise)
+
+  await promise
+})
+
+test('exposed use returns server', (t) => {
+  const server = {}
+
+  boot(server)
+
+  t.assert.strictEqual(
+    server.use(function (instance, opts, done) {
+      done()
+    }),
+    server
+  )
+})
+
+test('exposed after returns server', async (t) => {
+  const server = {}
+
+  boot(server)
+
+  t.assert.strictEqual(
+    server.after(function (err, done) {
+      if (err) {
+        done(err)
+        return
+      }
+
+      done()
+    }),
+    server
+  )
+
+  await server.ready()
+})
+
+test('exposed onClose returns server', async (t) => {
+  const server = {}
+
+  boot(server)
+
+  t.assert.strictEqual(
+    server.onClose(function () {}),
+    server
+  )
+
+  await server.ready()
+  await server.close()
+})
+
+test('exposed close returns server when callback is supplied', async (t) => {
+  const server = {}
+
+  boot(server)
+
+  const result = server.close(function (err) {
+    t.assert.strictEqual(err, null)
+  })
+
+  t.assert.strictEqual(result, server)
+
+  await server.ready()
+})

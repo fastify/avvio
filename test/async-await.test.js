@@ -321,3 +321,14 @@ test('ready queue error', async (t) => {
 
   await t.assert.rejects(app.ready(), { message: 'kaboom' })
 })
+
+test('ready promise rejects with plugin error', async (t) => {
+  const app = boot()
+  const error = new Error('boot failed')
+
+  app.use(function (instance, opts, done) {
+    done(error)
+  })
+
+  await t.assert.rejects(app.ready(), error)
+})

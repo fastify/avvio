@@ -68,3 +68,32 @@ test('chainable standalone with server', (t, testDone) => {
   })
   t.assert.strictEqual(readyResult, undefined)
 })
+
+test('start is chainable', (t) => {
+  const app = boot()
+
+  t.assert.strictEqual(app.start(), app)
+})
+
+test('use is chainable', (t) => {
+  const app = boot()
+
+  t.assert.strictEqual(
+    app.use(function (instance, opts, done) {
+      done()
+    }),
+    app
+  )
+})
+
+test('start is chainable and idempotent', async (t) => {
+  const app = boot()
+
+  t.assert.strictEqual(app.start(), app)
+  t.assert.strictEqual(app.start(), app)
+  t.assert.strictEqual(app.start(), app)
+
+  await app.ready()
+
+  t.assert.strictEqual(app.started, true)
+})
