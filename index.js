@@ -8,7 +8,8 @@ const {
   AVV_ERR_CALLBACK_NOT_FN,
   AVV_ERR_ROOT_PLG_BOOTED,
   AVV_ERR_READY_TIMEOUT,
-  AVV_ERR_ATTRIBUTE_ALREADY_DEFINED
+  AVV_ERR_ATTRIBUTE_ALREADY_DEFINED,
+  AVV_ERR_PARENT_PLG_LOADED
 } = require('./lib/errors')
 const {
   kAvvio,
@@ -200,7 +201,7 @@ Boot.prototype._addPlugin = function (pluginFn, opts, isAfter) {
   this._trackPluginLoading(plugin)
 
   if (current.loaded) {
-    throw new Error(plugin.name, current.name)
+    throw new AVV_ERR_PARENT_PLG_LOADED(plugin.name, current.name)
   }
 
   // we add the plugin to be loaded at the end of the current queue

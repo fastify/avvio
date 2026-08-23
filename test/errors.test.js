@@ -53,7 +53,7 @@ test('adding plugin to loaded current plugin throws', (t) => {
       app._addPlugin(function plugin () {}, {}, false)
     },
     {
-      message: 'plugin'
+      code: 'AVV_ERR_PARENT_PLG_LOADED'
     }
   )
 })
