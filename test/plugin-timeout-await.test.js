@@ -6,7 +6,10 @@ const { test } = require('node:test')
 const boot = require('..')
 
 test('do not load', async (t) => {
-  const app = boot({}, { timeout: 10 })
+  // Leave enough time for the nested plugins to start when the test suite is
+  // running concurrently. Their timeout is shortened relative to the parent,
+  // so the deliberately unresolved `third` plugin still expires first.
+  const app = boot({}, { timeout: 100 })
 
   app.use(first)
 
